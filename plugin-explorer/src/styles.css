@@ -1,0 +1,71 @@
+/* You can add global styles to this file, and also import other style files */
+main {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 100%;
+}
+
+h2,
+h3 {
+  margin: 0;
+}
+
+main > * {
+  margin: 0.5rem 0;
+}
+
+.columns {
+  display: flex;
+  width: 100%;
+}
+
+vscode-text-field {
+  width: 100%;
+}
+
+.tooltip {
+  position: relative;
+  display: inline-block;
+  border-bottom: 1px dotted var(--vscode-editor-background);
+}
+
+.tooltip .tooltiptext {
+  visibility: hidden;
+  width: 120px;
+  background-color: var(--vscode-editor-background);
+  color: var(--vscode-editor-foreground);
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px 0;
+
+  /* Position the tooltip */
+  position: absolute;
+  z-index: 1;
+}
+
+.small-tooltip {
+  font-size: smaller !important;
+  width: 190px;
+}
+
+.ionicon {
+  width: 16px;
+  height: 16px;
+}
+
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+}
+
+p {
+  line-height: 1.7;
+  margin: 0;
+}
+
+/* For live editing */
+/* body {
+  background-color: #2c2c2c;
+  color: white;
+  font-family:Arial, Helvetica, sans-serif;
+} */

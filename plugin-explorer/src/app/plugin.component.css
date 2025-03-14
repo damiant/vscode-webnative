@@ -1,0 +1,72 @@
+vscode-badge {
+  margin: 0.2rem;
+  padding: 0.2rem;
+  border-radius: 0.1rem;
+  opacity: 0.3;
+  background: rgba(255, 255, 255, 0.1);
+  line-height: 2;
+}
+
+vscode-button {
+  margin-right: 0.5rem;
+}
+
+.subtitle {
+  font-family: monospace, 'Courier New', Courier;
+  opacity: 0.5;
+  margin-top: 0.2rem;
+  margin-bottom: 0;
+  font-size: smaller;
+}
+
+.px-group {
+  display: flex;
+  flex-direction: row;
+  justify-content: stretch;
+  width: 100%;
+}
+
+.side {
+  min-width: 160px;
+  justify-content: flex-end;
+}
+
+.author {
+  vertical-align: middle;
+  width: 50px;
+  height: 50px;
+  object-fit: contain;
+  border-radius: 50%;
+}
+
+.prof {
+  min-width: 55px;
+  height: 55px;
+  margin-right: 1rem;
+  display: flex;
+  justify-content: center;
+}
+
+.panel2 {
+  width: 100%;
+  padding-right: 1rem;
+}
+
+.center-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.center-image {
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.wide-tip {
+  width: 300px !important;
+  top: 25px;
+  line-height: 2;
+  padding: 1rem;
+}

@@ -1,0 +1,107 @@
+<main [ngClass]="ready ? 'show' : 'hide'">
+  @if (!creating) {
+    <h1>New Ionic Project</h1>
+    <p>Name</p>
+    <vscode-text-field
+      id="projectName"
+      autofocus
+      [value]="projectName"
+      placeholder="The Name of your project"
+    ></vscode-text-field>
+    <div class="msg">
+      @if (nameError) {
+        <vscode-tag>Please specify a name for your project</vscode-tag>
+      }
+    </div>
+    <p>Folder</p>
+    <div class="bar" style="gap: unset">
+      <div (click)="chooseFolder()" class="folder-bar">
+        <p style="padding-left: 0.5rem">{{ projectsFolder }}</p>
+        <p style="opacity: 0.4">{{ slash() }}{{ projectFolder }}</p>
+      </div>
+      <vscode-button
+        aria-label="choose folder for projects"
+        style="height: 26px"
+        appearance="icon"
+        (click)="chooseFolder()"
+        >•••</vscode-button
+      >
+    </div>
+    <div class="bar">
+      <div>
+        <p>Framework</p>
+        <div class="rows">
+          @for (framework of frameworks; track framework) {
+            <div class="gap">
+              <vscode-button appearance="icon" [class]="framework.appearance" (click)="select(framework)">
+                <div class="framework">
+                  <img class="ionicon" [src]="assetsUri + '/logo-' + framework.icon + '.svg'" />
+                  <p>{{ framework.name }}</p>
+                </div>
+              </vscode-button>
+            </div>
+          }
+        </div>
+      </div>
+      <div [ngClass]="showTargets ? 'show' : 'hide'">
+        <p>Targets</p>
+        <div class="rows">
+          @for (target of targets; track target) {
+            <div class="gap">
+              <vscode-button appearance="icon" [class]="target.appearance" (click)="selectTarget(target)">
+                <div class="framework">
+                  <img class="ionicon" [src]="assetsUri + '/' + target.icon + '.svg'" />
+                  <p>{{ target.name }}</p>
+                </div>
+              </vscode-button>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+    @if (frameworkTemplates.length > 0) {
+      <div>
+        <p>Template</p>
+        <div class="rows">
+          @for (template of frameworkTemplates; track template) {
+            <div class="gap">
+              <vscode-button
+                class="tooltip"
+                appearance="icon"
+                [class]="template.appearance"
+                (click)="selectTemplate(template)"
+              >
+                <div class="framework">
+                  <img class="ionicon" [src]="assetsUri + '/' + template.icon + '.svg'" />
+                  <p>{{ template.title }}</p>
+                </div>
+                <span class="tooltiptext">{{ template.description }}</span>
+              </vscode-button>
+            </div>
+          }
+        </div>
+        <div class="pad-top"></div>
+        <vscode-divider></vscode-divider>
+        <div class="bar-end pad-top">
+          <vscode-button (click)="create()">Create Project</vscode-button>
+        </div>
+      </div>
+    }
+    @if (!showTargets) {
+      <div>
+        <div class="pad-top"></div>
+        <vscode-divider></vscode-divider>
+        <div class="bar-end pad-top">
+          <vscode-button (click)="create()">Create Plugin</vscode-button>
+        </div>
+      </div>
+    }
+  } @else {
+    <div class="flex">
+      <div class="progress">
+        <img class="pulse" [src]="assetsUri + '/webnative.svg'" />
+        <vscode-label>Please Wait</vscode-label>
+      </div>
+    </div>
+  }
+</main>

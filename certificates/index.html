@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Ionic Certificate</title>
+
+    <base href="/" />
+
+    <meta name="color-scheme" content="light dark" />
+    <meta
+      name="viewport"
+      content="viewport-fit=cover, width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="msapplication-tap-highlight" content="no" />
+
+    <link rel="icon" type="image/png" href="favicon.png" />
+    <script type="module" src="https://cdn.jsdelivr.net/npm/@ionic/core/dist/ionic/ionic.esm.js"></script>
+    <script nomodule src="https://cdn.jsdelivr.net/npm/@ionic/core/dist/ionic/ionic.js"></script>
+    <script src="index.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@ionic/core/css/ionic.bundle.css" />
+    <link rel="stylesheet" href="index.css" />
+    <!-- add to homescreen for ios -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  </head>
+  <html>
+    <body>
+      <ion-content>
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>Install & Trust</ion-card-title>
+          </ion-card-header>
+
+          <ion-card-content>
+            The Ionic Root Certificate needs to be installed and trusted on each device you want to run your application
+            to enable Live Reload with HTTPS.<br /><br />
+            <ion-button href="ca.crt">Download Root Certificate</ion-button>
+          </ion-card-content>
+        </ion-card>
+
+        <ion-card id="mac">
+          <ion-card-header>
+            <ion-card-title>Install & Trust on Mac</ion-card-title>
+          </ion-card-header>
+
+          <ion-card-content>
+            <ul>
+              <li>Download the certificate</li>
+              <li>Open the <i>ca.crt</i> file using the <i>Keychain Access</i> app</li>
+              <li>Double click <i>Ionic Root CA Certificate</i></li>
+              <li>Expand the <i>Trust</i> section</li>
+              <li>Choose <i>Always Trust</i> from the drop down next to <i>When Using This Certificate</i></li>
+            </ul>
+            You can now use the Live Reload feature which will use a certificate generated from this root CA.
+          </ion-card-content>
+        </ion-card>
+
+        <ion-card id="other">
+          <ion-card-header>
+            <ion-card-title>Install & Trust on iOS & Android</ion-card-title>
+          </ion-card-header>
+
+          <ion-card-content>
+            <ul>
+              <li>Open <i id="url"></i> in the browser on your device</li>
+              <li>Follow the displayed directions</li>
+            </ul>
+          </ion-card-content>
+        </ion-card>
+
+        <ion-card id="ios">
+          <ion-card-header>
+            <ion-card-title>Install & Trust on iOS</ion-card-title>
+          </ion-card-header>
+
+          <ion-card-content>
+            <ul>
+              <li>Click the <i>Download</i> button above</li>
+              <li>Choose <i>Allow</i> to the configuration profile download</li>
+              <li>If asked choose <i>iPhone</i></li>
+              <li>Go to the <i>Settings</i> app</li>
+              <li>Press the <i>Profile Downloaded</i> option</li>
+              <li>Press <i>Install</i> (& confirm several times)</li>
+              <li>Press <i>Done</i> button</li>
+              <li>Go the the <i>General</i> -> <i>About section</i></li>
+              <li>Scroll to the bottom and choose <i>Certificate Trust Settings</i></li>
+              <li>Enable <i>Ionic Root CA Certificate</i> to enable full trust for the root Certificate</li>
+            </ul>
+            You can now use the Live Reload feature which will use a certificate generated from this root CA.
+          </ion-card-content>
+        </ion-card>
+
+        <ion-card id="android">
+          <ion-card-header>
+            <ion-card-title>Install & Trust on Android</ion-card-title>
+          </ion-card-header>
+
+          <ion-card-content>
+            <ul>
+              <li>Click the <i>Download</i> button above</li>
+              <li>Go to the Android <i>Settings</i> app</li>
+              <li>Go to <i>Security</i> > <i>Encryption & Credentials</i></li>
+              <li>Press <i>Install a certificate</i></li>
+              <li>Press <i>CA Certificate</i> and choose <i>Install Anyway</i></li>
+              <li>Choose the <i>ca.crt.pem</i> file that was downloaded earlier</li>
+            </ul>
+            You can now use the Live Reload feature which will use a certificate generated from this root CA.
+          </ion-card-content>
+        </ion-card>
+      </ion-content>
+    </body>
+  </html>
+</html>

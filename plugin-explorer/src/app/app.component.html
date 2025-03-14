@@ -1,0 +1,50 @@
+<main>
+  <div class="columns">
+    <vscode-text-field
+      autofocus
+      id="sch"
+      [value]="terms"
+      (keydown.enter)="search()"
+      class="wide"
+      placeholder="Search for Capacitor and Cordova Plugins"
+    >
+    </vscode-text-field>
+    <vscode-button type="submit" (click)="search()">Search</vscode-button>
+  </div>
+  <div class="two-col">
+    @if (busy) {
+      <div class="progress">
+        <vscode-progress-ring></vscode-progress-ring>
+      </div>
+    }
+    <div style="width: 100%" [hidden]="!plugins || busy">
+      <p>{{ listTitle }}</p>
+      @for (plugin of plugins; track plugin) {
+        <div class="panel">
+          <plugin [assetsUri]="assetsUri" [data]="plugin"></plugin>
+        </div>
+      }
+      <p style="opacity: 0.5">
+        The most popular open source plugins are tested and indexed. Got a plugin that isnt here?
+        <vscode-link href="https://github.com/ionic-team/vscode-ionic/issues">Submit a suggestion</vscode-link>
+      </p>
+    </div>
+    <div class="side">
+      <br />
+      <vscode-radio-group orientation="vertical">
+        <label slot="label">Platform</label>
+        <vscode-radio id="ios" (click)="change()">iOS</vscode-radio>
+        <vscode-radio id="android" (click)="change()">Android</vscode-radio>
+        <vscode-radio id="both" (click)="change()">Both</vscode-radio>
+        <vscode-radio id="any" checked (click)="change()">Any</vscode-radio>
+      </vscode-radio-group>
+      <br />
+      <p>Filters</p>
+      <vscode-checkbox id="installed" (click)="this.terms = ''; change()" [attr.checked]="isInstalled"
+        >Installed</vscode-checkbox
+      ><br />
+      <vscode-checkbox id="official" (click)="changeOfficial()">Official Support</vscode-checkbox><br />
+      <vscode-checkbox id="capOnly" (click)="change()">Capacitor Only</vscode-checkbox><br />
+    </div>
+  </div>
+</main>

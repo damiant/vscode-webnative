@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+    <dict>
+        <key>scopeName</key>
+        <string>code.log</string>
+        <key>fileTypes</key>
+        <array>
+            <string>log</string>
+        </array>
+        <key>name</key>
+        <string>Log file</string>
+        <key>patterns</key>
+        <array>
+            <dict>
+                <!-- Ionic start/end -->
+                <key>match</key>
+                <string>^(\[Ionic\]).*</string>
+                <key>name</key>
+                <string>support.type</string> <!-- cyan -->
+            </dict>
+            <dict>
+                <!-- React Error -->
+                <key>match</key>
+                <string>^\[ERROR\].*</string>
+                <key>name</key>
+                <string>invalid.illegal</string>
+            </dict>
+            <dict>
+                <!-- Critical Vunerability -->
+                <key>match</key>
+                <string>(\[critical\]|\[fatal\]|\[error\]).*</string>
+                <key>name</key>
+                <string>invalid.illegal</string>
+            </dict>
+            <dict>
+                <!-- Command line -->
+                <key>match</key>
+                <string>^\[high\].*</string>
+                <key>name</key>
+                <string>entity.name.function</string>
+            </dict>	 
+            <dict>
+                <!-- Test Fail -->
+                <key>match</key>
+                <string>^(FAIL|npm ERR|Error:|\[error\]|\[Error\]).*</string>
+                <key>name</key>
+                <string>invalid.deprecated</string>
+            </dict>
+            <dict>
+                <!-- Command line -->
+                <key>match</key>
+                <string>^\>.*</string>
+                <key>name</key>
+                <string>constant.numeric</string>
+            </dict>
+            <dict>
+                <!-- Generic URI/URL -->
+                <key>match</key>
+                <string>(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})</string>
+                <key>name</key>
+                <string>storage</string>
+            </dict>
+            <dict>
+                <!-- Command line -->
+                <key>match</key>
+                <string>(\✖).*</string>
+                <key>name</key>
+                <string>invalid.illegal</string>
+            </dict>
+            <dict>
+                <!-- Command line Check -->
+                <key>match</key>
+                <string>(\✔|\⚡).*</string>
+                <key>name</key>
+                <string>comment log.date</string> <!-- green -->
+            </dict>            
+            <dict>
+                <!-- Command line -->
+                <key>match</key>
+                <string>^(npm WARN|WARNING:|Warning:|\▲|\[Warning\]).*</string>
+                <key>name</key>
+                <string>markup.deleted log.warning</string>
+            </dict>	 	
+            <dict>
+                <!-- Warning -->
+                <key>match</key>
+                <string>(\[warn\]|\[warning\]).*</string>
+                <key>name</key>
+                <string>markup.deleted log.warning</string>
+            </dict>
+            <dict>
+                <!-- Info -->
+                <key>match</key>
+                <string>\[info\].*</string>
+                <key>name</key>
+                <string>markup.changed log.debug</string> <!-- blue -->
+            </dict>	  	    
+            <dict>
+                <!-- Verbose -->
+                <key>match</key>
+                <string>\[verbose\].*</string>
+                <key>name</key>
+                <string>comment log.verbose</string>
+            </dict>	  	     
+                   	
+        </array>
+        <key>uuid</key>
+        <string>ab259404-3072-4cd4-a943-7cbbd32e373f</string>
+    </dict>
+</plist>

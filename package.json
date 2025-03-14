@@ -1,0 +1,656 @@
+{
+  "name": "webnative",
+  "displayName": "WebNative",
+  "description": "Extension to quickly create web and native projects",
+  "version": "0.0.1",
+  "icon": "media/webnative.png",
+  "publisher": "WebNative LLC",
+  "keywords": [
+    "Cross Platform",
+    "Web Native",
+    "Android",
+    "iOS",
+    "React",
+    "Vue",
+    "Angular",
+    "React Native",
+    "Flutter"
+  ],
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "prepare": "husky install",
+    "install:all": "npm install && cd plugin-explorer && npm install",
+    "build:pe": "cd plugin-explorer && npm run build --configuration=production",
+    "build:is": "cd starter && npm run build --configuration=production",
+    "clean": "find ./node_modules -name '*.md' -delete && find ./node_modules -name '*.ts' -delete && find ./node_modules -iname 'LICENSE' -delete && find ./node_modules -name '*.map' -delete && find ./node_modules -name '*.txt' -delete",
+    "build": "npm run compile && npm run build:pe && npm run build:is && npm run clean && npm run esbuild && npm run vsix-package && npm run reset",
+    "reset": "rm -rf node_modules && npm install",
+    "vsix-package": "vsce package",
+    "pre-release": "npm run build && vsce publish --pre-release",
+    "vscode:prepublish": "npm run esbuild-base -- --minify",
+    "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=out/main.js --external:vscode --external:prettier --format=cjs --platform=node",
+    "esbuild": "npm run esbuild-base -- --sourcemap",
+    "esbuild-watch": "npm run esbuild-base -- --sourcemap --watch",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "lint": "npm run eslint && npm run prettier -- --check",
+    "fmt": "npm run eslint -- --fix && npm run prettier -- --write",
+    "prettier": "prettier \"**/*.ts\"",
+    "eslint": "eslint . --ext .ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://webnative.dev"
+  },
+  "engines": {
+    "vscode": "^1.65.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onView:ionic",
+    "onStartupFinished"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "keybindings": [
+      {
+        "command": "webnative.run",
+        "key": "alt+r",
+        "mac": "alt+r",
+        "when": "explorerViewletVisible"
+      },
+      {
+        "command": "webnative.debug",
+        "key": "alt+d",
+        "mac": "alt+d",
+        "when": "explorerViewletVisible"
+      },
+      {
+        "command": "webnative.build",
+        "key": "alt+b",
+        "mac": "alt+b",
+        "when": "explorerViewletVisible"
+      }
+    ],
+    "viewsWelcome": [
+      {
+        "view": "wn-tree",
+        "contents": "Please wait while inspecting project...",
+        "when": "inspectedProject == false && isAnonymous == false && noProjectFound == false"
+      },
+      {
+        "view": "wn-tree",
+        "contents": "Want to create a new Mobile or Web App?\n[Start New Project](command:webnative.newProject)\n",
+        "when": "noProjectFound == true"
+      },
+      {
+        "view": "wn-tree",
+        "contents": "A free Ionic account is required to unlock all extension features or [Skip for Now](command:webnative.skipLogin).\n[Login](command:webnative.login)\n[Sign Up](command:webnative.signUp)\n",
+        "when": "isAnonymous == true && isLoggingIn == false"
+      },
+      {
+        "view": "wn-tree",
+        "contents": "Complete the login in the web browser. This view will change as soon as you login.",
+        "when": "isAnonymous == true && isLoggingIn == true"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "wn-recommendation",
+          "title": "WebNative",
+          "icon": "media/webnative.svg"
+        }
+      ]
+    },
+    "views": {
+      "wn-recommendation": [
+        {
+          "id": "wn-tree",
+          "name": "Ionic",
+          "contextualTitle": "Ionic"
+        },
+        {
+          "id": "ionic-devserver",
+          "type": "webview",
+          "name": "Preview",
+          "when": "isDevServing == true"
+        },
+        {
+          "id": "ionic-zprojects",
+          "name": "Projects",
+          "when": "isMonoRepo == true"
+        }
+      ],
+      "explorer": []
+    },
+    "languages": [
+      {
+        "id": "Log",
+        "aliases": [
+          "log"
+        ],
+        "extensions": [
+          ".log"
+        ],
+        "mimetypes": [
+          "log",
+          "text/log",
+          "text/x-log",
+          "text/x-code-output",
+          "x-code-output"
+        ]
+      }
+    ],
+    "grammars": [
+      {
+        "language": "Log",
+        "scopeName": "code.log",
+        "path": "./resources/log-language.xml"
+      }
+    ],
+    "commands": [
+      {
+        "command": "webnative.refresh",
+        "title": "Ionic: Refresh",
+        "icon": {
+          "light": "resources/light/refresh.svg",
+          "dark": "resources/dark/refresh.svg"
+        }
+      },
+      {
+        "command": "webnative.add",
+        "title": "Ionic: Packages",
+        "icon": {
+          "light": "resources/light/more.svg",
+          "dark": "resources/dark/more.svg"
+        }
+      },
+      {
+        "command": "webnative.pluginExplorer",
+        "title": "Ionic: Plugins"
+      },
+      {
+        "command": "webnative.newProject",
+        "title": "Ionic: New Project"
+      },
+      {
+        "command": "webnative.run",
+        "title": "Ionic: Run"
+      },
+      {
+        "command": "webnative.debug",
+        "title": "Ionic: Run and Debug"
+      },
+      {
+        "command": "webnative.build",
+        "title": "Ionic: Build"
+      },
+      {
+        "command": "webnative.lightbulb",
+        "title": "Upgrade",
+        "icon": {
+          "light": "resources/light/lightbulb.svg",
+          "dark": "resources/dark/lightbulb.svg"
+        }
+      },
+      {
+        "command": "webnative.fix",
+        "title": "Ionic: Fix Issue"
+      },
+      {
+        "command": "webnative.signUp",
+        "title": "Ionic: Sign Up"
+      },
+      {
+        "command": "webnative.login",
+        "title": "Ionic: Login"
+      },
+      {
+        "command": "webnative.skipLogin",
+        "title": "Ionic: Skip Login"
+      },
+      {
+        "command": "webnative.open",
+        "title": "View"
+      },
+      {
+        "command": "webnative.rebuild",
+        "title": "Rebuild"
+      },
+      {
+        "command": "webnative.openXcode",
+        "title": "Ionic: Open in XCode"
+      },
+      {
+        "command": "webnative.openAndroidStudio",
+        "title": "Ionic: Open in Android Studio"
+      },
+      {
+        "command": "webnative.runIOS",
+        "title": "Ionic: Run for iOS"
+      },
+      {
+        "command": "webnative.runAndroid",
+        "title": "Ionic: Run for Android"
+      },
+      {
+        "command": "webnative.runWeb",
+        "title": "Ionic: Run for Web"
+      },
+      {
+        "command": "webnative.capSync",
+        "title": "Ionic: Sync"
+      },
+      {
+        "command": "webnative.refreshDebug",
+        "title": "Refresh",
+        "icon": {
+          "light": "resources/light/sync.svg",
+          "dark": "resources/dark/sync.svg"
+        }
+      },
+      {
+        "command": "webnative.function",
+        "title": "Execute"
+      },
+      {
+        "command": "webnative.stop",
+        "title": "Stop"
+      },
+      {
+        "command": "webnative.buildConfig",
+        "title": "Build Configuration",
+        "icon": {
+          "light": "resources/light/more.svg",
+          "dark": "resources/dark/more.svg"
+        }
+      },
+      {
+        "command": "webnative.webOpenBrowser",
+        "title": "Open in a web browser",
+        "icon": {
+          "light": "resources/light/globe.svg",
+          "dark": "resources/dark/globe.svg"
+        }
+      },
+      {
+        "command": "webnative.webOpenBrowserSelected",
+        "title": "Open in a web browser",
+        "icon": {
+          "light": "resources/light/globe-select.svg",
+          "dark": "resources/dark/globe-select.svg"
+        }
+      },
+      {
+        "command": "webnative.liveReload",
+        "title": "Live Reload - Refresh your app after a code change",
+        "icon": {
+          "light": "resources/light/live.svg",
+          "dark": "resources/dark/live.svg"
+        }
+      },
+      {
+        "command": "webnative.liveReloadSelected",
+        "title": "Live Reload - Click to turn off",
+        "icon": {
+          "light": "resources/light/live-select.svg",
+          "dark": "resources/dark/live-select.svg"
+        }
+      },
+      {
+        "command": "webnative.webNexus",
+        "title": "Open in Nexus Browser",
+        "icon": {
+          "light": "resources/light/nexus.svg",
+          "dark": "resources/dark/nexus.svg"
+        }
+      },
+      {
+        "command": "webnative.webNexusSelected",
+        "title": "Open in Nexus Browser",
+        "icon": {
+          "light": "resources/light/nexus-select.svg",
+          "dark": "resources/dark/nexus-select.svg"
+        }
+      },
+      {
+        "command": "webnative.webEditor",
+        "title": "Open in a VS Code window",
+        "icon": {
+          "light": "resources/light/vscode.svg",
+          "dark": "resources/dark/vscode.svg"
+        }
+      },
+      {
+        "command": "webnative.webEditorSelected",
+        "title": "Open in a VS Code window",
+        "icon": {
+          "light": "resources/light/vscode-select.svg",
+          "dark": "resources/dark/vscode-select.svg"
+        }
+      },
+      {
+        "command": "webnative.webDebugConfig",
+        "title": "Web Debug Configuration",
+        "icon": {
+          "light": "resources/light/more.svg",
+          "dark": "resources/dark/more.svg"
+        }
+      },
+      {
+        "command": "webnative.selectAction",
+        "title": "Select an action",
+        "icon": {
+          "light": "resources/light/more.svg",
+          "dark": "resources/dark/more.svg"
+        }
+      },
+      {
+        "command": "webnative.selectDevice",
+        "title": "Select device to run",
+        "icon": "$(device-mobile)"
+      },
+      {
+        "command": "webnative.runMode",
+        "title": "Switch to run mode",
+        "icon": {
+          "light": "resources/light/run.svg",
+          "dark": "resources/dark/run.svg"
+        }
+      },
+      {
+        "command": "webnative.upgrade",
+        "title": "Upgrade",
+        "icon": {
+          "light": "resources/light/more.svg",
+          "dark": "resources/dark/more.svg"
+        }
+      }
+    ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "webnative.skipLogin",
+          "when": "false"
+        },
+        {
+          "command": "webnative.refresh",
+          "when": "false"
+        },
+        {
+          "command": "webnative.fix",
+          "when": "false"
+        },
+        {
+          "command": "webnative.open",
+          "when": "false"
+        },
+        {
+          "command": "webnative.rebuild",
+          "when": "false"
+        },
+        {
+          "command": "webnative.refreshDebug",
+          "when": "false"
+        },
+        {
+          "command": "webnative.function",
+          "when": "false"
+        },
+        {
+          "command": "webnative.buildConfig",
+          "when": "false"
+        },
+        {
+          "command": "webnative.webOpenBrowser",
+          "when": "false"
+        },
+        {
+          "command": "webnative.liveReload",
+          "when": "false"
+        },
+        {
+          "command": "webnative.webNexus",
+          "when": "false"
+        },
+        {
+          "command": "webnative.webEditor",
+          "when": "false"
+        },
+        {
+          "command": "webnative.webDebugConfig",
+          "when": "false"
+        },
+        {
+          "command": "webnative.selectAction",
+          "when": "false"
+        },
+        {
+          "command": "webnative.selectDevice",
+          "when": "false"
+        },
+        {
+          "command": "webnative.runMode",
+          "when": "false"
+        },
+        {
+          "command": "webnative.lightbulb",
+          "when": "false"
+        },
+        {
+          "command": "webnative.upgrade",
+          "when": "false"
+        },
+        {
+          "command": "webnative.stop",
+          "when": "false"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "webnative.refresh",
+          "when": "view == wn-tree",
+          "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "webnative.add",
+          "when": "view == wn-tree && viewItem == packages",
+          "group": "inline"
+        },
+        {
+          "command": "webnative.lightbulb",
+          "when": "view == wn-tree && viewItem == lightbulb",
+          "group": "inline"
+        },
+        {
+          "command": "webnative.stop",
+          "when": "view == wn-tree && viewItem == stop",
+          "group": "inline"
+        },
+        {
+          "command": "webnative.open",
+          "when": "view == wn-tree && viewItem == asset",
+          "group": "inline"
+        },
+        {
+          "command": "webnative.rebuild",
+          "when": "view == wn-tree && viewItem == rebuild",
+          "group": "inline"
+        },
+        {
+          "command": "webnative.refreshDebug",
+          "when": "view == wn-tree && viewItem == refreshDebug",
+          "group": "inline"
+        },
+        {
+          "command": "webnative.upgrade",
+          "when": "view == wn-tree && viewItem == upgrade",
+          "group": "inline"
+        },
+        {
+          "command": "webnative.buildConfig",
+          "when": "view == wn-tree && viewItem == buildConfig",
+          "group": "inline"
+        },
+        {
+          "command": "webnative.liveReload",
+          "when": "view == wn-tree && viewItem == selectDevice && !liveReload",
+          "group": "inline"
+        },
+        {
+          "command": "webnative.liveReloadSelected",
+          "when": "view == wn-tree && viewItem == selectDevice && liveReload",
+          "group": "inline"
+        },
+        {
+          "command": "webnative.webOpenBrowser",
+          "when": "view == wn-tree && viewItem == webConfig && webConfig !== WebConfigWebBrowser && webConfig",
+          "group": "inline"
+        },
+        {
+          "command": "webnative.webOpenBrowserSelected",
+          "when": "view == wn-tree && viewItem == webConfig && (webConfig == WebConfigWebBrowser || !webConfig)",
+          "group": "inline"
+        },
+        {
+          "command": "webnative.webNexus",
+          "when": "view == wn-tree && viewItem == webConfig && webConfig !== WebConfigNexusBrowser",
+          "group": "inline"
+        },
+        {
+          "command": "webnative.webNexusSelected",
+          "when": "view == wn-tree && viewItem == webConfig && webConfig == WebConfigNexusBrowser",
+          "group": "inline"
+        },
+        {
+          "command": "webnative.webEditor",
+          "when": "view == wn-tree && viewItem == webConfig && webConfig !== WebConfigEditor",
+          "group": "inline"
+        },
+        {
+          "command": "webnative.webEditorSelected",
+          "when": "view == wn-tree && viewItem == webConfig && webConfig == WebConfigEditor",
+          "group": "inline"
+        },
+        {
+          "command": "webnative.webDebugConfig",
+          "when": "view == wn-tree && viewItem == webDebugConfig",
+          "group": "inline"
+        },
+        {
+          "command": "webnative.selectAction",
+          "when": "view == wn-tree && viewItem == selectAction",
+          "group": "inline"
+        },
+        {
+          "command": "webnative.selectDevice",
+          "when": "view == wn-tree && viewItem == selectDevice",
+          "group": "inline"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Ionic",
+      "properties": {
+        "webnative.defaultPort": {
+          "type": "number",
+          "default": 8100,
+          "description": "The default port number used when serving your Ionic app (default is 8100)."
+        },
+        "webnative.shellPath": {
+          "type": "string",
+          "scope": "application",
+          "default": "",
+          "description": "Use this option to override the shell used (eg /bin/zsh). Default is /bin/sh or cmd on Windows."
+        },
+        "webnative.buildForProduction": {
+          "type": "boolean",
+          "default": false,
+          "description": "Use the production configuration when building the application."
+        },
+        "webnative.ignoreIonicCLIConfig": {
+          "type": "boolean",
+          "default": false,
+          "description": "Ignore the settings in Ionic CLI config."
+        },
+        "webnative.javaHome": {
+          "type": "string",
+          "scope": "application",
+          "default": "",
+          "description": "Location of JAVA_HOME. Used to specify how Android will be built"
+        },
+        "webnative.internalAddress": {
+          "type": "boolean",
+          "scope": "application",
+          "default": false,
+          "description": "Whether to avoid using an external IP Address when using Live Reload"
+        },
+        "webnative.autoImportIcons": {
+          "type": "string",
+          "scope": "workspace",
+          "enum": [
+            "yes",
+            "no",
+            ""
+          ],
+          "default": "",
+          "description": "Whether to automatically import ion-icons for this project."
+        },
+        "webnative.manualNewProjects": {
+          "type": "boolean",
+          "scope": "application",
+          "default": false,
+          "description": "Whether to show the new project wizard only when chosen from the command palette"
+        },
+        "webnative.adbPath": {
+          "type": "string",
+          "scope": "application",
+          "default": "",
+          "description": "Location of the Android Debug Bridge (ADB). Used to specify where adb is installed (blank will choose its default location)"
+        },
+        "webnative.debugSkipFiles": {
+          "type": "string",
+          "scope": "application",
+          "default": "",
+          "description": "Array of glob patterns to skip during debugging. Eg: [\"!**/node_modules/**\",\"<node_internals>/**\"]"
+        }
+      }
+    }
+  },
+  "eslintConfig": {
+    "extends": "@ionic/eslint-config/recommended"
+  },
+  "prettier": "@ionic/prettier-config",
+  "devDependencies": {
+    "@ionic/eslint-config": "^0.3.0",
+    "@ionic/prettier-config": "4.0.0",
+    "@types/glob": "7.2.0",
+    "@types/netmask": "^2.0.5",
+    "@types/node": "18.19.26",
+    "@types/vscode": "1.65.0",
+    "@typescript-eslint/eslint-plugin": "5.12.1",
+    "@typescript-eslint/parser": "5.12.1",
+    "esbuild": "0.14.23",
+    "eslint": "^7.32.0",
+    "husky": "^7.0.0",
+    "typescript": "5.0.4"
+  },
+  "dependencies": {
+    "@trapezedev/configure": "7.1.3",
+    "fast-xml-parser": "^3.21.1",
+    "globule": "1.3.4",
+    "htmlparser2": "^9.1.0",
+    "netmask": "2.0.2",
+    "rimraf": "4.4.1",
+    "semver": "7.6.3",
+    "simple-plist": "1.3.0",
+    "ts-morph": "23.0.0",
+    "xcode": "3.0.1"
+  }
+}
