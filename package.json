@@ -114,13 +114,13 @@
           "contextualTitle": "Ionic"
         },
         {
-          "id": "ionic-devserver",
+          "id": "webnative-devserver",
           "type": "webview",
           "name": "Preview",
           "when": "isDevServing == true"
         },
         {
-          "id": "ionic-zprojects",
+          "id": "webnative-zprojects",
           "name": "Projects",
           "when": "isMonoRepo == true"
         }
@@ -155,7 +155,7 @@
     "commands": [
       {
         "command": "webnative.refresh",
-        "title": "Ionic: Refresh",
+        "title": "WebNative:Refresh",
         "icon": {
           "light": "resources/light/refresh.svg",
           "dark": "resources/dark/refresh.svg"
@@ -163,7 +163,7 @@
       },
       {
         "command": "webnative.add",
-        "title": "Ionic: Packages",
+        "title": "WebNative:Packages",
         "icon": {
           "light": "resources/light/more.svg",
           "dark": "resources/dark/more.svg"
@@ -171,23 +171,23 @@
       },
       {
         "command": "webnative.pluginExplorer",
-        "title": "Ionic: Plugins"
+        "title": "WebNative:Plugins"
       },
       {
         "command": "webnative.newProject",
-        "title": "Ionic: New Project"
+        "title": "WebNative:New Project"
       },
       {
         "command": "webnative.run",
-        "title": "Ionic: Run"
+        "title": "WebNative:Run"
       },
       {
         "command": "webnative.debug",
-        "title": "Ionic: Run and Debug"
+        "title": "WebNative:Run and Debug"
       },
       {
         "command": "webnative.build",
-        "title": "Ionic: Build"
+        "title": "WebNative:Build"
       },
       {
         "command": "webnative.lightbulb",
@@ -199,19 +199,19 @@
       },
       {
         "command": "webnative.fix",
-        "title": "Ionic: Fix Issue"
+        "title": "WebNative:Fix Issue"
       },
       {
         "command": "webnative.signUp",
-        "title": "Ionic: Sign Up"
+        "title": "WebNative:Sign Up"
       },
       {
         "command": "webnative.login",
-        "title": "Ionic: Login"
+        "title": "WebNative:Login"
       },
       {
         "command": "webnative.skipLogin",
-        "title": "Ionic: Skip Login"
+        "title": "WebNative:Skip Login"
       },
       {
         "command": "webnative.open",
@@ -223,27 +223,27 @@
       },
       {
         "command": "webnative.openXcode",
-        "title": "Ionic: Open in XCode"
+        "title": "WebNative:Open in XCode"
       },
       {
         "command": "webnative.openAndroidStudio",
-        "title": "Ionic: Open in Android Studio"
+        "title": "WebNative:Open in Android Studio"
       },
       {
         "command": "webnative.runIOS",
-        "title": "Ionic: Run for iOS"
+        "title": "WebNative:Run for iOS"
       },
       {
         "command": "webnative.runAndroid",
-        "title": "Ionic: Run for Android"
+        "title": "WebNative:Run for Android"
       },
       {
         "command": "webnative.runWeb",
-        "title": "Ionic: Run for Web"
+        "title": "WebNative:Run for Web"
       },
       {
         "command": "webnative.capSync",
-        "title": "Ionic: Sync"
+        "title": "WebNative:Sync"
       },
       {
         "command": "webnative.refreshDebug",

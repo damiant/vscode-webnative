@@ -22,7 +22,7 @@ let currentErrorFilename: string;
 let onSave: Disposable;
 
 export async function handleError(error: string, logs: Array<string>, folder: string): Promise<boolean> {
-  if (error && error.includes('ionic: command not found')) {
+  if (error && error.includes('WebNative:command not found')) {
     await window.showErrorMessage(
       'The Ionic CLI is not installed. Get started by running npm install -g @ionic/cli at the terminal.',
       'More Information',

@@ -10,7 +10,7 @@ import { commands } from 'vscode';
 import { CommandName } from './command-name';
 import { qrWebView } from './nexus-browser';
 
-export class IonicDevServerProvider implements WebviewViewProvider {
+export class DevServerProvider implements WebviewViewProvider {
   registered = false;
   constructor(
     private workspaceRoot: string | undefined,

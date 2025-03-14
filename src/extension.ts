@@ -18,7 +18,7 @@ import { selectDevice } from './capacitor-device';
 import { getLocalFolder } from './monorepo';
 import { androidDebugUnforward } from './android-debug-bridge';
 import { AndroidDebugProvider } from './android-debug-provider';
-import { IonicDevServerProvider } from './ionic-devserver-provider';
+import { DevServerProvider } from './devserver-provider';
 import { AndroidDebugType } from './android-debug';
 import { CapacitorPlatform } from './capacitor-platform';
 import { kill } from './process-list';
@@ -221,15 +221,15 @@ export async function activate(context: ExtensionContext) {
 
   // Project List Panel
   const ionicProjectsProvider = new IonicProjectsreeProvider(rootPath, context);
-  const projectsView = window.createTreeView('ionic-zprojects', { treeDataProvider: ionicProjectsProvider });
+  const projectsView = window.createTreeView('webnative-zprojects', { treeDataProvider: ionicProjectsProvider });
 
   // Quick Fixes
 
   // Dev Server Running Panel
-  const ionicDevServerProvider = new IonicDevServerProvider(rootPath, context);
+  const ionicDevServerProvider = new DevServerProvider(rootPath, context);
 
   context.subscriptions.push(
-    window.registerWebviewViewProvider('ionic-devserver', ionicDevServerProvider, {
+    window.registerWebviewViewProvider('webnative-devserver', ionicDevServerProvider, {
       webviewOptions: { retainContextWhenHidden: false },
     }),
   );
