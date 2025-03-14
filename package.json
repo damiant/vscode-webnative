@@ -1,7 +1,7 @@
 {
   "name": "webnative",
   "displayName": "WebNative",
-  "description": "Extension to quickly create web and native projects",
+  "description": "Create and maintain web and native projects",
   "version": "0.0.1",
   "icon": "media/webnative.png",
   "publisher": "WebNative LLC",
@@ -78,7 +78,7 @@
     "viewsWelcome": [
       {
         "view": "wn-tree",
-        "contents": "Please wait while inspecting project...",
+        "contents": "Inspecting project...",
         "when": "inspectedProject == false && isAnonymous == false && noProjectFound == false"
       },
       {
@@ -88,7 +88,7 @@
       },
       {
         "view": "wn-tree",
-        "contents": "A free Ionic account is required to unlock all extension features or [Skip for Now](command:webnative.skipLogin).\n[Login](command:webnative.login)\n[Sign Up](command:webnative.signUp)\n",
+        "contents": "A free account is required to unlock all extension features or [Skip for Now](command:webnative.skipLogin).\n[Login](command:webnative.login)\n[Sign Up](command:webnative.signUp)\n",
         "when": "isAnonymous == true && isLoggingIn == false"
       },
       {
@@ -148,7 +148,7 @@
     "grammars": [
       {
         "language": "Log",
-        "scopeName": "code.log",
+        "scopeName": "wn.log",
         "path": "./resources/log-language.xml"
       }
     ],

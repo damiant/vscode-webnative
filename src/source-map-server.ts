@@ -1,13 +1,13 @@
-import { writeIonic } from './logging';
+import { writeWN } from './logging';
 import { readFile } from 'fs';
 import { createServer } from 'http';
 import { extname, join } from 'path';
 
 export function startSourceMapServer(folder: string) {
-  writeIonic('Starting source map server on port 80....');
+  writeWN('Starting source map server on port 80....');
   createServer((request, response) => {
     const filePath = join(folder, request.url);
-    writeIonic(`Serving ${filePath}`);
+    writeWN(`Serving ${filePath}`);
 
     const ex = extname(filePath);
     const contentType = getMimeType(ex);

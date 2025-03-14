@@ -286,6 +286,7 @@ export enum TipType {
   Box,
   Experiment,
   Ionic,
+  WebNative,
   Run,
   Link,
   Android,

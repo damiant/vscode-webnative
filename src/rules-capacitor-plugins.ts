@@ -1,5 +1,5 @@
 import { getPackageVersion, isGreaterOrEqual, isLess } from './analyzer';
-import { showOutput, write, writeIonic } from './logging';
+import { showOutput, write, writeWN } from './logging';
 import { Project } from './project';
 import { QueueFunction, Tip, TipType } from './tip';
 import { window } from 'vscode';
@@ -61,7 +61,7 @@ export async function migrateCapacitorPlugin(
     });
   } finally {
     const message = `Capacitor Plugin migration to v${migrateVersion} completed.`;
-    writeIonic(message);
+    writeWN(message);
     showOutput();
     const changesTitle = 'View Changes';
     window.showInformationMessage(message, changesTitle, 'OK').then((res) => {
@@ -112,7 +112,7 @@ async function migratePluginToCapacitor5(queueFunction: QueueFunction, project: 
   await showProgress('Migrating Plugin...', async () => {
     await project.run2('npx @capacitor/plugin-migration-v4-to-v5@latest', false);
     const msg = `Plugin has been migrated. Please read migration docs and verify your plugin before publishing.`;
-    writeIonic(msg);
+    writeWN(msg);
     window.showInformationMessage(msg, 'OK');
   });
 }

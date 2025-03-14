@@ -2,7 +2,7 @@ import { existsSync } from 'fs';
 import { exists, isLess } from './analyzer';
 import { CapacitorPlatform } from './capacitor-platform';
 import { InternalCommand } from './command-name';
-import { writeError, writeIonic } from './logging';
+import { writeError, writeWN } from './logging';
 import { ionicBuild } from './ionic-build';
 import { ionicState } from './wn-tree-provider';
 import { certPath, liveReloadSSL } from './live-reload';
@@ -28,7 +28,7 @@ export async function capacitorRun(project: Project, platform: CapacitorPlatform
 
   // If the user modified something in the editor then its likely they need to rebuild the app before running
   if (ionicState.projectDirty) {
-    writeIonic('Rebuilding as you changed your project...');
+    writeWN('Rebuilding as you changed your project...');
     preop = (await ionicBuild(project, { platform })) + ' && ';
     rebuilt = true;
   } else {
@@ -90,7 +90,7 @@ async function capRun(
   if (liveReload && exists('@ionic-enterprise/auth') && isLess('@ionic-enterprise/auth', '3.9.4')) {
     capRunFlags = '';
     // @ionic-enterprise/auth gets a crypt error when running with an external IP address. So avoid the issue
-    writeIonic('Live Update was ignored as you have less than v3.9.4 of @ionic-enterprise/auth in your project');
+    writeWN('Live Update was ignored as you have less than v3.9.4 of @ionic-enterprise/auth in your project');
   }
 
   const ionic = '';

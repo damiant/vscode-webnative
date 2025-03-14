@@ -3,7 +3,7 @@
 // Create ionic:build if there is a build script
 
 import { getRunOutput } from './utilities';
-import { write, writeError, writeIonic } from './logging';
+import { write, writeError, writeWN } from './logging';
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { exists } from './analyzer';
@@ -40,7 +40,7 @@ export async function ionicInit(folder: string): Promise<boolean> {
     }
     writeFileSync(filename, JSON.stringify(packageFile, undefined, 2));
     addIonicConfigCapacitor(folder);
-    writeIonic('Created Ionic Project');
+    writeWN('Created Ionic Project');
     return true;
   } catch (err) {
     writeError('Unable to create Ionic project:' + err);

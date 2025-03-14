@@ -289,7 +289,7 @@ export function fixYarnOutdated(data: string, project: Project): string {
   [{"current":"17.3.1","latest":"17.3.2","name":"@angular/cli","severity":"patch","type":"devDependencies"},{"current":"7.8.1","latest":"7.8.2","name":"@ionic/angular","severity":"patch","type":"dependencies"},{"current":"7.3.0","latest":"7.3.1","name":"ionicons","severity":"patch","type":"dependencies"}]
   */
   if (data.startsWith(`Usage Error: Couldn't find a script named "outdated"`)) {
-    project.setGroup('Extension', '', TipType.Ionic, true);
+    project.setGroup('Extension', '', TipType.WebNative, true);
     project.tip(new Tip('Install yarn outdated plugin', '', TipType.Idea).setQueuedAction(installYarnPlugin, project));
     return;
   }

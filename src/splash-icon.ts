@@ -1,5 +1,5 @@
 import { channelShow, run } from './utilities';
-import { write, writeIonic } from './logging';
+import { write, writeWN } from './logging';
 import { QueueFunction, Tip, TipType } from './tip';
 import { Project } from './project';
 import { exists } from './analyzer';
@@ -169,7 +169,7 @@ async function runCapacitorAssets(queueFunction: QueueFunction | undefined, proj
   if (queueFunction) {
     queueFunction();
   }
-  writeIonic('Generating Splash Screen and Icon Assets...');
+  writeWN('Generating Splash Screen and Icon Assets...');
   channelShow();
   await showProgress('Generating Splash Screen and Icon Assets', async () => {
     if (exists('cordova-res')) {
@@ -197,7 +197,7 @@ async function runCapacitorAssets(queueFunction: QueueFunction | undefined, proj
     }
   });
 
-  writeIonic('Completed created Splash Screen and Icon Assets');
+  writeWN('Completed created Splash Screen and Icon Assets');
   channelShow();
 }
 

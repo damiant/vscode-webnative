@@ -2,7 +2,7 @@ import { Project } from './project';
 import { getRunOutput, openUri } from './utilities';
 import { ionicState } from './wn-tree-provider';
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'fs';
-import { writeError, writeIonic } from './logging';
+import { writeError, writeWN } from './logging';
 import { basename, extname, join } from 'path';
 import { window } from 'vscode';
 import { Server, createServer } from 'http';
@@ -43,7 +43,7 @@ export async function setupServerCertificate(project: Project): Promise<void> {
   const cmd = `openssl req -new -nodes -sha256 -keyout '${certPath('key')}' -config '${crFile}' -out '${certPath(
     'csr',
   )}' -newkey rsa:4096 -subj "/C=US/ST=/L=/O=/CN=myserver"`;
-  writeIonic(`> ${cmd}`);
+  writeWN(`> ${cmd}`);
   const txt = await getRunOutput(cmd, project.folder);
 
   // Create the server certificate
@@ -52,7 +52,7 @@ export async function setupServerCertificate(project: Project): Promise<void> {
   )}' -CA '${getRootCACertFilename()}' -CAkey '${getRootCAKeyFilename()}' -CAcreateserial -out '${certPath(
     'crt',
   )}' -days 180`;
-  writeIonic(`> ${cmd2}`);
+  writeWN(`> ${cmd2}`);
   const txt2 = await getRunOutput(cmd2, project.folder);
 
   rmSync(crFile);
@@ -178,13 +178,13 @@ async function createRootCA(keyFilename: string): Promise<string> {
 
   // Create the CA Certificate
   const cmd = `openssl req -config '${filename}' -key ${keyFilename} -new -x509 -days 3650 -sha256 -out ${certFName}`;
-  writeIonic(cmd);
+  writeWN(cmd);
   const certTxt = await getRunOutput(cmd, globalPath());
   if (!existsSync(certFilePath)) {
     writeError(certTxt);
     throw new Error('Unable to create root CA Certificate');
   }
-  writeIonic(`Ionic Root CA certificate created (${certFilePath})`);
+  writeWN(`Ionic Root CA certificate created (${certFilePath})`);
   return certFilePath;
 }
 
@@ -214,7 +214,7 @@ async function createRootCAKey(): Promise<string> {
 
   // Create the CA Key
   const cmd = `openssl genrsa -out ${filename} 4096`;
-  writeIonic(cmd);
+  writeWN(cmd);
   const txt = await getRunOutput(cmd, globalPath());
 
   if (!existsSync(keyFilename)) {
@@ -230,7 +230,7 @@ function servePage(certFilename: string): string {
   if (certServer) {
     certServer.close();
     certServer = undefined;
-    writeIonic(`Certificate Server stopped.`);
+    writeWN(`Certificate Server stopped.`);
     return;
   }
   const port = 8942;
@@ -263,7 +263,7 @@ function servePage(certFilename: string): string {
 
   const address = getAddress();
   const url = `http://${address}:${port}`;
-  writeIonic(`Server running at ${url}`);
+  writeWN(`Server running at ${url}`);
   return url;
 }
 

@@ -1,7 +1,7 @@
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { exists } from './analyzer';
-import { writeError, writeIonic } from './logging';
+import { writeError, writeWN } from './logging';
 import { npmInstall } from './node-commands';
 import { getRunOutput, showProgress } from './utilities';
 
@@ -11,7 +11,7 @@ export async function injectScript(folder: string, address: string, port: number
   }
   return await showProgress('Enabling Remote Logging', async () => {
     if (!exists('@ionic/remote-log')) {
-      writeIonic('Installing @ionic/remote-log');
+      writeWN('Installing @ionic/remote-log');
       await getRunOutput(npmInstall('@ionic/remote-log'), folder);
     }
     if (hasMainTSFile(folder)) {

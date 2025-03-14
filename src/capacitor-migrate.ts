@@ -2,7 +2,7 @@ import { existsSync, lstatSync, readdirSync, readFileSync, writeFileSync } from 
 import { join } from 'path';
 
 import { exists, isLess, isVersionGreaterOrEqual } from './analyzer';
-import { clearOutput, showOutput, write, writeError, writeIonic, writeWarning } from './logging';
+import { clearOutput, showOutput, write, writeError, writeWN, writeWarning } from './logging';
 import { installForceArgument, npmInstall, npmUninstall, npmUpdate, saveDevArgument } from './node-commands';
 import { inspectProject, Project } from './project';
 import { doDoes, getRunOutput, getStringFrom, plural, pluralize, run, setAllStringIn, showProgress } from './utilities';
@@ -145,7 +145,7 @@ export async function migrateCapacitor(
   let changesTitle = '';
   await showProgress(`Migrating to Capacitor ${versionTitle}...`, async () => {
     if (report.commands.length > 0) {
-      writeIonic(`Upgrading plugins that were incompatible with Capacitor ${versionTitle}`);
+      writeWN(`Upgrading plugins that were incompatible with Capacitor ${versionTitle}`);
       for (const command of report.commands) {
         write(`> ${command}`);
         await project.run2(command, true);
@@ -164,14 +164,14 @@ export async function migrateCapacitor(
       );
       write(result);
       if (result.includes('[error] npm install failed. Try deleting node_modules')) {
-        writeIonic('Attempting to reinstall node modules....');
+        writeWN('Attempting to reinstall node modules....');
         await project.run2(logCmd(removeNodeModules()));
         await project.run2(logCmd(npmUpdate()));
-        writeIonic('Completed install. You should sync and test your project.');
+        writeWN('Completed install. You should sync and test your project.');
       }
       // await project.run2(cmd2);
     } finally {
-      writeIonic(`Capacitor ${versionTitle} Migration Completed.`);
+      writeWN(`Capacitor ${versionTitle} Migration Completed.`);
       showOutput();
       const problems =
         report.incompatible.length == 0
@@ -309,7 +309,7 @@ export async function migrateCapacitor4(
 
       if (replaceStorage) {
         await project.run2(npmInstall(`@capacitor/preferences@${pluginVersion}`));
-        writeIonic('Migrated @capacitor/storage to @capacitor/preferences.');
+        writeWN('Migrated @capacitor/storage to @capacitor/preferences.');
       }
 
       if (exists('@capacitor/ios')) {
@@ -440,7 +440,7 @@ export async function migrateCapacitor4(
       // Ran Cap Sync
       await project.run2(await capacitorSync(project), true);
 
-      writeIonic('Capacitor 4 Migration Completed.');
+      writeWN('Capacitor 4 Migration Completed.');
 
       writeBreakingChanges();
       showOutput();
@@ -489,16 +489,16 @@ function writeBreakingChanges() {
     }
   }
   if (broken.length > 0) {
-    writeIonic(
+    writeWN(
       `IMPORTANT: Review https://capacitorjs.com/docs/updating/4-0#plugins for breaking changes in these plugins that you use: ${broken.join(
         ', ',
       )}.`,
     );
   } else {
-    writeIonic('IMPORTANT: Review https://capacitorjs.com/docs/updating/4-0 for optional manual updates.');
+    writeWN('IMPORTANT: Review https://capacitorjs.com/docs/updating/4-0 for optional manual updates.');
   }
   if (exists('@capacitor/android')) {
-    writeIonic(
+    writeWN(
       'Warning: The Android Gradle plugin was updated and it requires Java 11 to run (included with Android Studio). You may need to select this in Android Studio (Preferences > Build, Execution, Deployment > Build Tools > Gradle).',
     );
   }
@@ -512,7 +512,7 @@ function updateVariablesGradle(filename: string, variable: string, value: string
 
   txt = txt.replace('}', `    ${variable}='${value}'\n}`);
   writeFileSync(filename, txt, 'utf-8');
-  writeIonic(`Migrated variables.gradle by adding ${variable} = ${value}.`);
+  writeWN(`Migrated variables.gradle by adding ${variable} = ${value}.`);
 }
 
 function updateAndroidManifest(filename: string) {
@@ -533,7 +533,7 @@ function updateAndroidManifest(filename: string) {
     return;
   }
   writeFileSync(filename, replaced, 'utf-8');
-  writeIonic(`Migrated AndroidManifest.xml by adding android:exported attribute to Activity.`);
+  writeWN(`Migrated AndroidManifest.xml by adding android:exported attribute to Activity.`);
 }
 
 function removeKey(filename: string, key: string) {
@@ -558,7 +558,7 @@ function removeKey(filename: string, key: string) {
 
   if (removed) {
     writeFileSync(filename, lines.join('\n'), 'utf-8');
-    writeIonic(`Migrated info.plist by removing  ${key} key.`);
+    writeWN(`Migrated info.plist by removing  ${key} key.`);
   }
 }
 
@@ -631,7 +631,7 @@ function updateGitIgnore(filename: string, lines: Array<string>) {
   }
   if (replaced !== txt) {
     writeFileSync(filename, replaced, 'utf-8');
-    writeIonic(`Migrated .gitignore by adding generated config files.`);
+    writeWN(`Migrated .gitignore by adding generated config files.`);
   }
 }
 
@@ -659,7 +659,7 @@ function patchPodFile(filename: string) {
 
   if (replaced !== txt) {
     writeFileSync(filename, replaced, 'utf-8');
-    writeIonic(`Migrated Podfile by assertingDeploymentTarget.`);
+    writeWN(`Migrated Podfile by assertingDeploymentTarget.`);
   }
 }
 
@@ -684,7 +684,7 @@ function removeInFile(filename: string, startLine: string, endLine: string) {
   });
   if (changed) {
     writeFileSync(filename, lines.join('\n'), 'utf-8');
-    writeIonic(`Migrated ${filename} by removing ${startLine}.`);
+    writeWN(`Migrated ${filename} by removing ${startLine}.`);
   }
 }
 
@@ -698,7 +698,7 @@ function replacePush(filename: string) {
   replaced = replaced.replace('USE_PUSH', '""');
   if (replaced != txt) {
     writeFileSync(filename, replaced, 'utf-8');
-    writeIonic(`Migrated ${filename} by removing USE_PUSH.`);
+    writeWN(`Migrated ${filename} by removing USE_PUSH.`);
   }
 }
 
@@ -718,7 +718,7 @@ function updateGradleWrapper(filename: string) {
   );
   if (txt != replaced) {
     writeFileSync(filename, replaced, 'utf-8');
-    writeIonic(`Migrated gradle-wrapper.properties by updating gradle version from 7.0 to 7.4.2.`);
+    writeWN(`Migrated gradle-wrapper.properties by updating gradle version from 7.0 to 7.4.2.`);
   }
 }
 
@@ -750,7 +750,7 @@ function updateAppBuildGradle(filename: string) {
 
   if (txt != replaced) {
     writeFileSync(filename, replaced, 'utf-8');
-    writeIonic(`Migrated ${filename}`);
+    writeWN(`Migrated ${filename}`);
   }
 }
 
@@ -770,7 +770,7 @@ function updateStyles(filename: string) {
   replaced = replaced.replace(`parent="Theme.AppCompat.NoActionBar"`, `parent="Theme.AppCompat.DayNight.NoActionBar"`);
   if (txt != replaced) {
     writeFileSync(filename, replaced, 'utf-8');
-    writeIonic(`Migrated ${filename} for Android 12 splash screen.`);
+    writeWN(`Migrated ${filename} for Android 12 splash screen.`);
   }
 }
 
@@ -796,7 +796,7 @@ function updateBuildGradle(filename: string) {
       if (isVersionGreaterOrEqual(neededDeps[dep], current)) {
         // Update
         replaced = setAllStringIn(replaced, `classpath '${dep}:`, `'`, neededDeps[dep]);
-        writeIonic(`Migrated build.gradle set ${dep} = ${neededDeps[dep]}.`);
+        writeWN(`Migrated build.gradle set ${dep} = ${neededDeps[dep]}.`);
       }
     }
   }
@@ -814,7 +814,7 @@ function updateBuildGradle(filename: string) {
       // Make sure we have mavenCentral()
       if (inRepositories && !hasMavenCentral) {
         final += '        mavenCentral()\n';
-        writeIonic(`Migrated build.gradle added mavenCentral().`);
+        writeWN(`Migrated build.gradle added mavenCentral().`);
       }
       inRepositories = false;
     }
@@ -823,7 +823,7 @@ function updateBuildGradle(filename: string) {
     }
     if (inRepositories && line.trim() === 'jcenter()') {
       // skip jCentral()
-      writeIonic(`Migrated build.gradle removed jcenter().`);
+      writeWN(`Migrated build.gradle removed jcenter().`);
     } else {
       final += line + '\n';
     }
@@ -881,7 +881,7 @@ function updateFile(
     }
     const message = replacement ? `${textStart} => ${replacement}` : '';
     if (changed) {
-      writeIonic(`Migrated ${filename} ${message}.`);
+      writeWN(`Migrated ${filename} ${message}.`);
     }
     return true;
   } else if (!skipIfNotFound) {

@@ -30,9 +30,9 @@ export function writeAppend(message: string) {
   getOutputChannel().append(message);
 }
 
-export function writeIonic(message: string) {
+export function writeWN(message: string) {
   const channel = getOutputChannel();
-  channel.appendLine(`[Ionic] ${message}`);
+  channel.appendLine(`[wn] ${message}`);
 }
 
 export function writeError(message: string) {

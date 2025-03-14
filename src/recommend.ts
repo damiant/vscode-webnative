@@ -35,7 +35,7 @@ import { analyzeSize } from './analyze-size';
 import { ionicExport } from './ionic-export';
 import { angularGenerate } from './angular-generate';
 import { LoggingSettings } from './log-settings';
-import { writeIonic } from './logging';
+import { writeWN } from './logging';
 import { cancelLastOperation } from './tasks';
 import { CommandName } from './command-name';
 import { CommandTitle } from './command-title';
@@ -44,7 +44,7 @@ import { ExtensionContext, Uri, commands, env } from 'vscode';
 export async function getRecommendations(project: Project, context: ExtensionContext, packages: any): Promise<void> {
   tStart('getRecommendations');
   if (project.isCapacitor) {
-    project.setGroup(`Run`, `Press ${alt('R')} to run the last chosen platform or Web.`, TipType.Ionic, true);
+    project.setGroup(`Run`, `Press ${alt('R')} to run the last chosen platform or Web.`, TipType.WebNative, true);
 
     const hasCapIos = project.hasCapacitorProject(CapacitorPlatform.ios);
     const hasCapAndroid = project.hasCapacitorProject(CapacitorPlatform.android);
@@ -143,7 +143,7 @@ export async function getRecommendations(project: Project, context: ExtensionCon
     const r = project.setGroup(
       'Debug',
       `Running Ionic applications you can debug (${alt('D')})`,
-      TipType.Ionic,
+      TipType.WebNative,
       ionicState.refreshDebugDevices,
       Context.refreshDebug,
     );
@@ -356,7 +356,7 @@ export async function getRecommendations(project: Project, context: ExtensionCon
   project.add(new Tip('Advanced', '', TipType.Settings).setQueuedAction(settings));
 
   // Support and Feedback
-  project.setGroup(`Support`, 'Feature requests and bug fixes', TipType.Ionic, false);
+  project.setGroup(`Support`, 'Feature requests and bug fixes', TipType.WebNative, false);
   project.add(
     new Tip(
       'Provide Feedback',
@@ -366,21 +366,12 @@ export async function getRecommendations(project: Project, context: ExtensionCon
       undefined,
       undefined,
       undefined,
-      `https://github.com/ionic-team/vscode-ionic/issues`,
+      `https://github.com/ionic-team/vscode-webnative/issues`,
     ),
   );
 
   project.add(
-    new Tip(
-      'Ionic Framework',
-      '',
-      TipType.Ionic,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      `https://ionicframework.com`,
-    ),
+    new Tip('WebNative', '', TipType.WebNative, undefined, undefined, undefined, undefined, `https://webnative.dev`),
   );
   tEnd('reviewPackages');
 }
@@ -451,13 +442,13 @@ async function toggleHttps(queueFunction: QueueFunction, current: boolean, proje
   await setSetting(WorkspaceSetting.httpsForWeb, !current);
   if (!current) {
     await showProgress('Enabling HTTPS', async () => {
-      writeIonic('Installing @jcesarmobile/ssl-skip');
+      writeWN('Installing @jcesarmobile/ssl-skip');
       await getRunOutput(npmInstall('@jcesarmobile/ssl-skip'), project.folder);
       await liveReloadSSL(project);
     });
   } else {
     await showProgress('Disabling HTTPS', async () => {
-      writeIonic('Uninstalling @jcesarmobile/ssl-skip');
+      writeWN('Uninstalling @jcesarmobile/ssl-skip');
       await getRunOutput(npmUninstall('@jcesarmobile/ssl-skip'), project.folder);
     });
   }

@@ -3,7 +3,7 @@ import { MonoRepoType } from './monorepo';
 import { CapacitorPlatform } from './capacitor-platform';
 import { InternalCommand } from './command-name';
 import { runWithProgress, getStringFrom, RunResults, openUri } from './utilities';
-import { writeError, writeIonic } from './logging';
+import { writeError, writeWN } from './logging';
 import { exists, isGreaterOrEqual } from './analyzer';
 import { readFileSync, writeFileSync } from 'fs';
 import { capacitorOpen } from './capacitor-open';
@@ -49,7 +49,7 @@ export async function capacitorBuild(queueFunction: QueueFunction, project: Proj
   try {
     queueFunction();
     const command = capBuildCommand(project, platform, args, settings);
-    writeIonic(command);
+    writeWN(command);
     const results: RunResults = { output: '', success: false };
     await runWithProgress(command, 'Preparing Release Build...', project.projectFolder(), results);
     if (results.success) {

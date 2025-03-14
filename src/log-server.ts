@@ -4,7 +4,7 @@ import { extname, join } from 'path';
 import { readFile } from 'fs';
 import { passesFilter, replaceAll } from './utilities';
 import { getSetting, WorkspaceSetting } from './workspace-state';
-import { writeIonic, write, writeError, showOutput } from './logging';
+import { writeWN, write, writeError, showOutput } from './logging';
 import { networkInterfaces } from 'os';
 import { Server, createServer } from 'http';
 
@@ -18,7 +18,7 @@ export async function startStopLogServer(folder: string): Promise<boolean> {
     logServer.close();
     removeScript(folder);
     logServer = undefined;
-    writeIonic(`Remote logging stopped.`);
+    writeWN(`Remote logging stopped.`);
     return true;
   }
 
@@ -47,7 +47,7 @@ export async function startStopLogServer(folder: string): Promise<boolean> {
         } else if (request.url == '/devices') {
           writeDevices(body);
         } else {
-          writeIonic(body);
+          writeWN(body);
         }
         response.writeHead(200);
         response.end();
@@ -81,7 +81,7 @@ export async function startStopLogServer(folder: string): Promise<boolean> {
   }).listen(port);
 
   const addressInfo = getAddress();
-  writeIonic(`Remote logging service has started at http://${addressInfo}:${port}`);
+  writeWN(`Remote logging service has started at http://${addressInfo}:${port}`);
   removeScript(folder);
   if (!(await injectScript(folder, addressInfo, port))) {
     writeError(`Unable to start remote logging (index.html or equivalent cannot be found).`);
@@ -135,7 +135,7 @@ function writeLog(body: string) {
 function writeDevices(body: string) {
   try {
     const device = JSON.parse(body);
-    writeIonic(`${device.agent}`);
+    writeWN(`${device.agent}`);
   } catch {
     write(body);
   }

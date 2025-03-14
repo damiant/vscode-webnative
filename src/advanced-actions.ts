@@ -1,7 +1,7 @@
 import { Project } from './project';
 import { PackageManager, npmInstall, npmInstallAll } from './node-commands';
 import { confirm, getRunOutput, isWindows, replaceAll } from './utilities';
-import { write, writeError, writeIonic } from './logging';
+import { write, writeError, writeWN } from './logging';
 import { exists, isGreaterOrEqual, isLess } from './analyzer';
 import { fixGlobalScss, readAngularJson, writeAngularJson } from './rules-angular-json';
 import { ionicState } from './wn-tree-provider';
@@ -208,7 +208,7 @@ export async function runCommands(commands: Array<string>, title: string, projec
       await run(commands, project.folder);
     });
 
-    writeIonic(`Completed ${title}`);
+    writeWN(`Completed ${title}`);
   } catch (err) {
     writeError(`Failed ${title}: ${err}`);
   }
@@ -216,7 +216,7 @@ export async function runCommands(commands: Array<string>, title: string, projec
 
 async function run(commands: Array<string>, folder: string): Promise<void> {
   for (const command of commands) {
-    writeIonic(replaceAll(command, InternalCommand.cwd, ''));
+    writeWN(replaceAll(command, InternalCommand.cwd, ''));
     try {
       write(await getRunOutput(command, folder));
     } catch (err) {

@@ -1,7 +1,7 @@
 import { mkdtempSync, rmSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
-import { clearOutput, writeError, writeIonic, writeWarning } from './logging';
+import { clearOutput, writeError, writeWN, writeWarning } from './logging';
 import { PackageManager, npmInstall, npmInstallAll, outdatedCommand } from './node-commands';
 import { NpmOutdatedDependency } from './npm-model';
 import { Project } from './project';
@@ -18,7 +18,7 @@ export async function updateMinorDependencies(
 ): Promise<void> {
   const channel = clearOutput();
   try {
-    writeIonic(`Checking for minor updates for ${Object.keys(packages).length} dependencies`);
+    writeWN(`Checking for minor updates for ${Object.keys(packages).length} dependencies`);
     const pkg = { dependencies: {}, name: 'tmp', license: 'MIT' };
     for (const library of Object.keys(packages).sort()) {
       pkg.dependencies[library] = `^${packages[library].version}`;
@@ -41,7 +41,7 @@ export async function updateMinorDependencies(
 
     if (count == 0) {
       const msg = 'All dependencies are on the latest minor update.';
-      writeIonic(msg);
+      writeWN(msg);
       window.showInformationMessage(msg, 'OK');
       return;
     }
@@ -101,7 +101,7 @@ async function addForPackageManager(
 }
 
 async function addForYarn(packages: object, tmpDir: string, channel: OutputChannel): Promise<string[]> {
-  writeIonic(`This may take a moment (as you are using yarn)`);
+  writeWN(`This may take a moment (as you are using yarn)`);
   await getRunOutput(npmInstallAll(), tmpDir);
   const data = await getRunOutput('yarn list --depth=0', tmpDir);
   const lines = data.split('\n');

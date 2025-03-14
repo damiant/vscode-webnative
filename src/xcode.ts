@@ -5,7 +5,7 @@ import * as plist from 'simple-plist';
 import { existsSync, writeFileSync } from 'fs';
 import { QueueFunction, Tip, TipType } from './tip';
 import { ExtensionContext, window } from 'vscode';
-import { writeError, writeIonic } from './logging';
+import { writeError, writeWN } from './logging';
 import { exists } from './analyzer';
 import { openUri, replaceAll } from './utilities';
 import { privacyManifestRules } from './privacy-manifest';
@@ -221,7 +221,7 @@ async function createPrivacyManifest(queueFunction: QueueFunction, project: Proj
     const r2 = xc.p.addResourceFile(filename, {}, res.uuid);
     r3.children.push({ value: r2.fileRef, comment: 'Resources' });
     writeFileSync(xc.projectFilePath, xc.p.writeSync());
-    writeIonic('A privacy manifest file was added to your project.');
+    writeWN('A privacy manifest file was added to your project.');
   } catch (e) {
     writeError(`Unable to create privacy manifest file: ${e}`);
   }

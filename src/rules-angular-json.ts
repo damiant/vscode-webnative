@@ -1,6 +1,6 @@
 import { Project } from './project';
 import { QueueFunction, Tip, TipType } from './tip';
-import { writeError, writeIonic } from './logging';
+import { writeError, writeWN } from './logging';
 import { ionicState } from './wn-tree-provider';
 import { isGreaterOrEqual } from './analyzer';
 import { getCapacitorConfigWebDir, getCapacitorConfigureFilename, writeCapacitorConfig } from './capacitor-config-file';
@@ -287,14 +287,14 @@ async function switchESBuild(queueFunction: QueueFunction, project: Project, fil
               value = value.replace(/\\/g, '/'); // On windows backslash is escape
             }
             writeCapacitorConfig(project, [{ key: 'webDir', value }]);
-            writeIonic(`Your Capacitor config webDir was changed from "${webDir}" to "${value}"`);
+            writeWN(`Your Capacitor config webDir was changed from "${webDir}" to "${value}"`);
           }
         }
       }
     }
     fixGlobalScss(project);
     writeFileSync(filename, JSON.stringify(angular, undefined, 2));
-    writeIonic(`Your angular.json was modified to use ESBuild.`);
+    writeWN(`Your angular.json was modified to use ESBuild.`);
     if (success) {
       window.showInformationMessage(`Your project is now using ESBuild. Enjoy faster builds!`, 'OK');
     }
@@ -313,7 +313,7 @@ export function fixGlobalScss(project: Project) {
       txt = replaceAll(txt, `@import "~`, `@import "`);
       txt = replaceAll(txt, `@import '~`, `@import '`);
       writeFileSync(filename, txt);
-      writeIonic(`Modified global.scss to use ESBuild compatible imports.`);
+      writeWN(`Modified global.scss to use ESBuild compatible imports.`);
     }
   } catch (error) {
     writeError(`Unable to write global.scss ${error}`);

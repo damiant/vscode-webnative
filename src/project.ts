@@ -233,6 +233,9 @@ export class Project {
       case TipType.Ionic:
         r.setIcon('ionic');
         break;
+      case TipType.WebNative:
+        r.setIcon('webnative');
+        break;
       case TipType.Android:
         r.setIcon('android');
         break;
@@ -252,6 +255,7 @@ export class Project {
         r.setIcon('files');
         break;
       case TipType.None:
+        r.setIcon('none');
         break;
       case TipType.Add:
         r.setIcon('add');
@@ -696,7 +700,6 @@ export async function inspectProject(
 
   commands.executeCommand(VSCommand.setContext, Context.inspectedProject, true);
 
-  //console.log(`Analyzed Project in ${Date.now() - startedOp}ms`);
   return { project, packages };
 }
 

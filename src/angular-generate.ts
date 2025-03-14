@@ -1,7 +1,7 @@
 import { Project } from './project';
 
 import { getRunOutput, getStringFrom, openUri, replaceAll } from './utilities';
-import { write, writeError, writeIonic } from './logging';
+import { write, writeError, writeWN } from './logging';
 import { join } from 'path';
 import { existsSync } from 'fs';
 import { isGreaterOrEqual } from './analyzer';
@@ -40,7 +40,7 @@ export async function angularGenerate(
       }
     }
     name = replaceAll(name, ' ', '-').trim();
-    writeIonic(`Creating Angular ${angularType} named ${name}..`);
+    writeWN(`Creating Angular ${angularType} named ${name}..`);
     checkAngularJson(project);
     const angularProjectName = ionicState.project ?? 'app';
     // eg ng generate page page-a --standalone --project=app
@@ -56,7 +56,7 @@ export async function angularGenerate(
     if (!src || !existsSync(path)) {
       writeError(`Failed to create Angular ${angularType} named ${name}`);
     } else {
-      writeIonic(`Created Angular ${angularType} named ${name}`);
+      writeWN(`Created Angular ${angularType} named ${name}`);
       await openUri(path);
     }
   } catch (err) {

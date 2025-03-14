@@ -3,7 +3,7 @@
 <plist version="1.0">
     <dict>
         <key>scopeName</key>
-        <string>code.log</string>
+        <string>wn.log</string>
         <key>fileTypes</key>
         <array>
             <string>log</string>
@@ -13,9 +13,9 @@
         <key>patterns</key>
         <array>
             <dict>
-                <!-- Ionic start/end -->
+                <!-- WebNative start/end -->
                 <key>match</key>
-                <string>^(\[Ionic\]).*</string>
+                <string>\[wn\].*</string>
                 <key>name</key>
                 <string>support.type</string> <!-- cyan -->
             </dict>
@@ -106,6 +106,6 @@
                    	
         </array>
         <key>uuid</key>
-        <string>ab259404-3072-4cd4-a943-7cbbd32e373f</string>
+        <string>92085f84-747a-49db-a971-300f9b00c0eb</string>
     </dict>
 </plist>

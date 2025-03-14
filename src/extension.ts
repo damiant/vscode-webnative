@@ -1,7 +1,6 @@
 'use strict';
 
 import { Context, VSCommand } from './context-variables';
-import { ionicLogin, ionicSignup } from './ionic-auth';
 import { ionicState, IonicTreeProvider } from './wn-tree-provider';
 import { clearRefreshCache } from './process-packages';
 import { Recommendation } from './recommendation';
@@ -28,7 +27,7 @@ import { PluginExplorerPanel } from './plugin-explorer';
 import { Features, showTips } from './features';
 
 import { webDebugSetting } from './web-debug';
-import { showOutput, write, writeError, writeIonic } from './logging';
+import { showOutput, write, writeError, writeWN } from './logging';
 import { ImportQuickFixProvider } from './quick-fix';
 import {
   cancelIfRunning,
@@ -105,7 +104,7 @@ export async function fixIssue(
         // Kill the process if the user cancels
         if (token.isCancellationRequested || tip.cancelRequested) {
           tip.cancelRequested = false;
-          writeIonic(`Stopped "${tip.title}"`);
+          writeWN(`Stopped "${tip.title}"`);
           if (tip.features.includes(TipFeature.welcome)) {
             commands.executeCommand(CommandName.hideDevServer);
           }
@@ -186,7 +185,7 @@ export async function fixIssue(
     if (failed) {
       writeError(`${tip.title} Failed.`);
     } else {
-      writeIonic(`${tip.title} Completed.`);
+      writeWN(`${tip.title} Completed.`);
     }
     write('');
     showOutput();
@@ -292,19 +291,8 @@ export async function activate(context: ExtensionContext) {
     await findAndRun(ionicProvider, rootPath, CommandTitle.Sync);
   });
 
-  commands.registerCommand(CommandName.SignUp, async () => {
-    await ionicSignup(context.extensionPath, context);
-    ionicProvider.refresh();
-  });
-
   commands.registerCommand(CommandName.Upgrade, async (recommendation: Recommendation) => {
     await packageUpgrade(recommendation.tip.data, getLocalFolder(rootPath));
-    ionicProvider.refresh();
-  });
-
-  commands.registerCommand(CommandName.Login, async () => {
-    await commands.executeCommand(VSCommand.setContext, Context.isLoggingIn, true);
-    await ionicLogin(context.extensionPath, context);
     ionicProvider.refresh();
   });
 
@@ -369,13 +357,6 @@ export async function activate(context: ExtensionContext) {
   commands.registerCommand(CommandName.PluginExplorer, async () => {
     await reviewProject(rootPath, context, context.workspaceState.get('SelectedProject'));
     PluginExplorerPanel.init(context.extensionUri, rootPath, context, ionicProvider);
-  });
-
-  commands.registerCommand(CommandName.SkipLogin, async () => {
-    ionicState.skipAuth = true;
-    await commands.executeCommand(VSCommand.setContext, Context.inspectedProject, false);
-    await commands.executeCommand(VSCommand.setContext, Context.isAnonymous, false);
-    ionicProvider.refresh();
   });
 
   commands.registerCommand(CommandName.Open, async (recommendation: Recommendation) => {

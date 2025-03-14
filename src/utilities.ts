@@ -8,7 +8,7 @@ import { exists } from './analyzer';
 import { ionicInit } from './ionic-init';
 import { request } from 'https';
 import { ExtensionSetting, getExtSetting, getSetting, WorkspaceSetting } from './workspace-state';
-import { showOutput, write, writeError, writeIonic, writeWarning } from './logging';
+import { showOutput, write, writeError, writeWN, writeWarning } from './logging';
 import { getWebConfiguration, WebConfigSetting } from './web-configuration';
 import { Publisher } from './discovery';
 import { join } from 'path';
@@ -432,7 +432,7 @@ function qualifyCommand(command: string, folder: string): string {
       if (existsSync(nvmrc)) {
         const txt = readFileSync(nvmrc, 'utf-8').replace('\n', '');
         ionicState.nvm = `source ${process.env.NVM_DIR}/nvm.sh && nvm use > /dev/null`;
-        writeIonic(`Detected nvm (${txt}) for this project.`);
+        writeWN(`Detected nvm (${txt}) for this project.`);
       }
     }
     if (ionicState.nvm) {

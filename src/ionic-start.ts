@@ -10,7 +10,7 @@ import {
   workspace,
 } from 'vscode';
 import { asAppId, getRunOutput, isWindows, replaceAll, run, toTitleCase } from './utilities';
-import { writeIonic } from './logging';
+import { writeWN } from './logging';
 import { homedir } from 'os';
 import { ExtensionSetting, GlobalSetting, getExtSetting, getGlobalSetting, setGlobalSetting } from './workspace-state';
 import { join } from 'path';
@@ -360,9 +360,9 @@ async function runCommands(cmds: string[]) {
   for (const cmd of cmds) {
     if (cmd.startsWith('#')) {
       folder = cmd.replace('#', '');
-      writeIonic(`Folder changed to ${folder}`);
+      writeWN(`Folder changed to ${folder}`);
     } else {
-      writeIonic(cmd);
+      writeWN(cmd);
       await run(folder, cmd, undefined, [], undefined, undefined);
     }
   }

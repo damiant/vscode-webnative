@@ -1,4 +1,4 @@
-import { writeError, writeIonic } from './logging';
+import { writeError, writeWN } from './logging';
 import { Project } from './project';
 import { isWindows, openUri, run, RunResults, showProgress, stripJSON } from './utilities';
 
@@ -21,7 +21,7 @@ export async function analyzeSize(queueFunction: QueueFunction, project: Project
     let previousValue;
     try {
       previousValue = enableSourceMaps(project);
-      writeIonic('Building for production with Sourcemaps...');
+      writeWN('Building for production with Sourcemaps...');
       let args = '';
       if (project.repoType == MonoRepoType.nx || project.frameworkType.startsWith('angular')) {
         args = '--configuration=production';
@@ -35,7 +35,7 @@ export async function analyzeSize(queueFunction: QueueFunction, project: Project
         writeError(err);
       }
 
-      writeIonic('Analyzing Sourcemaps...');
+      writeWN('Analyzing Sourcemaps...');
       const result: RunResults = { output: '', success: undefined };
       try {
         await run2(project, `npx source-map-explorer "${dist}/**/*.js" --json --exclude-source-map`, result);
@@ -55,7 +55,7 @@ export async function analyzeSize(queueFunction: QueueFunction, project: Project
           'Size of assets in your distribution folder.',
         );
       showWindow(project.projectFolder(), html);
-      writeIonic('Launched project statistics window.');
+      writeWN('Launched project statistics window.');
     } finally {
       revertSourceMaps(project, previousValue);
     }
@@ -87,7 +87,7 @@ function enableSourceMaps(project: Project): string {
             return previousValue;
           } else {
             cfg.build.configurations.production.sourceMap = true;
-            writeIonic(`Temporarily modified production sourceMap of ${prj} to true in angular.json`);
+            writeWN(`Temporarily modified production sourceMap of ${prj} to true in angular.json`);
             changeMade = true;
           }
         }

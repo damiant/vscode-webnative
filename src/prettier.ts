@@ -3,7 +3,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { ignore } from './ignore';
 import { npmInstall, npmRun, saveDevArgument } from './node-commands';
-import { writeError, writeIonic } from './logging';
+import { writeError, writeWN } from './logging';
 import { ExtensionContext, window } from 'vscode';
 import { Tip } from './tip';
 
@@ -18,11 +18,11 @@ export async function integratePrettier(project: Project) {
     if (question != 'Yes') return;
 
     await project.run2(npmInstall('husky', saveDevArgument(project), '--save-exact'));
-    writeIonic(`Installed husky`);
+    writeWN(`Installed husky`);
     await project.run2(npmInstall('prettier', saveDevArgument(project), '--save-exact'));
-    writeIonic(`Installed prettier`);
+    writeWN(`Installed prettier`);
     await project.run2(npmInstall('lint-staged', saveDevArgument(project), '--save-exact'));
-    writeIonic(`Installed lint-staged`);
+    writeWN(`Installed lint-staged`);
     const filename = join(project.projectFolder(), 'package.json');
     const packageFile = JSON.parse(readFileSync(filename, 'utf8'));
 

@@ -27,7 +27,7 @@ import { checkAngularJson } from './rules-angular-json';
 import { checkBrowsersList } from './rules-browserslist';
 import { ionicState } from './wn-tree-provider';
 import { integratePWA } from './capacitor-pwa';
-import { showOutput, write, writeIonic } from './logging';
+import { showOutput, write, writeWN } from './logging';
 import { ExtensionContext, window } from 'vscode';
 import { WorkspaceSetting, getSetting, setSetting } from './workspace-state';
 import { angularMigrate, maxAngularVersion } from './rules-angular-migrate';
@@ -872,7 +872,7 @@ async function updateCocoaPods(
 
     const v = await getCocoaPodsVersion(project, true);
     const msg = `Cocoapods Updated to ${v}. Be sure to "Sync" your project.`;
-    writeIonic(msg);
+    writeWN(msg);
     if (isVersionGreaterOrEqual(v, minVersion)) {
       window.showInformationMessage(msg, 'OK');
     }

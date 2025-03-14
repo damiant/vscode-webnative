@@ -2,7 +2,7 @@ import { ProgressLocation, window, CancellationToken } from 'vscode';
 import { InternalCommand } from './command-name';
 import { Context } from './context-variables';
 import { ionicState } from './wn-tree-provider';
-import { clearOutput, write, writeIonic } from './logging';
+import { clearOutput, write, writeWN } from './logging';
 import { Tip } from './tip';
 import { channelShow, replaceAll, stopPublishing } from './utilities';
 
@@ -83,7 +83,7 @@ export function startCommand(tip: Tip, cmd: string, clear?: boolean) {
     if (clear !== false) {
       clearOutput();
     }
-    writeIonic(`${message}...`);
+    writeWN(`${message}...`);
     let command = cmd;
     if (command?.includes(InternalCommand.cwd)) {
       command = command.replace(InternalCommand.cwd, '');

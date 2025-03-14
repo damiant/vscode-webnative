@@ -1,5 +1,5 @@
 import { window } from 'vscode';
-import { clearOutput, write, writeError, writeIonic } from './logging';
+import { clearOutput, write, writeError, writeWN } from './logging';
 import { Project } from './project';
 import { getRunOutput, run, showProgress, stripJSON } from './utilities';
 import { QueueFunction } from './tip';
@@ -24,7 +24,7 @@ export async function audit(queueFunction: QueueFunction, project: Project): Pro
           if (vulnerabilities.length > 0) {
             await checkAuditFix(vulnerabilities, project);
           } else {
-            writeIonic(`No security vulnerabilities were found using npm audit.`);
+            writeWN(`No security vulnerabilities were found using npm audit.`);
           }
         }, 1);
       } catch (error) {
@@ -98,7 +98,7 @@ async function checkAuditFix(vulnerabilities: SecurityVulnerability[], project: 
 async function completeAudit(project: Project, audit: Audit) {
   const severities = ['critical', 'high', 'moderate', 'low'];
   const types = ['direct', 'indirect'];
-  writeIonic(
+  writeWN(
     `There are ${audit.metadata.vulnerabilities.total} security vulnerabilities in your projects ${audit.metadata.dependencies.total} dependencies`,
   );
   for (const type of types) {
