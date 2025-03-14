@@ -153,8 +153,9 @@ export class Project {
       r.setContext(contextValue);
     }
     r.children = [];
-    r.setIcon('dependency');
-    this.setIcon(type, r);
+    r.setIcon('none');
+    this.setIcon(TipType.None, r);
+    //this.setIcon(type, r);
     this.group = r;
     this.groups.push(this.group);
     return r;

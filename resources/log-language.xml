@@ -17,7 +17,7 @@
                 <key>match</key>
                 <string>\[wn\].*</string>
                 <key>name</key>
-                <string>support.type</string> <!-- cyan -->
+                <string>storage</string> <!-- cyan -->
             </dict>
             <dict>
                 <!-- React Error -->
@@ -38,7 +38,7 @@
                 <key>match</key>
                 <string>^\[high\].*</string>
                 <key>name</key>
-                <string>entity.name.function</string>
+                <string>invalid.illegal</string>
             </dict>	 
             <dict>
                 <!-- Test Fail -->

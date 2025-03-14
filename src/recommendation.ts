@@ -24,6 +24,10 @@ export class Recommendation extends TreeItem {
   }
 
   public setIcon(name: string) {
+    if (name === 'none') {
+      this.iconPath = undefined;
+      return;
+    }
     this.iconName = name;
     this.iconPath = {
       light: join(__filename, '..', '..', 'resources', 'light', name + '.svg'),

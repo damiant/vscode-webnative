@@ -1,4 +1,3 @@
-import { exists } from './analyzer';
 import { CapacitorPlatform } from './capacitor-platform';
 import { useIonicCLI } from './capacitor-run';
 import { InternalCommand } from './command-name';
