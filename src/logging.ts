@@ -4,7 +4,7 @@ let channel: OutputChannel = undefined;
 
 function getOutputChannel(): OutputChannel {
   if (!channel) {
-    channel = window.createOutputChannel('Ionic');
+    channel = window.createOutputChannel('WebNative');
     channel.show();
   }
   return channel;

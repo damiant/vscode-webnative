@@ -1,6 +1,6 @@
 import { exists } from './analyzer';
 import { CommandName } from './command-name';
-import { ionicState } from './wn-tree-provider';
+import { exState } from './wn-tree-provider';
 import { getNpmWorkspaceProjects } from './monorepos-npm';
 import { getNXProjects } from './monorepos-nx';
 import { Project } from './project';
@@ -68,8 +68,8 @@ export async function checkForMonoRepo(project: Project, selectedProject: string
       // Standalone nx project
       projects.push({ name: 'app', folder: '', nodeModulesAtRoot: true, isNXStandalone: true });
     }
-    ionicState.projects = projects;
-    ionicState.projectsView.title = 'NX Projects';
+    exState.projects = projects;
+    exState.projectsView.title = 'NX Projects';
   } else if (project.workspaces?.length > 0 && !isPnpm) {
     // For npm workspaces check package.json
     projects = getNpmWorkspaceProjects(project);
@@ -77,33 +77,33 @@ export async function checkForMonoRepo(project: Project, selectedProject: string
     if (project.packageManager == PackageManager.yarn) {
       project.repoType = MonoRepoType.yarn;
     }
-    ionicState.projects = projects;
-    ionicState.projectsView.title = 'Workspaces';
+    exState.projects = projects;
+    exState.projectsView.title = 'Workspaces';
   } else {
     // See if it looks like a folder based repo
     projects = getFolderBasedProjects(project);
 
     if (projects?.length > 0 && !isPnpm) {
       project.repoType = MonoRepoType.folder;
-      ionicState.projectsView.title = 'Projects';
+      exState.projectsView.title = 'Projects';
     } else {
       if (isPnpm) {
         project.repoType = MonoRepoType.pnpm;
         projects = getPnpmWorkspaces(project);
-        ionicState.projects = projects;
-        ionicState.projectsView.title = 'Workspaces';
+        exState.projects = projects;
+        exState.projectsView.title = 'Workspaces';
       } else {
         // Might be lerna based
         const lerna = join(project.folder, 'lerna.json');
         if (existsSync(lerna)) {
           project.repoType = MonoRepoType.lerna;
           projects = getLernaWorkspaces(project);
-          ionicState.projects = projects;
-          ionicState.projectsView.title = 'Workspaces';
+          exState.projects = projects;
+          exState.projectsView.title = 'Workspaces';
         }
       }
     }
-    ionicState.projects = projects;
+    exState.projects = projects;
   }
   if (projects?.length > 0) {
     const found = projects.find((project) => project.name == selectedProject);
@@ -116,7 +116,7 @@ export async function checkForMonoRepo(project: Project, selectedProject: string
       project.repoType = MonoRepoType.none;
       window.showErrorMessage('No mono repo projects found.');
     } else {
-      ionicState.view.title = project.monoRepo.name;
+      exState.view.title = project.monoRepo.name;
 
       //  // Switch to pnpm if needed
       //  const isPnpm = fs.existsSync(path.join(projects[0].folder, 'pnpm-lock.yaml'));
@@ -138,7 +138,7 @@ export async function checkForMonoRepo(project: Project, selectedProject: string
       commands.executeCommand(CommandName.ProjectsRefresh, project.monoRepo.name);
     }
   }
-  ionicState.repoType = project.repoType;
+  exState.repoType = project.repoType;
 
   commands.executeCommand(VSCommand.setContext, Context.isMonoRepo, project.repoType !== MonoRepoType.none);
 }
@@ -201,7 +201,7 @@ function vsCodeWorkSpaces(): Array<MonoFolder> {
 }
 
 export function getMonoRepoFolder(name: string, defaultFolder: string): string {
-  const found: MonoRepoProject = ionicState.projects.find((repo) => repo.name == name);
+  const found: MonoRepoProject = exState.projects.find((repo) => repo.name == name);
   if (!found) {
     return defaultFolder;
   }
@@ -213,12 +213,12 @@ export function getPackageJSONFilename(rootFolder: string): string {
 }
 
 export function getLocalFolder(rootFolder: string): string {
-  switch (ionicState.repoType) {
+  switch (exState.repoType) {
     case MonoRepoType.npm:
     case MonoRepoType.yarn:
     case MonoRepoType.lerna:
     case MonoRepoType.folder:
-      return getMonoRepoFolder(ionicState.workspace, rootFolder);
+      return getMonoRepoFolder(exState.workspace, rootFolder);
   }
   return rootFolder;
 }

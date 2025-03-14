@@ -11,21 +11,22 @@ import {
   WebView,
   WebViewType,
 } from './android-debug-models';
-import { ionicState } from './wn-tree-provider';
+import { exState } from './wn-tree-provider';
 import { workspace } from 'vscode';
 import { existsSync } from 'fs';
 import { join, resolve } from 'path';
 import { homedir } from 'os';
 import { spawn } from 'child_process';
+import { WorkspaceSection } from './workspace-state';
 
 const forwardedSockets: ForwardedSocket[] = [];
 
 export async function androidDebugUnforward(): Promise<void> {
-  if (!ionicState.debugged) {
+  if (!exState.debugged) {
     return; // May be debugging some other non Ionic app
   }
   // Swtich back to Ionic View
-  ionicState.view.reveal(undefined, { focus: true });
+  exState.view.reveal(undefined, { focus: true });
 
   const promises: Promise<any>[] = [];
 
@@ -233,7 +234,7 @@ async function unforward(options: UnforwardOptions): Promise<void> {
 }
 
 function getAdbArguments(): string[] {
-  const adbArgs = workspace.getConfiguration('ionic').get<string[]>('adbArgs');
+  const adbArgs = workspace.getConfiguration(WorkspaceSection).get<string[]>('adbArgs');
 
   if (adbArgs) {
     return adbArgs;
@@ -243,7 +244,7 @@ function getAdbArguments(): string[] {
 }
 
 function getAdbExecutable(): string {
-  const adbPath = workspace.getConfiguration('ionic').get<string>('adbPath');
+  const adbPath = workspace.getConfiguration(WorkspaceSection).get<string>('adbPath');
   if (adbPath) {
     return resolvePath(adbPath);
   } else {

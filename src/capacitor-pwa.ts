@@ -2,7 +2,7 @@ import { window } from 'vscode';
 import { Project } from './project';
 import { ActionResult } from './command-name';
 import { ignore } from './ignore';
-import { ionicState } from './wn-tree-provider';
+import { exState } from './wn-tree-provider';
 import { QueueFunction, Tip } from './tip';
 import { runCommands } from './advanced-actions';
 import { npx } from './node-commands';
@@ -14,7 +14,7 @@ export async function integratePWA(queueFunction: QueueFunction, project: Projec
     'Ignore',
   );
   if (result == 'Ignore') {
-    ignore(tip, ionicState.context);
+    ignore(tip, exState.context);
     return;
   }
   if (!result) {

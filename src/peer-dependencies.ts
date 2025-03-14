@@ -1,4 +1,4 @@
-import { ionicState } from './wn-tree-provider';
+import { exState } from './wn-tree-provider';
 import { satisfies, gt } from 'semver';
 import { write, writeError, writeWarning } from './logging';
 import { PackageManager, npmInstall } from './node-commands';
@@ -36,7 +36,7 @@ export async function checkPeerDependencies(
   peerDeps: DependencyVersion[],
   ignoreDeps: string[],
 ): Promise<PeerReport> {
-  if (ionicState.packageManager != PackageManager.npm) return { dependencies: [], incompatible: [], commands: [] };
+  if (exState.packageManager != PackageManager.npm) return { dependencies: [], incompatible: [], commands: [] };
   const dependencies = await getDependencyConflicts(folder, peerDeps, ignoreDeps);
   const conflicts = [];
   const updates: string[] = [];
@@ -106,7 +106,7 @@ async function getNPMInfoFor(dependency: string): Promise<any> {
     return pck;
   } catch (error) {
     // This can happen if the package is not public
-    const data = await getRunOutput(`npm view ${dependency} --json`, ionicState.rootFolder, undefined, true);
+    const data = await getRunOutput(`npm view ${dependency} --json`, exState.rootFolder, undefined, true);
     const pck = JSON.parse(data);
     pck.latestVersion = pck.version;
     pck.versions[pck.latestVersion] = { peerDependencies: pck.peerDependencies };

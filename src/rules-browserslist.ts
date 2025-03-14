@@ -2,7 +2,7 @@ import { Project } from './project';
 import { QueueFunction, Tip, TipType } from './tip';
 import { writeError } from './logging';
 import { openUri } from './utilities';
-import { ionicState } from './wn-tree-provider';
+import { exState } from './wn-tree-provider';
 import { ignore } from './ignore';
 import { browsersList, exists } from './analyzer';
 import { existsSync, readFileSync, rmSync, writeFileSync } from 'fs';
@@ -85,7 +85,7 @@ async function setBrowsersList(queueFunction: QueueFunction, project: Project, t
 
   try {
     if (choice == 'Ignore') {
-      ignore(new Tip(title, message), ionicState.context);
+      ignore(new Tip(title, message), exState.context);
       return;
     }
 
@@ -120,7 +120,7 @@ async function moveFile(
 
   try {
     if (choice == 'Ignore') {
-      ignore(new Tip(title, message), ionicState.context);
+      ignore(new Tip(title, message), exState.context);
       return;
     }
     queueFunction();

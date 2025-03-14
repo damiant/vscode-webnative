@@ -1,6 +1,6 @@
 import { window, commands } from 'vscode';
 import { CommandName, InternalCommand } from './command-name';
-import { ionicState } from './wn-tree-provider';
+import { exState } from './wn-tree-provider';
 import { getMonoRepoFolder, MonoRepoType } from './monorepo';
 import { Project } from './project';
 import { showProgress } from './utilities';
@@ -75,10 +75,10 @@ export function installForceArgument(project: Project): string {
 export function npmInstall(name: string, ...args): string {
   const argList = args.join(' ').trim();
 
-  switch (ionicState.repoType) {
+  switch (exState.repoType) {
     case MonoRepoType.npm:
       return `${pm(PMOperation.install, name)} ${argList} --workspace=${getMonoRepoFolder(
-        ionicState.workspace,
+        exState.workspace,
         undefined,
       )}`;
     case MonoRepoType.yarn:
@@ -92,7 +92,7 @@ export function npmInstall(name: string, ...args): string {
 }
 
 function notForce(args: string): string {
-  if (ionicState.packageManager !== PackageManager.yarn) return args;
+  if (exState.packageManager !== PackageManager.yarn) return args;
   return args.replace('--force', '');
 }
 
@@ -121,11 +121,11 @@ export function preflightNPMCheck(project: Project): string {
 }
 
 export async function suggestInstallAll(project: Project) {
-  if (!ionicState || !ionicState.hasPackageJson) {
+  if (!exState || !exState.hasPackageJson) {
     return;
   }
 
-  ionicState.hasNodeModulesNotified = true;
+  exState.hasNodeModulesNotified = true;
 
   if (project.isModernYarn()) {
     return;
@@ -150,7 +150,7 @@ export async function suggestInstallAll(project: Project) {
 }
 
 export function npmInstallAll(): string {
-  switch (ionicState.repoType) {
+  switch (exState.repoType) {
     case MonoRepoType.pnpm:
     case MonoRepoType.lerna:
     case MonoRepoType.folder:
@@ -161,7 +161,7 @@ export function npmInstallAll(): string {
 }
 
 export function npmUpdate(): string {
-  switch (ionicState.repoType) {
+  switch (exState.repoType) {
     case MonoRepoType.pnpm:
     case MonoRepoType.lerna:
     case MonoRepoType.folder:
@@ -172,7 +172,7 @@ export function npmUpdate(): string {
 }
 
 function pm(operation: PMOperation, name?: string): string {
-  switch (ionicState.packageManager) {
+  switch (exState.packageManager) {
     case PackageManager.npm:
       return npm(operation, name);
     case PackageManager.yarn:
@@ -270,9 +270,9 @@ export function npx(project: Project, options?: NpxOptions): string {
 }
 
 export function npmUninstall(name: string): string {
-  switch (ionicState.repoType) {
+  switch (exState.repoType) {
     case MonoRepoType.npm:
-      return `${pm(PMOperation.uninstall, name)} --workspace=${getMonoRepoFolder(ionicState.workspace, undefined)}`;
+      return `${pm(PMOperation.uninstall, name)} --workspace=${getMonoRepoFolder(exState.workspace, undefined)}`;
     case MonoRepoType.folder:
     case MonoRepoType.yarn:
     case MonoRepoType.lerna:
@@ -284,9 +284,9 @@ export function npmUninstall(name: string): string {
 }
 
 export function npmRun(name: string): string {
-  switch (ionicState.repoType) {
+  switch (exState.repoType) {
     case MonoRepoType.npm:
-      return `${pm(PMOperation.run, name)} --workspace=${getMonoRepoFolder(ionicState.workspace, undefined)}`;
+      return `${pm(PMOperation.run, name)} --workspace=${getMonoRepoFolder(exState.workspace, undefined)}`;
     case MonoRepoType.folder:
     case MonoRepoType.yarn:
     case MonoRepoType.lerna:

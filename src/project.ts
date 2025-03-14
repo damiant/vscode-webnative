@@ -3,7 +3,7 @@ import { Tip, TipType } from './tip';
 import { load, exists } from './analyzer';
 import { isRunning } from './tasks';
 import { getGlobalIonicConfig, getIonicConfig, sendTelemetryEvents } from './telemetry';
-import { ionicState } from './wn-tree-provider';
+import { exState } from './wn-tree-provider';
 import { Context, VSCommand } from './context-variables';
 import { getRecommendations } from './recommend';
 import { getIgnored } from './ignore';
@@ -657,21 +657,21 @@ export async function inspectProject(
   const project: Project = new Project('My Project');
   project.folder = folder;
   project.packageManager = getPackageManager(folder, project.repoType);
-  ionicState.packageManager = project.packageManager;
-  ionicState.rootFolder = folder;
-  ionicState.projectRef = project;
+  exState.packageManager = project.packageManager;
+  exState.rootFolder = folder;
+  exState.projectRef = project;
 
   let packages = await load(folder, project, context);
-  ionicState.view.title = project.name;
+  exState.view.title = project.name;
   project.type = project.isCapacitor ? 'Capacitor' : project.isCordova ? 'Cordova' : 'Other';
 
   const gConfig = getGlobalIonicConfig();
 
   if (!Features.requireLogin) {
-    ionicState.skipAuth = true;
+    exState.skipAuth = true;
   }
 
-  if (!gConfig['user.id'] && !ionicState.skipAuth) {
+  if (!gConfig['user.id'] && !exState.skipAuth) {
     commands.executeCommand(VSCommand.setContext, Context.isAnonymous, true);
     return undefined;
   } else {
@@ -684,7 +684,7 @@ export async function inspectProject(
     // Use the package manager from the monorepo project
     project.packageManager = getPackageManager(project.monoRepo.folder, project.repoType);
 
-    ionicState.packageManager = project.packageManager;
+    exState.packageManager = project.packageManager;
   }
   if (project.monoRepo?.localPackageJson) {
     packages = await load(project.monoRepo.folder, project, context);
@@ -737,7 +737,7 @@ function getPackageManager(folder: string, monoRepoType: MonoRepoType): PackageM
   const bunLock = join(folder, 'bun.lockb');
   if (existsSync(yarnLock)) {
     return PackageManager.yarn;
-  } else if (existsSync(pnpmLock) || ionicState.repoType == MonoRepoType.pnpm) {
+  } else if (existsSync(pnpmLock) || exState.repoType == MonoRepoType.pnpm) {
     return PackageManager.pnpm;
   } else if (existsSync(bunLock)) {
     return PackageManager.bun;

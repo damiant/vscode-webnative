@@ -18,7 +18,7 @@ import { capacitorOpen } from './capacitor-open';
 import { CapacitorPlatform } from './capacitor-platform';
 import { addScripts } from './scripts';
 import { Context } from './context-variables';
-import { ionicState } from './wn-tree-provider';
+import { exState } from './wn-tree-provider';
 import { getAndroidWebViewList } from './android-debug-list';
 import { getDebugBrowserName } from './editor-preview';
 import { checkIonicNativePackages } from './rules-ionic-native';
@@ -73,7 +73,7 @@ export async function getRecommendations(project: Project, context: ExtensionCon
       .canAnimate()
       .setTooltip(`Run a development server and open using the default web browser (${alt('R')})`);
     project.add(runWeb);
-    ionicState.runWeb = runWeb;
+    exState.runWeb = runWeb;
 
     const runPoints: Array<RunPoint> = [
       { text: 'Copying web assets', title: 'Copying...' },
@@ -89,7 +89,7 @@ export async function getRecommendations(project: Project, context: ExtensionCon
     if (hasCapAndroid) {
       const runAndroid = new Tip(
         CommandTitle.RunForAndroid,
-        ionicState.selectedAndroidDeviceName ?? '',
+        exState.selectedAndroidDeviceName ?? '',
         TipType.Run,
         'Run',
         undefined,
@@ -111,12 +111,12 @@ export async function getRecommendations(project: Project, context: ExtensionCon
         .setContextValue(Context.selectDevice);
 
       project.add(runAndroid);
-      ionicState.runAndroid = runAndroid;
+      exState.runAndroid = runAndroid;
     }
     if (hasCapIos) {
       const runIos = new Tip(
         CommandTitle.RunForIOS,
-        ionicState.selectedIOSDeviceName ?? '',
+        exState.selectedIOSDeviceName ?? '',
         TipType.Run,
         'Run',
         undefined,
@@ -137,14 +137,14 @@ export async function getRecommendations(project: Project, context: ExtensionCon
         .setSyncOnSuccess(CapacitorPlatform.ios)
         .setContextValue(Context.selectDevice);
       project.add(runIos);
-      ionicState.runIOS = runIos;
+      exState.runIOS = runIos;
     }
 
     const r = project.setGroup(
       'Debug',
       `Running Ionic applications you can debug (${alt('D')})`,
       TipType.WebNative,
-      ionicState.refreshDebugDevices,
+      exState.refreshDebugDevices,
       Context.refreshDebug,
     );
 
@@ -281,7 +281,7 @@ export async function getRecommendations(project: Project, context: ExtensionCon
     );
     project.add(
       new Tip('Export', '', TipType.Media)
-        .setQueuedAction(ionicExport, project, ionicState.context)
+        .setQueuedAction(ionicExport, project, exState.context)
         .setTooltip('Export a markdown file with all project dependencies and plugins'),
     );
   }
@@ -426,7 +426,7 @@ function useHttps(project: Project): Tip {
 
 async function toggleRemoteLogging(project: Project, current: boolean): Promise<void> {
   if (await startStopLogServer(project.folder)) {
-    ionicState.remoteLogging = !current;
+    exState.remoteLogging = !current;
   }
   await cancelLastOperation();
   return Promise.resolve();

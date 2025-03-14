@@ -1,7 +1,7 @@
 import { ProgressLocation, window, CancellationToken } from 'vscode';
 import { InternalCommand } from './command-name';
 import { Context } from './context-variables';
-import { ionicState } from './wn-tree-provider';
+import { exState } from './wn-tree-provider';
 import { clearOutput, write, writeWN } from './logging';
 import { Tip } from './tip';
 import { channelShow, replaceAll, stopPublishing } from './utilities';
@@ -21,11 +21,11 @@ export function getLastOperation(): Tip {
 
 export function isRunning(tip: Tip) {
   const found: RunningAction = runningOperations.find((found: RunningAction) => {
-    return same(found, { tip, workspace: ionicState.workspace });
+    return same(found, { tip, workspace: exState.workspace });
   });
   if (found == undefined) {
     const foundAction: RunningAction = runningActions.find((found) => {
-      return same(found, { tip, workspace: ionicState.workspace });
+      return same(found, { tip, workspace: exState.workspace });
     });
     return foundAction != undefined;
   }
@@ -44,7 +44,7 @@ export async function cancelLastOperation(): Promise<void> {
 
 function cancelRunning(tip: Tip): Promise<void> {
   const found: RunningAction = runningOperations.find((found) => {
-    return same(found, { tip, workspace: ionicState.workspace });
+    return same(found, { tip, workspace: exState.workspace });
   });
   if (found) {
     found.tip.cancelRequested = true;
@@ -70,10 +70,10 @@ export async function cancelIfRunning(tip: Tip): Promise<boolean> {
 
 export function finishCommand(tip: Tip) {
   runningOperations = runningOperations.filter((op: RunningAction) => {
-    return !same(op, { tip, workspace: ionicState.workspace });
+    return !same(op, { tip, workspace: exState.workspace });
   });
   runningActions = runningActions.filter((op: RunningAction) => {
-    return !same(op, { tip, workspace: ionicState.workspace });
+    return !same(op, { tip, workspace: exState.workspace });
   });
 }
 
@@ -87,8 +87,8 @@ export function startCommand(tip: Tip, cmd: string, clear?: boolean) {
     let command = cmd;
     if (command?.includes(InternalCommand.cwd)) {
       command = command.replace(InternalCommand.cwd, '');
-      if (ionicState.workspace) {
-        write(`> Workspace: ${ionicState.workspace}`);
+      if (exState.workspace) {
+        write(`> Workspace: ${exState.workspace}`);
       }
     }
     write(`> ${replaceAll(command, InternalCommand.cwd, '')}`);
@@ -97,11 +97,11 @@ export function startCommand(tip: Tip, cmd: string, clear?: boolean) {
 }
 
 export function markActionAsRunning(tip: Tip) {
-  runningActions.push({ tip, workspace: ionicState.workspace });
+  runningActions.push({ tip, workspace: exState.workspace });
 }
 
 export function markOperationAsRunning(tip: Tip) {
-  runningOperations.push({ tip, workspace: ionicState.workspace });
+  runningOperations.push({ tip, workspace: exState.workspace });
   lastOperation = tip;
 }
 
@@ -111,7 +111,7 @@ function delay(ms: number) {
 function runningInThisWorkSpace(): number {
   let count = 0;
   for (const action of runningActions) {
-    if (action.workspace == ionicState.workspace) {
+    if (action.workspace == exState.workspace) {
       count++;
     }
   }
@@ -148,6 +148,6 @@ export async function waitForOtherActions(tip: Tip): Promise<boolean> {
 
 export function markActionAsCancelled(tip: Tip) {
   runningActions = runningActions.filter((op: RunningAction) => {
-    return !same(op, { tip, workspace: ionicState.workspace });
+    return !same(op, { tip, workspace: exState.workspace });
   });
 }

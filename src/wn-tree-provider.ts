@@ -13,7 +13,7 @@ import { accessSync } from 'fs';
 import { join } from 'path';
 import { IonicStartPanel } from './ionic-start';
 
-interface IonicState {
+interface ExState {
   view: TreeView<any>;
   skipAuth: boolean;
   projects: Array<MonoRepoProject>;
@@ -50,7 +50,7 @@ interface IonicState {
   lastRun: CapacitorPlatform;
   projectRef: Project;
 }
-export const ionicState: IonicState = {
+export const exState: ExState = {
   view: undefined,
   context: undefined,
   skipAuth: false,
@@ -90,7 +90,7 @@ interface FolderInfo {
 
 let folderInfoCache: FolderInfo = undefined;
 
-export class IonicTreeProvider implements TreeDataProvider<Recommendation> {
+export class ExTreeProvider implements TreeDataProvider<Recommendation> {
   private _onDidChangeTreeData: EventEmitter<Recommendation | undefined | void> = new EventEmitter<
     Recommendation | undefined | void
   >();
@@ -145,7 +145,7 @@ export class IonicTreeProvider implements TreeDataProvider<Recommendation> {
         if (!summary) return [];
         return summary.project.groups;
       } else {
-        IonicStartPanel.init(ionicState.context.extensionUri, this.workspaceRoot, ionicState.context);
+        IonicStartPanel.init(exState.context.extensionUri, this.workspaceRoot, exState.context);
         return Promise.resolve([]);
       }
     }

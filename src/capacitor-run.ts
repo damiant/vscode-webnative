@@ -4,13 +4,13 @@ import { CapacitorPlatform } from './capacitor-platform';
 import { InternalCommand } from './command-name';
 import { writeError, writeWN } from './logging';
 import { ionicBuild } from './ionic-build';
-import { ionicState } from './wn-tree-provider';
+import { exState } from './wn-tree-provider';
 import { certPath, liveReloadSSL } from './live-reload';
 import { MonoRepoType } from './monorepo';
 import { npx, PackageManager, preflightNPMCheck } from './node-commands';
 import { Project } from './project';
 import { gradleToJson } from './gradle-to-json';
-import { ExtensionSetting, getExtSetting, getSetting, WorkspaceSetting } from './workspace-state';
+import { ExtensionSetting, getExtSetting, getSetting, WorkspaceSection, WorkspaceSetting } from './workspace-state';
 import { window, workspace } from 'vscode';
 import { join } from 'path';
 import { ionicServe } from './ionic-serve';
@@ -27,7 +27,7 @@ export async function capacitorRun(project: Project, platform: CapacitorPlatform
   let noSync = false;
 
   // If the user modified something in the editor then its likely they need to rebuild the app before running
-  if (ionicState.projectDirty) {
+  if (exState.projectDirty) {
     writeWN('Rebuilding as you changed your project...');
     preop = (await ionicBuild(project, { platform })) + ' && ';
     rebuilt = true;
@@ -35,10 +35,10 @@ export async function capacitorRun(project: Project, platform: CapacitorPlatform
     preop = preflightNPMCheck(project);
   }
 
-  noSync = ionicState.syncDone.includes(platform);
+  noSync = exState.syncDone.includes(platform);
 
-  ionicState.refreshDebugDevices = true;
-  ionicState.lastRun = platform;
+  exState.refreshDebugDevices = true;
+  exState.lastRun = platform;
 
   switch (project.repoType) {
     case MonoRepoType.none:
@@ -77,7 +77,7 @@ async function capRun(
   let liveReload = getSetting(WorkspaceSetting.liveReload);
   const externalIP = !getExtSetting(ExtensionSetting.internalAddress) && liveReload;
   const httpsForWeb = getSetting(WorkspaceSetting.httpsForWeb);
-  const prod: boolean = workspace.getConfiguration('ionic').get('buildForProduction');
+  const prod: boolean = workspace.getConfiguration(WorkspaceSection).get('buildForProduction');
 
   if (liveReload && project.repoType == MonoRepoType.npm) {
     writeError('Live Reload is not supported with npm workspaces. Ignoring the live reload option');
@@ -118,14 +118,14 @@ async function capRun(
     capRunFlags += '--no-sync';
   }
 
-  if (ionicState.project && ionicState.project != 'app') {
+  if (exState.project && exState.project != 'app') {
     if (capRunFlags.length >= 0) capRunFlags += ' ';
-    capRunFlags += `--project=${ionicState.project}`;
+    capRunFlags += `--project=${exState.project}`;
   }
 
   if (liveReload) {
     //capRunFlags += getConfigurationArgs();
-    capRunFlags += ` --port=${ionicState.servePort}`;
+    capRunFlags += ` --port=${exState.servePort}`;
   }
 
   const flavors = await getFlavors(platform, project);
@@ -185,8 +185,8 @@ async function getFlavors(platform: CapacitorPlatform, prj: Project): Promise<st
     return '';
   }
 
-  if (ionicState.flavors == undefined) {
-    ionicState.flavors = [];
+  if (exState.flavors == undefined) {
+    exState.flavors = [];
     const buildGradle = join(prj.projectFolder(), 'android', 'app', 'build.gradle');
     const data = gradleToJson(buildGradle);
     if (data?.android?.productFlavors) {
@@ -194,14 +194,14 @@ async function getFlavors(platform: CapacitorPlatform, prj: Project): Promise<st
       if (list?.length == 0) {
         return '';
       }
-      ionicState.flavors = list;
+      exState.flavors = list;
     }
   }
-  if (ionicState.flavors.length == 0) {
+  if (exState.flavors.length == 0) {
     return '';
   }
 
-  const selection = await window.showQuickPick(ionicState.flavors, { placeHolder: 'Select the Android Flavor to run' });
+  const selection = await window.showQuickPick(exState.flavors, { placeHolder: 'Select the Android Flavor to run' });
   if (!selection) return undefined;
   return ` --flavor=${selection}`;
 }

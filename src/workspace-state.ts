@@ -1,5 +1,7 @@
 import { workspace } from 'vscode';
-import { ionicState } from './wn-tree-provider';
+import { exState } from './wn-tree-provider';
+
+export const WorkspaceSection = 'webnative';
 
 export enum WorkspaceSetting {
   liveReload = 'liveReload',
@@ -26,21 +28,21 @@ export enum GlobalSetting {
 }
 
 export function getSetting(key: WorkspaceSetting): any {
-  return ionicState.context.workspaceState.get(key);
+  return exState.context.workspaceState.get(key);
 }
 
 export async function setSetting(key: WorkspaceSetting, value: any): Promise<void> {
-  await ionicState.context.workspaceState.update(key, value);
+  await exState.context.workspaceState.update(key, value);
 }
 
 export function getExtSetting(key: ExtensionSetting): any {
-  return workspace.getConfiguration('ionic').get(key);
+  return workspace.getConfiguration(WorkspaceSection).get(key);
 }
 
 export function getGlobalSetting(key: GlobalSetting): any {
-  return ionicState.context.globalState.get(key);
+  return exState.context.globalState.get(key);
 }
 
 export async function setGlobalSetting(key: GlobalSetting, value: any): Promise<void> {
-  return await ionicState.context.globalState.update(key, value);
+  return await exState.context.globalState.update(key, value);
 }

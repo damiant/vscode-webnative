@@ -1,6 +1,6 @@
 import { dirname, join } from 'path';
 import { writeError } from './logging';
-import { ionicState } from './wn-tree-provider';
+import { exState } from './wn-tree-provider';
 import { MonoRepoProject } from './monorepo';
 import { Project } from './project';
 import { stripJsonComments } from './strip-json-comments';
@@ -19,8 +19,8 @@ let nxProjectFolder: string = undefined;
  */
 export async function getNXProjects(project: Project): Promise<Array<MonoRepoProject>> {
   // Do we return the list of projects we've already cached
-  if (ionicState.projects?.length > 0 && nxProjectFolder == project.folder) {
-    return ionicState.projects;
+  if (exState.projects?.length > 0 && nxProjectFolder == project.folder) {
+    return exState.projects;
   }
 
   const filename = join(project.folder, 'workspace.json');

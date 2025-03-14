@@ -25,7 +25,7 @@ import { MonoRepoType } from './monorepo';
 import { CapacitorMigrationOptions, migrateCapacitor4, migrateCapacitor } from './capacitor-migrate';
 import { checkAngularJson } from './rules-angular-json';
 import { checkBrowsersList } from './rules-browserslist';
-import { ionicState } from './wn-tree-provider';
+import { exState } from './wn-tree-provider';
 import { integratePWA } from './capacitor-pwa';
 import { showOutput, write, writeWN } from './logging';
 import { ExtensionContext, window } from 'vscode';
@@ -207,7 +207,7 @@ export async function checkCapacitorRules(project: Project, context: ExtensionCo
 
   // Migration for 3.x, 4.0.0-beta, 4.0.0 to Capacitor 4.0.1+
   if (isLess('@capacitor/core', '4.0.1') || startsWith('@capacitor/core', '4.0.0')) {
-    if (ionicState.hasNodeModules && isGreaterOrEqual('@capacitor/core', '3.0.0')) {
+    if (exState.hasNodeModules && isGreaterOrEqual('@capacitor/core', '3.0.0')) {
       // Recommend migration from 3 to 4
       project.tip(
         new Tip('Migrate to Capacitor 4', '', TipType.Capacitor)
@@ -359,7 +359,7 @@ function suggestCapacitorMigration(
   migrateOptions: CapacitorMigrationOptions,
 ) {
   if (isLess('@capacitor/core', maxCapacitorCore)) {
-    if (ionicState.hasNodeModules && isGreaterOrEqual('@capacitor/core', minCapacitorCore)) {
+    if (exState.hasNodeModules && isGreaterOrEqual('@capacitor/core', minCapacitorCore)) {
       project.tip(
         new Tip(`Migrate to Capacitor ${migrateOptions.versionTitle}`, '', type)
           .setQueuedAction(migrateCapacitor, project, getPackageVersion('@capacitor/core'), migrateOptions)
@@ -437,7 +437,7 @@ export async function capacitorRecommendations(project: Project, forMigration: b
       ).showProgressDialog(),
     );
   } else {
-    if (!project.hasCapacitorProject(CapacitorPlatform.android) && ionicState.hasNodeModules) {
+    if (!project.hasCapacitorProject(CapacitorPlatform.android) && exState.hasNodeModules) {
       tips.push(
         new Tip(
           'Add Android Project',
@@ -455,7 +455,7 @@ export async function capacitorRecommendations(project: Project, forMigration: b
       );
     }
 
-    if (!project.hasCapacitorProject(CapacitorPlatform.ios) && ionicState.hasNodeModules) {
+    if (!project.hasCapacitorProject(CapacitorPlatform.ios) && exState.hasNodeModules) {
       tips.push(
         new Tip(
           'Add iOS Project',

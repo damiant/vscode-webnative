@@ -1,9 +1,9 @@
 import { Event, EventEmitter, ExtensionContext, TreeDataProvider, TreeItem, TreeItemCollapsibleState } from 'vscode';
 import { CommandName } from './command-name';
-import { ionicState } from './wn-tree-provider';
+import { exState } from './wn-tree-provider';
 import { Recommendation } from './recommendation';
 
-export class IonicProjectsreeProvider implements TreeDataProvider<Recommendation> {
+export class ProjectsProvider implements TreeDataProvider<Recommendation> {
   private _onDidChangeTreeData: EventEmitter<Recommendation | undefined | void> = new EventEmitter<
     Recommendation | undefined | void
   >();
@@ -16,7 +16,7 @@ export class IonicProjectsreeProvider implements TreeDataProvider<Recommendation
   selectedProject: string;
 
   refresh(project: string): void {
-    ionicState.workspace = project;
+    exState.workspace = project;
     this.selectedProject = project;
     this._onDidChangeTreeData.fire();
   }
@@ -31,7 +31,7 @@ export class IonicProjectsreeProvider implements TreeDataProvider<Recommendation
 
   projectList(): Array<Recommendation> {
     const list = [];
-    for (const project of ionicState.projects) {
+    for (const project of exState.projects) {
       const cmd = {
         command: CommandName.ProjectSelect,
         title: 'Open',

@@ -1,7 +1,7 @@
 import { ProgressLocation, window } from 'vscode';
 import { CommandName } from './command-name';
 import { handleError } from './error-handler';
-import { ionicState } from './wn-tree-provider';
+import { exState } from './wn-tree-provider';
 
 import { Tip } from './tip';
 import { getRunOutput, replaceAll } from './utilities';
@@ -21,7 +21,7 @@ export async function selectDevice(
   srcCommand?: CommandName,
 ): Promise<string> {
   const isAndroid = command.includes('android');
-  const preselected = isAndroid ? ionicState.selectedAndroidDevice : ionicState.selectedIOSDevice;
+  const preselected = isAndroid ? exState.selectedAndroidDevice : exState.selectedIOSDevice;
   if (preselected) {
     return preselected;
   }
@@ -56,18 +56,18 @@ export async function selectDevice(
   tip.commandTitle = device?.name;
   if (userChosen) {
     if (command.includes('android')) {
-      ionicState.selectedAndroidDevice = device?.target;
-      ionicState.selectedAndroidDeviceName = device?.name;
+      exState.selectedAndroidDevice = device?.target;
+      exState.selectedAndroidDeviceName = device?.name;
     } else {
-      ionicState.selectedIOSDevice = device?.target;
-      ionicState.selectedIOSDeviceName = device?.name;
+      exState.selectedIOSDevice = device?.target;
+      exState.selectedIOSDeviceName = device?.name;
     }
   } else {
     if (getSetting(WorkspaceSetting.liveReload)) {
       if (command.includes('android')) {
-        ionicState.selectedAndroidDeviceName = `(running)`;
+        exState.selectedAndroidDeviceName = `(running)`;
       } else {
-        ionicState.selectedIOSDeviceName = `(running)`;
+        exState.selectedIOSDeviceName = `(running)`;
       }
     }
   }

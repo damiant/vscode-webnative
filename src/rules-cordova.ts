@@ -14,7 +14,7 @@ import { Project } from './project';
 import { Tip, TipType } from './tip';
 import { getRunOutput } from './utilities';
 import { ionicExport } from './ionic-export';
-import { ionicState } from './wn-tree-provider';
+import { exState } from './wn-tree-provider';
 
 /**
  * Check rules for Cordova projects
@@ -77,7 +77,7 @@ export function checkCordovaRules(project: Project) {
   if (!project.isCapacitor) {
     project.add(
       new Tip('Export', '', TipType.Media)
-        .setQueuedAction(ionicExport, project, ionicState.context)
+        .setQueuedAction(ionicExport, project, exState.context)
         .setTooltip('Export a markdown file with all project dependencies and plugins'),
     );
   }

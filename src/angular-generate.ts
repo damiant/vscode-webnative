@@ -7,7 +7,7 @@ import { existsSync } from 'fs';
 import { isGreaterOrEqual } from './analyzer';
 import { window } from 'vscode';
 import { QueueFunction } from './tip';
-import { ionicState } from './wn-tree-provider';
+import { exState } from './wn-tree-provider';
 import { npx } from './node-commands';
 import { checkAngularJson } from './rules-angular-json';
 
@@ -42,7 +42,7 @@ export async function angularGenerate(
     name = replaceAll(name, ' ', '-').trim();
     writeWN(`Creating Angular ${angularType} named ${name}..`);
     checkAngularJson(project);
-    const angularProjectName = ionicState.project ?? 'app';
+    const angularProjectName = exState.project ?? 'app';
     // eg ng generate page page-a --standalone --project=app
     let cmd = `${npx(project)} ng generate ${angularType} ${name}${args} --project=${angularProjectName}`;
     if (angularType == 'directive') {

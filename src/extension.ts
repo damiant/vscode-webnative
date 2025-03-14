@@ -1,7 +1,7 @@
 'use strict';
 
 import { Context, VSCommand } from './context-variables';
-import { ionicState, IonicTreeProvider } from './wn-tree-provider';
+import { exState, ExTreeProvider } from './wn-tree-provider';
 import { clearRefreshCache } from './process-packages';
 import { Recommendation } from './recommendation';
 import { installPackage, reviewProject } from './project';
@@ -10,7 +10,7 @@ import { CancelObject, run, estimateRunTime, openUri } from './utilities';
 import { ignore } from './ignore';
 import { ActionResult, CommandName, InternalCommand } from './command-name';
 import { packageUpgrade } from './rules-package-upgrade';
-import { IonicProjectsreeProvider } from './ionic-projects-provider';
+import { ProjectsProvider } from './projects-provider';
 import { buildConfiguration } from './build-configuration';
 import { setWebConfig, WebConfigSetting } from './web-configuration';
 import { selectDevice } from './capacitor-device';
@@ -54,19 +54,19 @@ import {
 import { existsSync } from 'fs';
 import { CommandTitle } from './command-title';
 import { autoFixOtherImports } from './imports-icons';
-import { setSetting, WorkspaceSetting } from './workspace-state';
+import { setSetting, WorkspaceSection, WorkspaceSetting } from './workspace-state';
 
 /**
  * Runs the command while showing a vscode window that can be cancelled
  * @param  {string|string[]} command Node command
  * @param  {string} rootPath path to run the command
- * @param  {IonicTreeProvider} ionicProvider? the provide which will be refreshed on completion
+ * @param  {ExTreeProvider} ionicProvider? the provide which will be refreshed on completion
  * @param  {string} successMessage? Message to display if successful
  */
 export async function fixIssue(
   command: string | string[],
   rootPath: string,
-  ionicProvider?: IonicTreeProvider,
+  ionicProvider?: ExTreeProvider,
   tip?: Tip,
   successMessage?: string,
   title?: string,
@@ -110,10 +110,10 @@ export async function fixIssue(
           }
 
           if (tip.title.toLowerCase() == CapacitorPlatform.ios) {
-            ionicState.selectedIOSDeviceName = '';
+            exState.selectedIOSDeviceName = '';
           }
           if (tip.title.toLowerCase() == CapacitorPlatform.android) {
-            ionicState.selectedAndroidDeviceName = '';
+            exState.selectedAndroidDeviceName = '';
           }
 
           //channelShow();
@@ -192,8 +192,8 @@ export async function fixIssue(
   }
 
   if (tip.syncOnSuccess) {
-    if (!ionicState.syncDone.includes(tip.syncOnSuccess)) {
-      ionicState.syncDone.push(tip.syncOnSuccess);
+    if (!exState.syncDone.includes(tip.syncOnSuccess)) {
+      exState.syncDone.push(tip.syncOnSuccess);
     }
   }
 }
@@ -205,7 +205,7 @@ export async function activate(context: ExtensionContext) {
       : undefined;
 
   // Ionic Tree View
-  const ionicProvider = new IonicTreeProvider(rootPath, context);
+  const ionicProvider = new ExTreeProvider(rootPath, context);
   const view = window.createTreeView('wn-tree', { treeDataProvider: ionicProvider });
 
   // Quick Fixes
@@ -215,12 +215,12 @@ export async function activate(context: ExtensionContext) {
     }),
   );
 
-  const diagnostics = languages.createDiagnosticCollection('ionic');
+  const diagnostics = languages.createDiagnosticCollection('webnative');
   context.subscriptions.push(diagnostics);
 
   // Project List Panel
-  const ionicProjectsProvider = new IonicProjectsreeProvider(rootPath, context);
-  const projectsView = window.createTreeView('webnative-zprojects', { treeDataProvider: ionicProjectsProvider });
+  const projectsProvider = new ProjectsProvider(rootPath, context);
+  const projectsView = window.createTreeView('webnative-zprojects', { treeDataProvider: projectsProvider });
 
   // Quick Fixes
 
@@ -233,19 +233,19 @@ export async function activate(context: ExtensionContext) {
     }),
   );
 
-  ionicState.view = view;
-  ionicState.projectsView = projectsView;
-  ionicState.context = context;
+  exState.view = view;
+  exState.projectsView = projectsView;
+  exState.context = context;
 
   // if (rootPath == undefined) {
   //     // Show the start new project panel
   //     IonicStartPanel.init(context.extensionUri, this.workspaceRoot, context);
   // }
 
-  ionicState.shell = context.workspaceState.get(Context.shell);
-  const shellOverride: string = workspace.getConfiguration('ionic').get('shellPath');
+  exState.shell = context.workspaceState.get(Context.shell);
+  const shellOverride: string = workspace.getConfiguration(WorkspaceSection).get('shellPath');
   if (shellOverride && shellOverride.length > 0) {
-    ionicState.shell = shellOverride;
+    exState.shell = shellOverride;
   }
 
   trackProjectChange();
@@ -297,7 +297,7 @@ export async function activate(context: ExtensionContext) {
   });
 
   commands.registerCommand(CommandName.RefreshDebug, async () => {
-    ionicState.refreshDebugDevices = true;
+    exState.refreshDebugDevices = true;
     ionicProvider.refresh();
   });
 
@@ -346,12 +346,12 @@ export async function activate(context: ExtensionContext) {
     if (config != 'default') {
       r.tip.addActionArg(`--configuration=${config}`);
     }
-    ionicState.configuration = config;
+    exState.configuration = config;
     runAction(r.tip, ionicProvider, rootPath);
   });
 
   commands.registerCommand(CommandName.NewProject, async () => {
-    IonicStartPanel.init(ionicState.context.extensionUri, this.workspaceRoot, ionicState.context, true);
+    IonicStartPanel.init(exState.context.extensionUri, this.workspaceRoot, exState.context, true);
   });
 
   commands.registerCommand(CommandName.PluginExplorer, async () => {
@@ -389,7 +389,7 @@ export async function activate(context: ExtensionContext) {
 
   // The project list panel needs refreshing
   commands.registerCommand(CommandName.ProjectsRefresh, async (project: string) => {
-    ionicProjectsProvider.refresh(project);
+    projectsProvider.refresh(project);
   });
 
   // User selected a project from the list (monorepo)
@@ -410,20 +410,20 @@ export async function activate(context: ExtensionContext) {
   });
 
   commands.registerCommand(CommandName.Debug, async () => {
-    runAction(debugOnWeb(ionicState.projectRef), ionicProvider, rootPath);
+    runAction(debugOnWeb(exState.projectRef), ionicProvider, rootPath);
   });
 
   commands.registerCommand(CommandName.Build, async () => {
-    runAction(build(ionicState.projectRef), ionicProvider, rootPath);
+    runAction(build(exState.projectRef), ionicProvider, rootPath);
   });
 
   commands.registerCommand(CommandName.SelectDevice, async (r: Recommendation) => {
     if (r.tip.actionArg(1) == CapacitorPlatform.android) {
-      ionicState.selectedAndroidDevice = undefined;
-      ionicState.selectedAndroidDeviceName = undefined;
+      exState.selectedAndroidDevice = undefined;
+      exState.selectedAndroidDeviceName = undefined;
     } else {
-      ionicState.selectedIOSDevice = undefined;
-      ionicState.selectedIOSDeviceName = undefined;
+      exState.selectedIOSDevice = undefined;
+      exState.selectedIOSDeviceName = undefined;
     }
     runAction(r.tip, ionicProvider, rootPath, CommandName.SelectDevice);
   });
@@ -435,7 +435,7 @@ export async function activate(context: ExtensionContext) {
   context.subscriptions.push(debug.registerDebugConfigurationProvider(AndroidDebugType, new AndroidDebugProvider()));
   context.subscriptions.push(debug.onDidTerminateDebugSession(androidDebugUnforward));
 
-  if (!ionicState.runWeb) {
+  if (!exState.runWeb) {
     const summary = await reviewProject(rootPath, context, context.workspaceState.get('SelectedProject'));
     if (summary?.project.isCapacitor) {
       showTips();
@@ -443,14 +443,14 @@ export async function activate(context: ExtensionContext) {
   }
 }
 
-async function runAgain(ionicProvider: IonicTreeProvider, rootPath: string) {
-  let runInfo = ionicState.runWeb;
-  switch (ionicState.lastRun) {
+async function runAgain(ionicProvider: ExTreeProvider, rootPath: string) {
+  let runInfo = exState.runWeb;
+  switch (exState.lastRun) {
     case CapacitorPlatform.android:
-      runInfo = ionicState.runAndroid;
+      runInfo = exState.runAndroid;
       break;
     case CapacitorPlatform.ios:
-      runInfo = ionicState.runIOS;
+      runInfo = exState.runIOS;
       break;
   }
   if (runInfo) {
@@ -458,7 +458,7 @@ async function runAgain(ionicProvider: IonicTreeProvider, rootPath: string) {
   }
 }
 
-async function findAndRun(ionicProvider: IonicTreeProvider, rootPath: string, commandTitle: CommandTitle) {
+async function findAndRun(ionicProvider: ExTreeProvider, rootPath: string, commandTitle: CommandTitle) {
   const list = await ionicProvider.getChildren();
   const r = findRecursive(commandTitle, list);
   if (r) {
@@ -485,7 +485,7 @@ function findRecursive(label: string, items: Recommendation[]): Recommendation |
 
 function trackProjectChange() {
   workspace.onDidSaveTextDocument((document: TextDocument) => {
-    ionicState.projectDirty = true;
+    exState.projectDirty = true;
     if (document.fileName.endsWith('.html')) {
       autoFixOtherImports(document);
     }
@@ -498,11 +498,11 @@ function trackProjectChange() {
         outputIsFocused = true;
       }
     }
-    ionicState.outputIsFocused = outputIsFocused;
+    exState.outputIsFocused = outputIsFocused;
   });
 }
 
-async function runAction(tip: Tip, ionicProvider: IonicTreeProvider, rootPath: string, srcCommand?: CommandName) {
+async function runAction(tip: Tip, ionicProvider: ExTreeProvider, rootPath: string, srcCommand?: CommandName) {
   if (await waitForOtherActions(tip)) {
     return; // Canceled
   }
@@ -536,12 +536,12 @@ async function runAction(tip: Tip, ionicProvider: IonicTreeProvider, rootPath: s
       command = (command as string).replace(InternalCommand.target, target);
     }
     if (command) {
-      execute(tip, ionicState.context);
+      execute(tip, exState.context);
       fixIssue(command, rootPath, ionicProvider, tip);
       return;
     }
   } else {
-    await execute(tip, ionicState.context);
+    await execute(tip, exState.context);
     if (tip.refresh) {
       ionicProvider.refresh();
     }
@@ -551,7 +551,7 @@ async function runAction(tip: Tip, ionicProvider: IonicTreeProvider, rootPath: s
 async function fix(
   tip: Tip,
   rootPath: string,
-  ionicProvider: IonicTreeProvider,
+  ionicProvider: ExTreeProvider,
   context: ExtensionContext,
 ): Promise<void> {
   if (await waitForOtherActions(tip)) {

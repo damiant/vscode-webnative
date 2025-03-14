@@ -2,15 +2,15 @@ import { Range, TextDocument, Uri, window, workspace, WorkspaceEdit } from 'vsco
 import { Parser } from 'htmlparser2';
 import { existsSync, readFileSync } from 'fs';
 import { FalseLiteral, Project } from 'ts-morph';
-import { ionicState } from './wn-tree-provider';
+import { exState } from './wn-tree-provider';
 import { join } from 'path';
 import { writeError } from './logging';
 import { exists } from './analyzer';
-import { getSetting, setSetting, WorkspaceSetting } from './workspace-state';
+import { getSetting, setSetting, WorkspaceSection, WorkspaceSetting } from './workspace-state';
 import { getStringFrom } from './utilities';
 
 export async function autoFixOtherImports(document: TextDocument): Promise<boolean> {
-  const value: string = workspace.getConfiguration('ionic').get('autoImportIcons');
+  const value: string = workspace.getConfiguration(WorkspaceSection).get('autoImportIcons');
   if (value === 'no') return;
 
   // Look for <ion-icon name="icon-name"></ion-icon> in file.html
@@ -157,7 +157,7 @@ async function addIconsToCode(icons: string[], tsFile: string) {
 
   if (!changed) return;
 
-  const value = workspace.getConfiguration('ionic').get('autoImportIcons');
+  const value = workspace.getConfiguration(WorkspaceSection).get('autoImportIcons');
   if (value === '') {
     // Some developers may not want this to be auto-fixed so ask
     const choice = await window.showInformationMessage(
@@ -167,7 +167,7 @@ async function addIconsToCode(icons: string[], tsFile: string) {
     );
 
     if (!choice) return;
-    workspace.getConfiguration('ionic').update('autoImportIcons', choice === 'Yes' ? 'yes' : 'no', true);
+    workspace.getConfiguration(WorkspaceSection).update('autoImportIcons', choice === 'Yes' ? 'yes' : 'no', true);
 
     if (choice === 'No') {
       return;
@@ -187,9 +187,9 @@ async function addIconsToCode(icons: string[], tsFile: string) {
 const camelize = (s: string) => s.replace(/-./g, (x) => x[1].toUpperCase());
 
 function getAvailableIcons(): string[] {
-  if (existsSync(ionicState.nodeModulesFolder)) {
+  if (existsSync(exState.nodeModulesFolder)) {
     //node_modules/ionicons/icons/index.d.ts
-    const filename = join(ionicState.nodeModulesFolder, 'ionicons/icons/index.d.ts');
+    const filename = join(exState.nodeModulesFolder, 'ionicons/icons/index.d.ts');
     const icons: string[] = [];
     if (existsSync(filename)) {
       const txt = readFileSync(filename, 'utf8');

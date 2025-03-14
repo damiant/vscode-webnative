@@ -1,7 +1,7 @@
 import { Uri, Webview, commands, window } from 'vscode';
 import { Context, VSCommand } from './context-variables';
 import { CommandName } from './command-name';
-import { ionicState } from './wn-tree-provider';
+import { exState } from './wn-tree-provider';
 import { join } from 'path';
 import { debugBrowser, viewInEditor } from './editor-preview';
 import { httpRequest, openUri } from './utilities';
@@ -17,7 +17,7 @@ export function qrView(externalUrl: string) {
 }
 
 export function qrWebView(webview: Webview, externalUrl: string): string | undefined {
-  const onDiskPath = Uri.file(join(ionicState.context.extensionPath, 'resources', 'qrious.min.js'));
+  const onDiskPath = Uri.file(join(exState.context.extensionPath, 'resources', 'qrious.min.js'));
   webview.options = { enableScripts: true };
   const qrSrc = webview.asWebviewUri(onDiskPath);
   if (getSetting(WorkspaceSetting.pluginDrift) !== 'shown') {
@@ -67,7 +67,7 @@ export async function troubleshootPlugins() {
     let problem = '';
     const pluginList = [];
 
-    const summary: ProjectSummary = await inspectProject(ionicState.rootFolder, ionicState.context, undefined);
+    const summary: ProjectSummary = await inspectProject(exState.rootFolder, exState.context, undefined);
     for (const libType of ['Capacitor Plugin', 'Plugin']) {
       for (const library of Object.keys(summary.packages).sort()) {
         const pkg: PackageInfo = summary.packages[library];

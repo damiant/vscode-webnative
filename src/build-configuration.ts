@@ -1,20 +1,20 @@
 import { Project } from './project';
-import { ionicState } from './wn-tree-provider';
+import { exState } from './wn-tree-provider';
 import { exists } from './analyzer';
 import { ExtensionContext, window } from 'vscode';
 import { existsSync, readFileSync } from 'fs';
 import { join } from 'path';
 
 export function getConfigurationName(): string {
-  if (!ionicState.configuration || ionicState.configuration == 'default') {
+  if (!exState.configuration || exState.configuration == 'default') {
     return '';
   } else {
-    return `(${ionicState.configuration})`;
+    return `(${exState.configuration})`;
   }
 }
 
 export function getConfigurationArgs(isDebugging?: boolean): string {
-  let config = ionicState.configuration;
+  let config = exState.configuration;
   if (isDebugging) {
     // If we are debugging and its an Angular project without a selected build config
     // then choose "development" so that source maps work

@@ -2,7 +2,7 @@ import { CommandName } from './command-name';
 import { openUri, showMessage } from './utilities';
 import { ionicInit } from './ionic-init';
 import { Context } from './context-variables';
-import { ionicState } from './wn-tree-provider';
+import { exState } from './wn-tree-provider';
 import { Project } from './project';
 import { getLastOperation } from './tasks';
 import { Disposable, Position, Selection, TextDocument, Uri, commands, window, workspace } from 'vscode';
@@ -43,8 +43,8 @@ export async function handleError(error: string, logs: Array<string>, folder: st
 
   if (error && error.startsWith('/bin/sh: npx')) {
     const zsh = '/bin/zsh';
-    ionicState.shell = zsh;
-    ionicState.context.workspaceState.update(Context.shell, zsh);
+    exState.shell = zsh;
+    exState.context.workspaceState.update(Context.shell, zsh);
     const msg =
       'It looks like node was not found with the default shell so it has been switched to ' +
       zsh +

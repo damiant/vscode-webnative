@@ -3,13 +3,20 @@ import { networkInterfaces } from 'os';
 
 import { getConfigurationArgs } from './build-configuration';
 import { InternalCommand } from './command-name';
-import { ionicState } from './wn-tree-provider';
+import { exState } from './wn-tree-provider';
 import { certPath } from './live-reload';
 import { FrameworkType, MonoRepoType } from './monorepo';
 import { npmRun, npx, preflightNPMCheck } from './node-commands';
 import { Project } from './project';
 import { liveReloadSSL } from './live-reload';
-import { ExtensionSetting, getExtSetting, getSetting, setSetting, WorkspaceSetting } from './workspace-state';
+import {
+  ExtensionSetting,
+  getExtSetting,
+  getSetting,
+  setSetting,
+  WorkspaceSection,
+  WorkspaceSetting,
+} from './workspace-state';
 import { getWebConfiguration, WebConfigSetting } from './web-configuration';
 import { window, workspace } from 'vscode';
 import { write, writeError } from './logging';
@@ -27,7 +34,7 @@ export async function ionicServe(
   isDebugging?: boolean,
   isNative?: boolean,
 ): Promise<string> {
-  ionicState.lastRun = undefined;
+  exState.lastRun = undefined;
   switch (project.repoType) {
     case MonoRepoType.none:
       return ionicCLIServe(project, dontOpenBrowser, isDebugging, isNative);
@@ -54,7 +61,7 @@ async function ionicCLIServe(
   const httpsForWeb = getSetting(WorkspaceSetting.httpsForWeb);
   const webConfig: WebConfigSetting = getWebConfiguration();
   const externalIP = !getExtSetting(ExtensionSetting.internalAddress);
-  const defaultPort: number | undefined = workspace.getConfiguration('ionic').get('defaultPort');
+  const defaultPort: number | undefined = workspace.getConfiguration(WorkspaceSection).get('defaultPort');
   let serveFlags = '';
   if ([WebConfigSetting.editor, WebConfigSetting.nexus, WebConfigSetting.none].includes(webConfig) || dontOpenBrowser) {
     serveFlags += ' --no-open';
@@ -71,11 +78,11 @@ async function ionicCLIServe(
   if (defaultPort) {
     const port = await findNextPort(defaultPort, externalIP ? '0.0.0.0' : undefined);
     serveFlags += ` --port=${port}`;
-    ionicState.servePort = port;
+    exState.servePort = port;
   }
 
-  if (ionicState.project) {
-    serveFlags += ` --project=${ionicState.project}`;
+  if (exState.project) {
+    serveFlags += ` --project=${exState.project}`;
   }
 
   serveFlags += getConfigurationArgs(isDebugging);

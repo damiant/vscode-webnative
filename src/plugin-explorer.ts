@@ -7,7 +7,7 @@ import { PackageManager, npmInstall, npmUninstall } from './node-commands';
 import { run } from './utilities';
 import { ProjectSummary, inspectProject } from './project';
 import { PackageInfo } from './package-info';
-import { IonicTreeProvider, ionicState } from './wn-tree-provider';
+import { ExTreeProvider, exState } from './wn-tree-provider';
 import { clearOutput, write } from './logging';
 import { findCompatibleVersion2 } from './peer-dependencies';
 import { getPackageVersion } from './analyzer';
@@ -33,7 +33,7 @@ export class PluginExplorerPanel {
   public static currentPanel: PluginExplorerPanel | undefined;
   private readonly panel: WebviewPanel;
   private disposables: Disposable[] = [];
-  private provider: IonicTreeProvider;
+  private provider: ExTreeProvider;
   private path: string;
 
   private constructor(
@@ -41,7 +41,7 @@ export class PluginExplorerPanel {
     extensionUri: Uri,
     path: string,
     context: ExtensionContext,
-    provider: IonicTreeProvider,
+    provider: ExTreeProvider,
   ) {
     this.panel = panel;
     this.path = path;
@@ -51,7 +51,7 @@ export class PluginExplorerPanel {
     this.setWebviewMessageListener(this.panel.webview, extensionUri, path, context);
   }
 
-  public static init(extensionUri: Uri, path: string, context: ExtensionContext, provider: IonicTreeProvider) {
+  public static init(extensionUri: Uri, path: string, context: ExtensionContext, provider: ExTreeProvider) {
     if (PluginExplorerPanel.currentPanel) {
       // If the webview panel already exists reveal it
       PluginExplorerPanel.currentPanel.provider = provider;
@@ -163,7 +163,7 @@ export class PluginExplorerPanel {
   }
 
   async checkEnterpriseRegister(plugin: string): Promise<boolean> {
-    if (ionicState.packageManager !== PackageManager.npm) {
+    if (exState.packageManager !== PackageManager.npm) {
       return;
     }
     if (!plugin.startsWith('@ionic-enterprise/')) {
@@ -215,7 +215,7 @@ export class PluginExplorerPanel {
       await run(this.path, cmd, undefined, [], [], undefined, undefined, undefined, false);
       await run(
         this.path,
-        await capacitorSync(ionicState.projectRef),
+        await capacitorSync(exState.projectRef),
         undefined,
         [],
         [],

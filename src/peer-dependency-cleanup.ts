@@ -1,6 +1,6 @@
 import { window } from 'vscode';
 import { getAllPackageNames, getPackageVersion, load } from './analyzer';
-import { ionicState } from './wn-tree-provider';
+import { exState } from './wn-tree-provider';
 import { write } from './logging';
 import { DependencyVersion, PeerReport, checkPeerDependencies } from './peer-dependencies';
 import { Project, inspectProject } from './project';
@@ -10,7 +10,7 @@ export async function peerDependencyCleanup(project: Project): Promise<void> {
   let report: PeerReport;
   await showProgress(`Checking dependencies in your project...`, async () => {
     // Need to reload dependency list
-    await inspectProject(ionicState.rootFolder, ionicState.context, undefined);
+    await inspectProject(exState.rootFolder, exState.context, undefined);
 
     const dependencies = getAllPackageNames();
     const list: DependencyVersion[] = [];

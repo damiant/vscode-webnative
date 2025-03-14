@@ -1,13 +1,13 @@
 import { RunPoint, TipFeature } from './tip';
 import { debugBrowser, viewInEditor } from './editor-preview';
 import { handleError } from './error-handler';
-import { ionicState, IonicTreeProvider } from './wn-tree-provider';
+import { exState, ExTreeProvider } from './wn-tree-provider';
 import { getMonoRepoFolder, getPackageJSONFilename } from './monorepo';
 import { InternalCommand } from './command-name';
 import { exists } from './analyzer';
 import { ionicInit } from './ionic-init';
 import { request } from 'https';
-import { ExtensionSetting, getExtSetting, getSetting, WorkspaceSetting } from './workspace-state';
+import { ExtensionSetting, getExtSetting, getSetting, WorkspaceSection, WorkspaceSetting } from './workspace-state';
 import { showOutput, write, writeError, writeWN, writeWarning } from './logging';
 import { getWebConfiguration, WebConfigSetting } from './web-configuration';
 import { Publisher } from './discovery';
@@ -80,7 +80,7 @@ function runOptions(command: string, folder: string, shell?: string): ExecOption
     }
   }
 
-  return { cwd: folder, shell: shell ? shell : ionicState.shell, encoding: 'utf8', env: env, maxBuffer: 10485760 };
+  return { cwd: folder, shell: shell ? shell : exState.shell, encoding: 'utf8', env: env, maxBuffer: 10485760 };
 }
 
 export interface RunResults {
@@ -137,7 +137,7 @@ export async function run(
   features: Array<TipFeature>,
   runPoints: Array<RunPoint>,
   progress: any,
-  ionicProvider?: IonicTreeProvider,
+  ionicProvider?: ExTreeProvider,
   output?: RunResults,
   suppressInfo?: boolean,
   auxData?: string,
@@ -153,7 +153,7 @@ export async function run(
   if (command.includes(InternalCommand.cwd)) {
     command = replaceAll(command, InternalCommand.cwd, '');
     // Change the work directory for monorepos as folder is the root folder
-    folder = getMonoRepoFolder(ionicState.workspace, folder);
+    folder = getMonoRepoFolder(exState.workspace, folder);
   }
   command = qualifyCommand(command, folder);
 
@@ -408,7 +408,7 @@ function stripColors(s: string): string {
  * This ensures that the focus is not pushed to the output window while you are editing a document
  */
 function focusOutput() {
-  if (ionicState.outputIsFocused) return;
+  if (exState.outputIsFocused) return;
   channelShow();
 }
 
@@ -420,23 +420,23 @@ export function replaceAll(str: string, find: string, replace: string): string {
 function qualifyCommand(command: string, folder: string): string {
   if (command.startsWith('npx ionic')) {
     if (!exists('@ionic/cli')) {
-      const cli = join(ionicState.context.extensionPath, 'node_modules/@ionic/cli/bin');
+      const cli = join(exState.context.extensionPath, 'node_modules/@ionic/cli/bin');
       if (existsSync(cli)) {
         command = command.replace('npx ionic', 'node "' + join(cli, 'ionic') + '"');
       }
     }
   }
   if (process.env.NVM_DIR) {
-    if (!ionicState.nvm) {
+    if (!exState.nvm) {
       const nvmrc = join(folder, '.nvmrc');
       if (existsSync(nvmrc)) {
         const txt = readFileSync(nvmrc, 'utf-8').replace('\n', '');
-        ionicState.nvm = `source ${process.env.NVM_DIR}/nvm.sh && nvm use > /dev/null`;
+        exState.nvm = `source ${process.env.NVM_DIR}/nvm.sh && nvm use > /dev/null`;
         writeWN(`Detected nvm (${txt}) for this project.`);
       }
     }
-    if (ionicState.nvm) {
-      return `${ionicState.nvm} && ${command}`;
+    if (exState.nvm) {
+      return `${exState.nvm} && ${command}`;
     }
   }
   return command;
@@ -449,7 +449,7 @@ export async function openUri(uri: string): Promise<void> {
 
 export function debugSkipFiles(): string {
   try {
-    let debugSkipFiles: string = workspace.getConfiguration('ionic').get('debugSkipFiles');
+    let debugSkipFiles: string = workspace.getConfiguration(WorkspaceSection).get('debugSkipFiles');
     if (!debugSkipFiles) {
       return undefined;
     }
@@ -541,7 +541,7 @@ export async function getExecOutput(
     if (command.includes(InternalCommand.cwd)) {
       command = replaceAll(command, InternalCommand.cwd, '');
       // Change the work directory for monorepos as folder is the root folder
-      folder = getMonoRepoFolder(ionicState.workspace, folder);
+      folder = getMonoRepoFolder(exState.workspace, folder);
     }
     command = qualifyCommand(command, folder);
     tStart(command);
@@ -580,9 +580,9 @@ export async function getExecOutput(
 }
 
 export function channelShow() {
-  if (ionicState.channelFocus) {
+  if (exState.channelFocus) {
     showOutput();
-    ionicState.channelFocus = false;
+    exState.channelFocus = false;
   }
 }
 

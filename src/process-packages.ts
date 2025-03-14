@@ -12,7 +12,7 @@ import {
   PackageCacheOutdated,
 } from './context-variables';
 import { join } from 'path';
-import { ionicState } from './wn-tree-provider';
+import { exState } from './wn-tree-provider';
 import { write, writeError, writeWarning } from './logging';
 import { fixYarnV1Outdated, fixModernYarnList, fixYarnOutdated, MonoRepoType } from './monorepo';
 import { ExtensionContext, window } from 'vscode';
@@ -87,7 +87,7 @@ export async function processPackages(
     versions = context.workspaceState.get(PackageCacheList(project));
     const changed = packagesModified.toUTCString() != packageModifiedLast;
     if (changed) {
-      ionicState.syncDone = [];
+      exState.syncDone = [];
     }
     if (changed || !outdated || !versions) {
       const outdatedCmd = outdatedCommand(project);

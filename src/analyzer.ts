@@ -16,7 +16,7 @@ import { Command, Tip, TipType } from './tip';
 import { Project } from './project';
 import { getRunOutput, setStringIn } from './utilities';
 import { npmInstall, npmUninstall, PackageManager } from './node-commands';
-import { ionicState } from './wn-tree-provider';
+import { exState } from './wn-tree-provider';
 import { ExtensionContext, window } from 'vscode';
 import { existsSync, lstatSync, readFileSync, statSync, writeFileSync } from 'fs';
 
@@ -109,8 +109,8 @@ export async function load(fn: string, project: Project, context: ExtensionConte
     cordovaConfig = processConfigXML(fn);
     androidManifest = processAndroidXML(fn);
   }
-  ionicState.hasPackageJson = existsSync(packageJsonFilename);
-  if (!ionicState.hasPackageJson) {
+  exState.hasPackageJson = existsSync(packageJsonFilename);
+  if (!exState.hasPackageJson) {
     error('package.json', 'This folder does not contain an Ionic application (its missing package.json)');
     allDependencies = [];
     packageFile = {};

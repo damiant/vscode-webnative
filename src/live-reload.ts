@@ -1,6 +1,6 @@
 import { Project } from './project';
 import { getRunOutput, openUri } from './utilities';
-import { ionicState } from './wn-tree-provider';
+import { exState } from './wn-tree-provider';
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'fs';
 import { writeError, writeWN } from './logging';
 import { basename, extname, join } from 'path';
@@ -64,7 +64,7 @@ export async function setupServerCertificate(project: Project): Promise<void> {
 }
 
 function globalPath() {
-  return ionicState.context.globalStorageUri.fsPath;
+  return exState.context.globalStorageUri.fsPath;
 }
 
 export function certPath(ext: string): string {
@@ -72,7 +72,7 @@ export function certPath(ext: string): string {
 }
 
 function certStorePath() {
-  return ionicState.context.globalStorageUri.fsPath;
+  return exState.context.globalStorageUri.fsPath;
 }
 
 function hasRootCA() {
@@ -234,7 +234,7 @@ function servePage(certFilename: string): string {
     return;
   }
   const port = 8942;
-  const basePath = join(ionicState.context.extensionPath, 'certificates');
+  const basePath = join(exState.context.extensionPath, 'certificates');
   certServer = createServer((request, response) => {
     response.setHeader('Access-Control-Allow-Origin', '*');
     response.setHeader('Access-Control-Request-Method', '*');

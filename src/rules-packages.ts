@@ -9,7 +9,7 @@ import {
   warnMinVersion,
 } from './analyzer';
 import { npmInstallAll, suggestInstallAll } from './node-commands';
-import { ionicState } from './wn-tree-provider';
+import { exState } from './wn-tree-provider';
 import { existsSync } from 'fs';
 
 /**
@@ -18,10 +18,10 @@ import { existsSync } from 'fs';
  */
 export function checkPackages(project: Project) {
   const nmf = project.getNodeModulesFolder();
-  ionicState.hasNodeModules = true;
-  ionicState.nodeModulesFolder = nmf;
+  exState.hasNodeModules = true;
+  exState.nodeModulesFolder = nmf;
   if (!existsSync(nmf) && !project.isModernYarn()) {
-    ionicState.hasNodeModules = false;
+    exState.hasNodeModules = false;
     project.add(
       new Tip(
         'Install Node Modules',
@@ -34,7 +34,7 @@ export function checkPackages(project: Project) {
         .performRun()
         .showProgressDialog(),
     );
-    if (!ionicState.hasNodeModulesNotified) {
+    if (!exState.hasNodeModulesNotified) {
       suggestInstallAll(project);
     }
   }

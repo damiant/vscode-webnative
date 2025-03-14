@@ -8,7 +8,7 @@ import { inspectProject, Project } from './project';
 import { doDoes, getRunOutput, getStringFrom, plural, pluralize, run, setAllStringIn, showProgress } from './utilities';
 import { capacitorSync } from './capacitor-sync';
 import { ActionResult } from './command-name';
-import { ionicState } from './wn-tree-provider';
+import { exState } from './wn-tree-provider';
 import { PackageManager } from './node-commands';
 import { openUri } from './utilities';
 import { capacitorOpen } from './capacitor-open';
@@ -89,7 +89,7 @@ export async function migrateCapacitor(
   queueFunction();
   let report: PeerReport;
   await showProgress(`Checking plugins in your project...`, async () => {
-    await inspectProject(ionicState.rootFolder, ionicState.context, undefined);
+    await inspectProject(exState.rootFolder, exState.context, undefined);
     report = await checkPeerDependencies(
       project.folder,
       [{ name: '@capacitor/core', version: versionFull }],
@@ -156,7 +156,7 @@ export async function migrateCapacitor(
     );
     write(`> ${cmd}`);
     await project.run2(cmd, true);
-    const manager = getPackageManager(ionicState.packageManager);
+    const manager = getPackageManager(exState.packageManager);
     try {
       const result = await getRunOutput(
         logCmd(`npx cap migrate --noprompt --packagemanager=${manager}`),

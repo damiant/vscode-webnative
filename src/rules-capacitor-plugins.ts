@@ -6,7 +6,7 @@ import { window } from 'vscode';
 import { openUri, showProgress } from './utilities';
 import { npx } from './node-commands';
 import { ActionResult } from './command-name';
-import { ionicState } from './wn-tree-provider';
+import { exState } from './wn-tree-provider';
 
 export interface CapacitorPluginMigrationOptions {
   changesLink: string;
@@ -81,7 +81,7 @@ function suggestCapacitorPluginMigration(
   migrateOptions: CapacitorPluginMigrationOptions,
 ) {
   if (isLess('@capacitor/core', maxCapacitorCore)) {
-    if (ionicState.hasNodeModules && isGreaterOrEqual('@capacitor/core', minCapacitorCore)) {
+    if (exState.hasNodeModules && isGreaterOrEqual('@capacitor/core', minCapacitorCore)) {
       project.tip(
         new Tip(`Migrate Capacitor Plugin to ${maxCapacitorCore}`, '', type)
           .setQueuedAction(

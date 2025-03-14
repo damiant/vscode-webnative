@@ -1,7 +1,7 @@
 import { Project } from './project';
 import { QueueFunction, Tip, TipType } from './tip';
 import { writeError, writeWN } from './logging';
-import { ionicState } from './wn-tree-provider';
+import { exState } from './wn-tree-provider';
 import { isGreaterOrEqual } from './analyzer';
 import { getCapacitorConfigWebDir, getCapacitorConfigureFilename, writeCapacitorConfig } from './capacitor-config-file';
 import { join, sep } from 'path';
@@ -25,19 +25,19 @@ export function checkAngularJson(project: Project) {
       const angular = parseAngularJSON(filename);
       for (const projectName of Object.keys(angular.projects)) {
         defaultConfiguration = angular.projects[projectName].architect?.build?.defaultConfiguration;
-        if (!ionicState.configuration && defaultConfiguration) {
-          ionicState.configuration = defaultConfiguration;
+        if (!exState.configuration && defaultConfiguration) {
+          exState.configuration = defaultConfiguration;
         }
-        if (!ionicState.project) {
-          ionicState.project = projectName;
+        if (!exState.project) {
+          exState.project = projectName;
         }
         checkWebpackToESBuild(angular, project, projectName, filename);
         if (fixAOT(angular, project, projectName, filename)) break;
       }
       checkPackageManager(angular, project, filename);
     }
-    if (ionicState.project == 'app') {
-      ionicState.project = undefined;
+    if (exState.project == 'app') {
+      exState.project = undefined;
     }
   } catch (e) {
     writeError(e);

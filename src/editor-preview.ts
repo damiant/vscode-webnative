@@ -1,6 +1,6 @@
 import { debug, DebugConfiguration, ViewColumn, window } from 'vscode';
 import { cancelLastOperation } from './tasks';
-import { ionicState } from './wn-tree-provider';
+import { exState } from './wn-tree-provider';
 import { debugSkipFiles } from './utilities';
 import { getSetting, WorkspaceSetting } from './workspace-state';
 
@@ -68,7 +68,7 @@ export async function debugBrowser(url: string, stopWebServerAfter: boolean) {
         // This stops the dev server
         await cancelLastOperation();
         // Switch back to Ionic View
-        ionicState.view.reveal(undefined, { focus: true });
+        exState.view.reveal(undefined, { focus: true });
       }
     });
 

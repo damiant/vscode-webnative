@@ -3,7 +3,7 @@ import { debugAndroid } from './android-debug';
 import { findDevices, findWebViews } from './android-debug-bridge';
 import { Device, WebView } from './android-debug-models';
 import { CommandName } from './command-name';
-import { ionicState } from './wn-tree-provider';
+import { exState } from './wn-tree-provider';
 import { Recommendation } from './recommendation';
 import { QueueFunction, Tip, TipType } from './tip';
 
@@ -11,8 +11,8 @@ export async function getAndroidWebViewList(
   hasCapacitorAndroid: boolean,
   wwwFolder: string,
 ): Promise<Recommendation[]> {
-  if (ionicState.refreshDebugDevices) {
-    ionicState.refreshDebugDevices = false;
+  if (exState.refreshDebugDevices) {
+    exState.refreshDebugDevices = false;
   }
   if (!hasCapacitorAndroid) {
     return [];

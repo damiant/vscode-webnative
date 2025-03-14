@@ -1,6 +1,6 @@
 import { Project } from './project';
 import { FrameworkType, MonoRepoType } from './monorepo';
-import { ionicState } from './wn-tree-provider';
+import { exState } from './wn-tree-provider';
 import { InternalCommand } from './command-name';
 import { npmRun, npx, preflightNPMCheck } from './node-commands';
 import { exists } from './analyzer';
@@ -10,6 +10,7 @@ import { workspace } from 'vscode';
 import { error } from 'console';
 import { existsSync, readFileSync } from 'fs';
 import { join } from 'path';
+import { WorkspaceSection } from './workspace-state';
 
 interface BuildOptions {
   platform?: CapacitorPlatform;
@@ -24,12 +25,12 @@ interface BuildOptions {
 export async function ionicBuild(project: Project, options: BuildOptions): Promise<string> {
   const preop = preflightNPMCheck(project);
 
-  ionicState.projectDirty = false;
+  exState.projectDirty = false;
 
-  const prod: boolean = workspace.getConfiguration('ionic').get('buildForProduction');
+  const prod: boolean = workspace.getConfiguration(WorkspaceSection).get('buildForProduction');
   let args = options.arguments ? options.arguments : '';
-  if (ionicState.project) {
-    args += ` --project=${ionicState.project}`;
+  if (exState.project) {
+    args += ` --project=${exState.project}`;
   }
   const additionalArgs = getConfigurationArgs(false);
   if (additionalArgs) {

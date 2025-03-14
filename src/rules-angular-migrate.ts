@@ -2,7 +2,7 @@ import { exists, getAllPackageNames, getPackageVersion } from './analyzer';
 import { QueueFunction, Tip, TipType } from './tip';
 import { coerce } from 'semver';
 import { npmInstall, npx } from './node-commands';
-import { ionicState } from './wn-tree-provider';
+import { exState } from './wn-tree-provider';
 import { runCommands } from './advanced-actions';
 import { Project } from './project';
 import { window } from 'vscode';

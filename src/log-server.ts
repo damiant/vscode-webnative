@@ -1,4 +1,4 @@
-import { ionicState } from './wn-tree-provider';
+import { exState } from './wn-tree-provider';
 import { injectScript, removeScript } from './log-server-scripts';
 import { extname, join } from 'path';
 import { readFile } from 'fs';
@@ -23,7 +23,7 @@ export async function startStopLogServer(folder: string): Promise<boolean> {
   }
 
   const port = 8942;
-  const basePath = join(ionicState.context.extensionPath, 'log-client');
+  const basePath = join(exState.context.extensionPath, 'log-client');
   logServer = createServer((request, response) => {
     let body = '';
 
