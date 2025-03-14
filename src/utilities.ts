@@ -200,7 +200,7 @@ export async function run(
     }
     switch (config) {
       case WebConfigSetting.editor:
-        viewInEditor(localUrl);
+        viewInEditor(localUrl, true, !!exState.webView);
         break;
       case WebConfigSetting.browser:
         if (!externalUrl) {

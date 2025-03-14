@@ -8,7 +8,16 @@ import { PackageManager } from './node-commands';
 import { Tip } from './tip';
 import { CapacitorPlatform } from './capacitor-platform';
 
-import { Event, EventEmitter, ExtensionContext, TreeDataProvider, TreeItem, TreeView, commands } from 'vscode';
+import {
+  Event,
+  EventEmitter,
+  ExtensionContext,
+  TreeDataProvider,
+  TreeItem,
+  TreeView,
+  WebviewPanel,
+  commands,
+} from 'vscode';
 import { accessSync } from 'fs';
 import { join } from 'path';
 import { IonicStartPanel } from './ionic-start';
@@ -44,6 +53,7 @@ interface ExState {
   flavors: string[]; // Android Flavors
   debugged: boolean; // Have we ever started debugging
   servePort: number; // The port used when the dev server is running
+  webView: WebviewPanel | undefined; // The Web Browser preview
   runIOS: Tip;
   runAndroid: Tip;
   runWeb: Tip;
@@ -74,6 +84,7 @@ export const exState: ExState = {
   nvm: undefined,
   flavors: undefined,
   rootFolder: undefined,
+  webView: undefined,
   lastRun: undefined,
   projectRef: undefined,
   configuration: undefined,

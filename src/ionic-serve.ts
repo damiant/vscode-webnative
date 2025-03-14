@@ -22,13 +22,14 @@ import { window, workspace } from 'vscode';
 import { write, writeError } from './logging';
 import { createServer } from 'http';
 import { join } from 'path';
+import { viewInEditor } from './editor-preview';
 
 /**
  * Create the ionic serve command
  * @param  {boolean} isNative Whether we are serving iOS or Android (for live reload)
  * @returns string
  */
-export async function ionicServe(
+export async function serve(
   project: Project,
   dontOpenBrowser: boolean,
   isDebugging?: boolean,
@@ -37,7 +38,7 @@ export async function ionicServe(
   exState.lastRun = undefined;
   switch (project.repoType) {
     case MonoRepoType.none:
-      return ionicCLIServe(project, dontOpenBrowser, isDebugging, isNative);
+      return runServe(project, dontOpenBrowser, isDebugging, isNative);
     case MonoRepoType.nx:
       return nxServe(project);
     case MonoRepoType.npm:
@@ -45,13 +46,13 @@ export async function ionicServe(
     case MonoRepoType.lerna:
     case MonoRepoType.pnpm:
     case MonoRepoType.folder:
-      return InternalCommand.cwd + (await ionicCLIServe(project, dontOpenBrowser, isDebugging));
+      return InternalCommand.cwd + (await runServe(project, dontOpenBrowser, isDebugging));
     default:
       throw new Error('Unsupported Monorepo type');
   }
 }
 
-async function ionicCLIServe(
+async function runServe(
   project: Project,
   dontOpenBrowser: boolean,
   isDebugging?: boolean,
@@ -62,6 +63,7 @@ async function ionicCLIServe(
   const webConfig: WebConfigSetting = getWebConfiguration();
   const externalIP = !getExtSetting(ExtensionSetting.internalAddress);
   const defaultPort: number | undefined = workspace.getConfiguration(WorkspaceSection).get('defaultPort');
+  exState.webView = viewInEditor('about:blank');
   let serveFlags = '';
   if ([WebConfigSetting.editor, WebConfigSetting.nexus, WebConfigSetting.none].includes(webConfig) || dontOpenBrowser) {
     serveFlags += ' --no-open';

@@ -1,7 +1,7 @@
 import { deprecatedPackages, exists, isGreaterOrEqual } from './analyzer';
 import { reviewCapacitorConfig } from './capacitor-configure';
 import { build } from './build';
-import { ionicServe } from './ionic-serve';
+import { serve } from './ionic-serve';
 import { Project } from './project';
 import { addSplashAndIconFeatures } from './splash-icon';
 import { QueueFunction, RunPoint, Tip, TipFeature, TipType } from './tip';
@@ -58,7 +58,7 @@ export async function getRecommendations(project: Project, context: ExtensionCon
       'Running on Web',
       `Project Served`,
     )
-      .setDynamicCommand(ionicServe, project, false)
+      .setDynamicCommand(serve, project, false)
       .requestIPSelection()
       .setData(project.name)
       .setContextValue(Context.webConfig)
@@ -365,7 +365,7 @@ async function settings(queueFunction: QueueFunction) {
 
 export function debugOnWeb(project: Project): Tip {
   return new Tip('Web', `(${getDebugBrowserName()})`, TipType.Debug, 'Serve', undefined, 'Debugging', `Project Served`)
-    .setDynamicCommand(ionicServe, project, true, true)
+    .setDynamicCommand(serve, project, true, true)
     .setFeatures([TipFeature.debugOnWeb])
     .setRunPoints([
       { title: 'Building...', text: 'Generating browser application bundles' },

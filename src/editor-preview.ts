@@ -1,4 +1,4 @@
-import { debug, DebugConfiguration, ViewColumn, window } from 'vscode';
+import { debug, DebugConfiguration, ViewColumn, WebviewPanel, window } from 'vscode';
 import { cancelLastOperation } from './tasks';
 import { exState } from './wn-tree-provider';
 import { debugSkipFiles } from './utilities';
@@ -12,6 +12,7 @@ interface device {
 }
 
 const devices: Array<device> = [
+  { name: 'Web', width: 0, height: 0, type: 'web' },
   { name: 'iPhone SE', width: 375, height: 667, type: 'ios' },
   { name: 'iPhone XR', width: 414, height: 896, type: 'ios' },
   { name: 'iPhone 12 Pro', width: 390, height: 844, type: 'ios' },
@@ -24,10 +25,12 @@ const devices: Array<device> = [
   { name: 'Samsung Galaxy Tab S4', width: 712, height: 1138, type: 'android' },
 ];
 
-export function viewInEditor(url: string, active?: boolean) {
-  const panel = window.createWebviewPanel('viewApp', 'Preview', active ? ViewColumn.Active : ViewColumn.Beside, {
-    enableScripts: true,
-  });
+export function viewInEditor(url: string, active?: boolean, existingPanel?: boolean): WebviewPanel {
+  const panel = existingPanel
+    ? exState.webView
+    : window.createWebviewPanel('viewApp', 'Preview', active ? ViewColumn.Active : ViewColumn.Beside, {
+        enableScripts: true,
+      });
 
   panel.webview.html = getWebviewContent(url);
 
@@ -36,6 +39,7 @@ export function viewInEditor(url: string, active?: boolean) {
     panel.title = device.name;
     panel.webview.postMessage(device);
   });
+  return panel;
 }
 
 export function getDebugBrowserName(): string {
@@ -80,7 +84,7 @@ export async function debugBrowser(url: string, stopWebServerAfter: boolean) {
 
 async function selectMockDevice(): Promise<device> {
   const selected = await window.showQuickPick(
-    devices.map((device) => `${device.name} (${device.width} x ${device.height})`),
+    devices.map((device) => (device.width == 0 ? device.name : `${device.name} (${device.width} x ${device.height})`)),
     { placeHolder: 'Select Emulated Device' },
   );
   if (!selected) return;
@@ -94,6 +98,13 @@ function getWebviewContent(url: string): string {
 		<meta charset="UTF-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<title>Preview App</title>
+    <style>
+    .body {
+       display: flex; 
+       align-items: center; justify-content: center;
+       margin: 0;
+    }
+    </style>
 	</head>
 	<script>
 	const vscode = acquireVsCodeApi();
@@ -102,11 +113,31 @@ function getWebviewContent(url: string): string {
 	window.addEventListener('message', event => {
 		const device = event.data;		
 		let newurl = baseUrl;
+    let width = device.width + 'px';
+    let deviceWidth = (device.height + 50) + 'px';
+    let height = device.height + 'px';
 		if (device.type == 'ios') { newurl += '?ionic:mode=ios'; }
-		document.getElementById('frame').src = newurl;
-		document.getElementById('devFrame').style.width = device.width + 'px';
-		document.getElementById('devFrame').style.height = (device.height + 50) + 'px';
-		document.getElementById('frameContainer').style.height = device.height + 'px';
+    if (device.type == 'web') {
+       width = '100%'; 
+       deviceWidth = '100%';
+       height = '100%';
+       document.getElementById('body').style.height = '100vh';
+       document.getElementById('body').style.margin = '0';
+       document.getElementById('body').style.display = 'block';
+       document.getElementById('devFrame').style.display = 'none';
+       document.getElementById('frame').src ='about:blank';
+       document.getElementById('web').width ='100%';
+       document.getElementById('web').src =newurl;
+    } else {
+       document.getElementById('devFrame').style.display = 'block';
+       document.getElementById('web').src ='about:blank';
+       document.getElementById('web').width ='0';
+       document.getElementById('body').style.marginTop = '20px';
+       document.getElementById('frame').src = newurl;
+    }
+		document.getElementById('devFrame').style.width = width;
+		document.getElementById('devFrame').style.height = deviceWidth;
+		document.getElementById('frameContainer').style.height = height;
 		console.log(device);
 	});
 	
@@ -114,7 +145,8 @@ function getWebviewContent(url: string): string {
 	    vscode.postMessage({url: document.getElementById('frame').src});
 	}
 	</script>
-	<body style="display: flex; align-items: center; justify-content: center; margin-top:20px;">
+	<body id="body" class="body">
+    <iframe id="web" src="" width="0" height="100%" frameBorder="0"></iframe>
 		<div id="devFrame" style="width: 375px; height: 717px; border: 2px solid #333; border-radius:10px; padding:10px; display: flex; align-items: center; flex-direction: column;">		   
 		   <div id="frameContainer" style="width: 100%; height: 667px;">
 		        <div onclick="change()"  style="border: 2px solid #333; width:5px; height: 70px; cursor: pointer; margin-top:20px; margin-left:-19px; position: absolute"></div>
@@ -124,7 +156,6 @@ function getWebviewContent(url: string): string {
       <div style="cursor: pointer; height: 25px; width:25px; padding:5px" onclick="history.back()"><svg viewBox="0 0 512 512"><path fill="none" stroke="#333" stroke-linecap="round" stroke-linejoin="round" stroke-width="48" d="M244 400L100 256l144-144M120 256h292"/></svg></div>
 			<div style="background-color: #333; cursor: pointer; height: 25px; width:25px; border-radius:30px; padding:5px" onclick="document.getElementById('frame').src = '${url}'"></div>
       <div style="cursor: pointer; height: 25px; width:25px; padding:5px" onclick="change()"><svg fill="#333" viewBox="0 0 512 512"><circle cx="256" cy="256" r="48"/><circle cx="416" cy="256" r="48"/><circle cx="96" cy="256" r="48"/></svg></div>
-      
 		  </div>  
 		 </div>
 	</body>

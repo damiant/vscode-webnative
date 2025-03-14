@@ -13,7 +13,7 @@ import { gradleToJson } from './gradle-to-json';
 import { ExtensionSetting, getExtSetting, getSetting, WorkspaceSection, WorkspaceSetting } from './workspace-state';
 import { window, workspace } from 'vscode';
 import { join } from 'path';
-import { ionicServe } from './ionic-serve';
+import { serve } from './ionic-serve';
 
 /**
  * Creates the command line to run for Capacitor
@@ -158,7 +158,7 @@ async function capRun(
 
   let post = '';
   if (liveReload) {
-    const serveCmd = await ionicServe(project, true, false, true);
+    const serveCmd = await serve(project, true, false, true);
     post = ` & ${serveCmd}`;
   }
   return `${pre}${npx(project)} ${ionic}cap run ${platform} --target=${InternalCommand.target} ${capRunFlags}${post}`;
