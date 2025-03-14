@@ -14,7 +14,7 @@ export function showTips() {
   const shownAt = tips ? Date.parse(tips) : 0;
   const days = (new Date().getTime() - shownAt) / (1000 * 3600 * 24);
   if (days > 30) {
-    window.showInformationMessage(`Ionic Tip: Press ${alt('D')} to debug your app and ${alt('R')} to run it!`, 'OK');
+    window.showInformationMessage(`Tip: Press ${alt('D')} to debug your app and ${alt('R')} to run it!`, 'OK');
     setGlobalSetting(GlobalSetting.lastTipsShown, new Date().toISOString());
   }
 }
