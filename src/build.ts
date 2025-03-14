@@ -1,5 +1,5 @@
 import { Project } from './project';
-import { FrameworkType, MonoRepoType } from './monorepo';
+import { MonoRepoType } from './monorepo';
 import { exState } from './wn-tree-provider';
 import { InternalCommand } from './command-name';
 import { npmRun, npx, preflightNPMCheck } from './node-commands';
@@ -22,7 +22,7 @@ interface BuildOptions {
  * @param  {Project} project
  * @returns string
  */
-export async function ionicBuild(project: Project, options: BuildOptions): Promise<string> {
+export async function build(project: Project, options: BuildOptions): Promise<string> {
   const preop = preflightNPMCheck(project);
 
   exState.projectDirty = false;
@@ -42,22 +42,22 @@ export async function ionicBuild(project: Project, options: BuildOptions): Promi
   }
   switch (project.repoType) {
     case MonoRepoType.none:
-      return `${preop}${build(prod, project, args, options.platform, options.sourceMaps)}`;
+      return `${preop}${runBuild(prod, project, args, options.platform, options.sourceMaps)}`;
     case MonoRepoType.npm:
-      return `${InternalCommand.cwd}${preop}${build(prod, project, args, options.platform)}`;
+      return `${InternalCommand.cwd}${preop}${runBuild(prod, project, args, options.platform)}`;
     case MonoRepoType.nx:
       return `${preop}${nxBuild(prod, project, args)}`;
     case MonoRepoType.folder:
     case MonoRepoType.yarn:
     case MonoRepoType.lerna:
     case MonoRepoType.pnpm:
-      return `${InternalCommand.cwd}${preop}${build(prod, project, args, options.platform, options.sourceMaps)}`;
+      return `${InternalCommand.cwd}${preop}${runBuild(prod, project, args, options.platform, options.sourceMaps)}`;
     default:
       throw new Error('Unsupported Monorepo type');
   }
 }
 
-function build(
+function runBuild(
   prod: boolean,
   project: Project,
   configurationArg?: string,

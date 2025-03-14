@@ -4,7 +4,7 @@ import { isWindows, openUri, run, RunResults, showProgress, stripJSON } from './
 
 import { basename, extname, join } from 'path';
 import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from 'fs';
-import { ionicBuild } from './ionic-build';
+import { build } from './build';
 import { MonoRepoType } from './monorepo';
 import { ViewColumn, window } from 'vscode';
 import { QueueFunction } from './tip';
@@ -27,7 +27,7 @@ export async function analyzeSize(queueFunction: QueueFunction, project: Project
         args = '--configuration=production';
       }
 
-      const cmd = await ionicBuild(project, { arguments: args, sourceMaps: true });
+      const cmd = await build(project, { arguments: args, sourceMaps: true });
       const bumpSize = !isWindows() ? 'export NODE_OPTIONS="--max-old-space-size=8192" && ' : '';
       try {
         await run2(project, `${bumpSize}${cmd}`, undefined);

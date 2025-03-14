@@ -3,11 +3,11 @@ import { exists, isLess } from './analyzer';
 import { CapacitorPlatform } from './capacitor-platform';
 import { InternalCommand } from './command-name';
 import { writeError, writeWN } from './logging';
-import { ionicBuild } from './ionic-build';
+import { build } from './build';
 import { exState } from './wn-tree-provider';
 import { certPath, liveReloadSSL } from './live-reload';
 import { MonoRepoType } from './monorepo';
-import { npx, PackageManager, preflightNPMCheck } from './node-commands';
+import { npx, preflightNPMCheck } from './node-commands';
 import { Project } from './project';
 import { gradleToJson } from './gradle-to-json';
 import { ExtensionSetting, getExtSetting, getSetting, WorkspaceSection, WorkspaceSetting } from './workspace-state';
@@ -29,7 +29,7 @@ export async function capacitorRun(project: Project, platform: CapacitorPlatform
   // If the user modified something in the editor then its likely they need to rebuild the app before running
   if (exState.projectDirty) {
     writeWN('Rebuilding as you changed your project...');
-    preop = (await ionicBuild(project, { platform })) + ' && ';
+    preop = (await build(project, { platform })) + ' && ';
     rebuilt = true;
   } else {
     preop = preflightNPMCheck(project);

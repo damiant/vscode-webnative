@@ -1,6 +1,6 @@
 import { deprecatedPackages, exists, isGreaterOrEqual } from './analyzer';
 import { reviewCapacitorConfig } from './capacitor-configure';
-import { ionicBuild } from './ionic-build';
+import { build } from './build';
 import { ionicServe } from './ionic-serve';
 import { Project } from './project';
 import { addSplashAndIconFeatures } from './splash-icon';
@@ -175,7 +175,7 @@ export async function getRecommendations(project: Project, context: ExtensionCon
       }
     }
 
-    project.add(build(project));
+    project.add(buildAction(project));
 
     if (hasCapIos || hasCapAndroid) {
       project.add(
@@ -397,9 +397,9 @@ export function debugOnWeb(project: Project): Tip {
     .setTooltip(`Debug using ${getDebugBrowserName()}. (${alt('D')})`);
 }
 
-export function build(project: Project) {
+export function buildAction(project: Project) {
   return new Tip('Build', getConfigurationName(), TipType.Build, 'Build', undefined, 'Building', undefined)
-    .setDynamicCommand(ionicBuild, project, {})
+    .setDynamicCommand(build, project, {})
     .setContextValue(Context.buildConfig)
     .canStop()
     .canAnimate()

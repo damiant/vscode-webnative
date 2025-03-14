@@ -38,7 +38,7 @@ import {
   startCommand,
   waitForOtherActions,
 } from './tasks';
-import { build, debugOnWeb } from './recommend';
+import { buildAction, debugOnWeb } from './recommend';
 import { IonicStartPanel } from './ionic-start';
 import {
   CancellationToken,
@@ -414,7 +414,7 @@ export async function activate(context: ExtensionContext) {
   });
 
   commands.registerCommand(CommandName.Build, async () => {
-    runAction(build(exState.projectRef), ionicProvider, rootPath);
+    runAction(buildAction(exState.projectRef), ionicProvider, rootPath);
   });
 
   commands.registerCommand(CommandName.SelectDevice, async (r: Recommendation) => {
