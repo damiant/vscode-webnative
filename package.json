@@ -110,8 +110,8 @@
       "wn-recommendation": [
         {
           "id": "wn-tree",
-          "name": "Ionic",
-          "contextualTitle": "Ionic"
+          "name": "",
+          "contextualTitle": ""
         },
         {
           "id": "webnative-devserver",
