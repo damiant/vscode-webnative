@@ -3,7 +3,7 @@ import { MonoRepoType } from './monorepo';
 import { npmRun } from './node-commands';
 import { Project } from './project';
 import { Tip, TipType } from './tip';
-import { getPackageJSON, PackageFile } from './utilities';
+import { getPackageJSON, PackageFile, toTitleCase } from './utilities';
 
 // Look in package.json for scripts and add options to execute
 export function addScripts(project: Project) {
@@ -22,7 +22,7 @@ function addScriptsFrom(packages: PackageFile, project: Project) {
   if (packages.scripts) {
     for (const script of Object.keys(packages.scripts)) {
       project.add(
-        new Tip(script, '', TipType.Run, '', npmRun(script), `Running ${script}`, `Ran ${script}`)
+        new Tip(niceName(script), '', TipType.Run, '', npmRun(script), `Running ${script}`, `Ran ${script}`)
           .canStop()
           .canAnimate()
           .setTooltip(`Runs 'npm run ${script}' found in package.json`),
@@ -32,6 +32,10 @@ function addScriptsFrom(packages: PackageFile, project: Project) {
 
   // We may be able to migrate a Capacitor Plugin
   project.isCapacitorPlugin = !!(packages.capacitor?.ios || packages.capacitor?.android);
+}
+
+function niceName(name: string) {
+  return toTitleCase(name.replace(/-/g, ' '));
 }
 
 function addNXScripts(names: Array<string>, project: Project) {

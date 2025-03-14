@@ -355,24 +355,6 @@ export async function getRecommendations(project: Project, context: ExtensionCon
 
   project.add(new Tip('Advanced', '', TipType.Settings).setQueuedAction(settings));
 
-  // Support and Feedback
-  project.setGroup(`Support`, 'Feature requests and bug fixes', TipType.WebNative, false);
-  project.add(
-    new Tip(
-      'Provide Feedback',
-      '',
-      TipType.Comment,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      `https://github.com/ionic-team/vscode-webnative/issues`,
-    ),
-  );
-
-  project.add(
-    new Tip('WebNative', '', TipType.WebNative, undefined, undefined, undefined, undefined, `https://webnative.dev`),
-  );
   tEnd('reviewPackages');
 }
 

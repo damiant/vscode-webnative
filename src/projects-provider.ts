@@ -2,6 +2,7 @@ import { Event, EventEmitter, ExtensionContext, TreeDataProvider, TreeItem, Tree
 import { CommandName } from './command-name';
 import { exState } from './wn-tree-provider';
 import { Recommendation } from './recommendation';
+import { toTitleCase } from './utilities';
 
 export class ProjectsProvider implements TreeDataProvider<Recommendation> {
   private _onDidChangeTreeData: EventEmitter<Recommendation | undefined | void> = new EventEmitter<
@@ -37,11 +38,21 @@ export class ProjectsProvider implements TreeDataProvider<Recommendation> {
         title: 'Open',
         arguments: [project.name],
       };
-      const r = new Recommendation(project.folder, undefined, project.name, TreeItemCollapsibleState.None, cmd);
+      const r = new Recommendation(
+        project.folder,
+        undefined,
+        this.niceName(project.name),
+        TreeItemCollapsibleState.None,
+        cmd,
+      );
       const icon = project.name == this.selectedProject ? 'circle-filled' : 'none';
       r.setIcon(icon);
       list.push(r);
     }
     return list;
+  }
+
+  niceName(name: string) {
+    return toTitleCase(name.replace(/-/g, ' '));
   }
 }
