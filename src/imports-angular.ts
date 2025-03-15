@@ -3,6 +3,7 @@ import { Range, TextDocument, Uri, WorkspaceEdit, workspace } from 'vscode';
 import { toPascalCase } from './utilities';
 import { IonicComponents } from './imports-auto-fix';
 import { Project } from 'ts-morph';
+import { isGreaterOrEqual } from './analyzer';
 
 export async function autoFixAngularImports(document: TextDocument, component: string): Promise<boolean> {
   // Validate that the file changed was a .html file that also has a .ts file which uses @ionic standalone
@@ -18,10 +19,18 @@ export async function autoFixAngularImports(document: TextDocument, component: s
     // Not a known Ionic Component
     return false;
   }
-  if (!tsText.includes('standalone: true')) {
-    // Doesnt include a standalone component
-    console.log(`${tsFile} does not include a standalone component`);
-    return false;
+  const a19 = isGreaterOrEqual('@angular/core', '19.0.0');
+  if (!a19) {
+    if (!tsText.includes('standalone: true')) {
+      // Doesnt include a standalone component
+      console.log(`${tsFile} does not include a standalone component`);
+      return false;
+    }
+  } else {
+    if (tsText.includes('standalone: false')) {
+      // Opted out of standalone components
+      return false;
+    }
   }
   if (tsText.includes('IonicModule')) {
     // Its got the IonicModule kitchen sink
