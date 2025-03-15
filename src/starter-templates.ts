@@ -1,4 +1,14 @@
-export const starterTemplates = [
+export interface Template {
+  type: string;
+  typeName: string;
+  name: string;
+  url?: string;
+  commands?: string[];
+  targets?: string;
+  description: string;
+}
+
+export const starterTemplates: Template[] = [
   {
     type: 'angular-standalone',
     typeName: 'New Angular Project',
@@ -252,6 +262,14 @@ export const starterTemplates = [
     url: 'https://vite.dev/guide/#trying-vite-online',
     commands: ['npm create vite@latest $(project-name) -- --template qwik-ts'],
   },
+  {
+    type: 'nuxt',
+    typeName: 'New Nuxt Project',
+    name: 'Nuxt',
+    description: 'A starter Nuxt project',
+    url: 'https://nuxt.com/docs/getting-started/installation',
+    commands: [`npm create nuxt $(project-name) -- --packageManager npm --gitInit false --modules '@nuxt/eslint'`],
+  },
 ];
 
 export const frameworks = [
@@ -264,6 +282,7 @@ export const frameworks = [
   { name: 'Preact', icon: 'preact.svg', icon2: 'vite.svg', type: 'vite-preact' },
   { name: 'Solid', icon: 'solid.svg', icon2: 'vite.svg', type: 'vite-solid' },
   { name: 'React', icon: 'react.svg', icon2: 'vite.svg', type: 'vite-react' },
+  { name: 'Nuxt', icon: 'nuxt.svg', type: 'nuxt' },
   { name: 'React+Ionic', icon: 'react.svg', icon2: 'ionic.svg', type: 'react' },
   { name: 'Qwik', icon: 'qwik.svg', icon2: 'vite.svg', type: 'vite-qwik' },
   { name: 'Lit', icon: 'lit.svg', icon2: 'vite.svg', type: 'vite-lit' },

@@ -17,16 +17,7 @@ import { join } from 'path';
 import { existsSync, readdirSync } from 'fs';
 import { CapacitorPlatform } from './capacitor-platform';
 import { npmInstall } from './node-commands';
-import { frameworks, starterTemplates, targets } from './starter-templates';
-
-interface Template {
-  type: string;
-  typeName: string;
-  name: string;
-  url?: string;
-  commands?: string[];
-  description: string;
-}
+import { frameworks, starterTemplates, targets, Template } from './starter-templates';
 
 enum MessageType {
   getTemplates = 'getTemplates',
