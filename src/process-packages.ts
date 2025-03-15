@@ -267,50 +267,6 @@ export function reviewPluginsWithHooks(packages: object): Tip[] {
   return tips;
 }
 
-// export function reviewPluginProperties(packages, project: Project) {
-//   if (Object.keys(packages).length == 0) return;
-
-//   // Process features and permissions
-//   const features = {};
-//   const permissions = {};
-//   for (const library of Object.keys(packages)) {
-//     if (packages[library].depType == 'Plugin') {
-//       for (const permission of packages[library].plugin.androidPermissions) {
-//         if (!permissions[permission]) {
-//           permissions[permission] = [];
-//         }
-//         permissions[permission].push(library);
-//       }
-//       for (const feature of packages[library].plugin.androidFeatures) {
-//         if (!features[feature]) {
-//           features[feature] = [];
-//         }
-//         features[feature].push(library);
-//       }
-//     }
-//   }
-
-//   if (Object.keys(permissions).length > 0) {
-//     project.setSubGroup(
-//       `Android Permissions`,
-//       TipType.Android,
-//       'The following Android permissions are used by plugins.'
-//     );
-//     for (const permission of Object.keys(permissions)) {
-//       project.add(new Tip(permission, permissions[permission].join(', ')));
-//     }
-//     project.clearSubgroup();
-//   }
-
-//   if (Object.keys(features).length > 0) {
-//     project.setSubGroup(`Android Features`, TipType.Android, 'The following Android features are used by plugins.');
-//     for (const feature of Object.keys(features)) {
-//       project.add(new Tip(feature, features[feature].join(', ')));
-//     }
-//     project.clearSubgroup();
-//   }
-// }
-
 function dateDiff(d1: Date, d2: Date): string {
   let months;
   months = (d2.getFullYear() - d1.getFullYear()) * 12;

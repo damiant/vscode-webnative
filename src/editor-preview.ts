@@ -37,7 +37,12 @@ function iconFor(name: string) {
 
 let lastUrl = '';
 
-export function viewInEditor(url: string, active?: boolean, existingPanel?: boolean): WebviewPanel {
+export function viewInEditor(
+  url: string,
+  active?: boolean,
+  existingPanel?: boolean,
+  stopSpinner?: boolean,
+): WebviewPanel {
   const id = `w${Math.random()}`;
   const panel = existingPanel
     ? exState.webView
@@ -54,7 +59,7 @@ export function viewInEditor(url: string, active?: boolean, existingPanel?: bool
     panel.title = device.name;
     panel.webview.postMessage(device);
   }
-  if (existingPanel) {
+  if (existingPanel || stopSpinner) {
     panel.webview.postMessage('stop-spinner');
   }
 
@@ -130,7 +135,7 @@ async function selectMockDevice(): Promise<device> {
   const selected = await window.showQuickPick(picks, { placeHolder: 'Select Emulated Device' });
   if (!selected) return;
   if (selected == newWindow) {
-    viewInEditor(lastUrl, true, false);
+    viewInEditor(lastUrl, true, false, true);
     return;
   }
   if (selected == newBrowser) {
@@ -250,13 +255,14 @@ function getWebviewContent(url: string, id: string): string {
     document.querySelector('.loader').style.display = 'none';
   }
 	</script>
-	<body onclick="change()" id="body" class="body">
+	<body id="body" class="body">
     <span style="position: absolute; left: auto; right: auto" class="loader"></span>
+    <div style="position: absolute; left: 0; top: 0; cursor: pointer; height: 16px; width:16px; padding:2px" onclick="change()"><svg fill="#999" viewBox="0 0 512 512"><circle cx="256" cy="256" r="48"/><circle cx="416" cy="256" r="48"/><circle cx="96" cy="256" r="48"/></svg></div>
     <iframe id="web" src="" width="0" height="100%" frameBorder="0"></iframe>
 		  <div id="devFrame" style="width: 375px; height: 610px; border: 2px solid #333; border-radius:10px; padding:10px; display: flex; align-items: center; flex-direction: column;">		   
 		     <div id="frameContainer" style="width: 100%; height: calc(100% - 50px);">
 		         <div onclick="change()" style="border: 2px solid #333; width:5px; height: 70px; cursor: pointer; margin-top:20px; margin-left:-19px; position: absolute"></div>
-				     <iframe id="frame" src="${url}" width="100%" height="100%" frameBorder="0"></iframe>
+				     <iframe style="overflow:hidden" id="frame" src="${url}" width="100%" height="100%" frameBorder="0"></iframe>
 		     </div>
 		     <div style="width: 100%; height: 50px; display: flex; align-items: center; justify-content: space-between;">
             <div style="cursor: pointer; height: 25px; width:25px; padding:5px" onclick="history.back()"><svg viewBox="0 0 512 512"><path fill="none" stroke="#333" stroke-linecap="round" stroke-linejoin="round" stroke-width="48" d="M244 400L100 256l144-144M120 256h292"/></svg></div>
