@@ -129,9 +129,23 @@ export const starterTemplates = [
   {
     type: 'custom-svelte',
     typeName: 'New Svelte Project',
-    name: 'Starter',
+    name: 'Minimal',
     description: 'A starter project for Svelte',
     commands: ['npx sv create $(project-name) --template minimal --types ts --no-add-ons --no-install'],
+  },
+  {
+    type: 'custom-svelte',
+    typeName: 'New Svelte Project',
+    name: 'Demo',
+    description: 'A starter project for Svelte',
+    commands: ['npx sv create $(project-name) --template demo --types ts --no-add-ons --no-install'],
+  },
+  {
+    type: 'custom-svelte',
+    typeName: 'New Svelte Project',
+    name: 'Library',
+    description: 'A starter project for Svelte',
+    commands: ['npx sv create $(project-name) --template library --types ts --no-add-ons --no-install'],
   },
 ];
 
