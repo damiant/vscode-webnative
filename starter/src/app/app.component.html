@@ -35,9 +35,9 @@
             <div class="gap">
               <vscode-button appearance="icon" [class]="framework.appearance" (click)="select(framework)">
                 <div class="framework">
-                  <img class="ionicon" [src]="assetsUri + '/logo-' + framework.icon + '.svg'" />
+                  <img class="ionicon" [src]="assetsUri + '/logo-' + framework.icon" />
                   @if (framework.icon2) {
-                    <img class="ionicon overlap" [src]="assetsUri + '/logo-' + framework.icon2 + '.svg'" />
+                    <img class="ionicon overlap" [src]="assetsUri + '/logo-' + framework.icon2" />
                   }
                   <p>{{ framework.name }}</p>
                 </div>
@@ -66,7 +66,7 @@
         </div>
       }
       @if (frameworkTemplates.length > 0) {
-        <div class="w-100">
+        <div class="w-100 fb-wrap">
           <p>Template</p>
           <div class="rows">
             @for (template of frameworkTemplates; track template) {
@@ -99,7 +99,7 @@
   } @else {
     <div class="flex">
       <div class="progress">
-        <img class="pulse" [src]="assetsUri + '/' + creatingIcon + '.svg'" />
+        <img class="pulse" [src]="assetsUri + '/' + creatingIcon" />
         <vscode-label>{{ creatingMessage }}</vscode-label>
       </div>
     </div>

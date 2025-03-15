@@ -293,6 +293,7 @@ export async function run(
               '➜  Local:', // AnalogJs
               '➜ Local:', // Nuxt with Vite
               '- Local:', // Vue
+              'Listening on ', // Tanstack start
             ]);
             if (url) {
               findLocalUrl = false;

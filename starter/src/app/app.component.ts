@@ -125,7 +125,7 @@ export class AppComponent implements OnInit {
         return;
       }
       const framework = this.frameworks.find((f) => f.type == template.type);
-      this.creatingIcon = framework?.icon ? `logo-${framework.icon}` : 'webnative';
+      this.creatingIcon = framework?.icon ? `logo-${framework.icon}` : 'webnative.svg';
       this.creatingMessage = `Creating ${framework?.name} project...`;
       const project = { type: template.type, template: template.name, name, targets };
       sendMessage(MessageType.createProject, JSON.stringify(project));
@@ -170,7 +170,7 @@ export class AppComponent implements OnInit {
   setup(templates: Template[], assetsUri: string, frameworks: Framework[], targetSet: TargetSet[]) {
     this.assetsUri = assetsUri;
     for (const template of templates) {
-      template.title = this.titleCase(template.name);
+      template.title = template.name;
       template.appearance = 'unselected';
       template.icon = this.templateIcon(template.name);
     }
