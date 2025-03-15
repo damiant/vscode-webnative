@@ -270,6 +270,15 @@ export const starterTemplates: Template[] = [
     url: 'https://nuxt.com/docs/getting-started/installation',
     commands: [`npm create nuxt $(project-name) -- --packageManager npm --gitInit false --modules '@nuxt/eslint'`],
   },
+  // Seems to be tied to older vue-cli-service and doesnt run
+  // {
+  //   type: 'nuxt-ionic',
+  //   typeName: 'New Nuxt Project',
+  //   name: 'Nuxt',
+  //   description: 'A starter Nuxt project with Ionic Framework',
+  //   url: 'https://nuxt.com/docs/getting-started/installation',
+  //   commands: [`npm create nuxt $(project-name) -- --packageManager npm --gitInit false --modules '@nuxt/eslint,@nuxtjs/ionic'`],
+  // },
 ];
 
 export const frameworks = [
@@ -283,6 +292,7 @@ export const frameworks = [
   { name: 'Solid', icon: 'solid.svg', icon2: 'vite.svg', type: 'vite-solid' },
   { name: 'React', icon: 'react.svg', icon2: 'vite.svg', type: 'vite-react' },
   { name: 'Nuxt', icon: 'nuxt.svg', type: 'nuxt' },
+  { name: 'Nuxt', icon: 'nuxt.svg', icon2: 'ionic.svg', type: 'nuxt-ionic' },
   { name: 'React+Ionic', icon: 'react.svg', icon2: 'ionic.svg', type: 'react' },
   { name: 'Qwik', icon: 'qwik.svg', icon2: 'vite.svg', type: 'vite-qwik' },
   { name: 'Lit', icon: 'lit.svg', icon2: 'vite.svg', type: 'vite-lit' },

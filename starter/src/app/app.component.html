@@ -87,17 +87,17 @@
           </div>
         </div>
       }
-      @if (frameworkTemplates.length > 0) {
-        <div class="w-100">
-          <div class="pad-top"></div>
-          <vscode-divider></vscode-divider>
-          <div class="bar-end pad-top">
-            <vscode-button appearance="secondary" (click)="info()">About Template</vscode-button>
-            <vscode-button (click)="create()">Create Project</vscode-button>
-          </div>
-        </div>
-      }
     </div>
+    @if (frameworkTemplates.length > 0) {
+      <div class="w-100">
+        <div class="pad-top"></div>
+        <vscode-divider></vscode-divider>
+        <div class="bar-end pad-top">
+          <vscode-button appearance="secondary" (click)="info()">About Template</vscode-button>
+          <vscode-button (click)="create()">Create Project</vscode-button>
+        </div>
+      </div>
+    }
   } @else {
     <div class="flex">
       <div class="progress">
