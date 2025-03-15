@@ -1,7 +1,7 @@
-import { debug, DebugConfiguration, Uri, ViewColumn, WebviewPanel, window } from 'vscode';
+import { debug, DebugConfiguration, QuickPickItemKind, Uri, ViewColumn, WebviewPanel, window } from 'vscode';
 import { cancelLastOperation } from './tasks';
 import { exState } from './wn-tree-provider';
-import { debugSkipFiles } from './utilities';
+import { debugSkipFiles, openUri } from './utilities';
 import { getSetting, setSetting, WorkspaceSetting } from './workspace-state';
 import { join } from 'path';
 
@@ -10,10 +10,11 @@ interface device {
   width: number;
   height: number;
   type: string;
+  icon?: string;
 }
 
 const devices: Array<device> = [
-  { name: 'Web', width: 0, height: 0, type: 'web' },
+  { name: 'Web', width: 0, height: 0, type: 'web', icon: '$(globe)' },
   { name: 'Mobile Responsive', width: 0, height: 0, type: 'mobile' },
   { name: 'iPhone SE', width: 375, height: 667, type: 'ios' },
   { name: 'iPhone XR', width: 414, height: 896, type: 'ios' },
@@ -34,24 +35,32 @@ function iconFor(name: string) {
   };
 }
 
+let lastUrl = '';
+
 export function viewInEditor(url: string, active?: boolean, existingPanel?: boolean): WebviewPanel {
+  const id = `w${Math.random()}`;
   const panel = existingPanel
     ? exState.webView
     : window.createWebviewPanel('viewApp', 'Preview', active ? ViewColumn.Active : ViewColumn.Beside, {
         enableScripts: true,
+        retainContextWhenHidden: true,
       });
-
-  panel.webview.html = getWebviewContent(url);
+  lastUrl = url;
+  panel.webview.html = getWebviewContent(url, id);
   panel.iconPath = iconFor('globe');
   const device = getSetting(WorkspaceSetting.emulator);
+
   if (device) {
     panel.title = device.name;
     panel.webview.postMessage(device);
   }
 
   panel.webview.onDidReceiveMessage(async (message) => {
+    console.log(message);
     const device = await selectMockDevice();
-    if (!device) return;
+    if (!device) {
+      return;
+    }
     setSetting(WorkspaceSetting.emulator, device);
     panel.title = device.name;
     panel.webview.postMessage(device);
@@ -101,21 +110,34 @@ export async function debugBrowser(url: string, stopWebServerAfter: boolean) {
 
 async function selectMockDevice(): Promise<device> {
   const last = getSetting(WorkspaceSetting.emulator);
-  const selected = await window.showQuickPick(
-    devices.map((device) => {
-      let name = device.width == 0 ? device.name : `${device.name} (${device.width} x ${device.height})`;
-      if (device.name == last?.name) {
-        name += ' $(check)';
-      }
-      return name;
-    }),
-    { placeHolder: 'Select Emulated Device' },
-  );
+  const picks: any[] = devices.map((device) => {
+    let name = device.icon ? `${device.icon} ` : '$(device-mobile) ';
+    name += device.width == 0 ? device.name : `${device.name} (${device.width} x ${device.height})`;
+    if (device.name == last?.name) {
+      name += ' $(check)';
+    }
+    return name;
+  });
+  const newWindow = '$(add) New Window';
+  picks.push({ label: '', kind: QuickPickItemKind.Separator });
+  picks.push(newWindow);
+  const newBrowser = `$(globe) Open in Browser`;
+  picks.push(newBrowser);
+
+  const selected = await window.showQuickPick(picks, { placeHolder: 'Select Emulated Device' });
   if (!selected) return;
-  return devices.find((device) => selected.startsWith(device.name));
+  if (selected == newWindow) {
+    viewInEditor(lastUrl, true, false);
+    return;
+  }
+  if (selected == newBrowser) {
+    openUri(lastUrl);
+    return;
+  }
+  return devices.find((device) => selected.includes(device.name));
 }
 
-function getWebviewContent(url: string): string {
+function getWebviewContent(url: string, id: string): string {
   return `<!DOCTYPE html>
 	<html lang="en">
 	<head>
@@ -142,6 +164,7 @@ function getWebviewContent(url: string): string {
   }
 
 	window.addEventListener('message', event => {
+    console.log('editor message',event.data);
 		const device = event.data;		
 		let newurl = baseUrl;
     let width = device.width + 'px';
@@ -193,7 +216,7 @@ function getWebviewContent(url: string): string {
 	});
 	
 	function change() {
-	    vscode.postMessage({url: document.getElementById('frame').src});
+	    vscode.postMessage({id: "${id}", url: document.getElementById('frame').src});
 	}
 	</script>
 	<body onclick="change()" id="body" class="body">
