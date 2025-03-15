@@ -387,18 +387,29 @@ function checkFolder(filename: string): FolderType {
       return FolderType.unknown;
     }
     const pck = JSON.parse(readFileSync(filename, 'utf8'));
-    const isIonic = !!(
-      pck?.dependencies?.['@ionic/vue'] ||
-      pck?.dependencies?.['@ionic/angular'] ||
-      pck?.dependencies?.['@ionic/react'] ||
-      pck?.dependencies?.['@capacitor/core'] ||
-      pck?.dependencies?.['@capacitor/ios'] ||
-      pck?.dependencies?.['@capacitor/android'] ||
-      pck?.dependencies?.['react'] ||
-      pck?.dependencies?.['vue'] ||
-      pck?.dependencies?.['svelte'] ||
-      pck?.dependencies?.['@angular/core']
-    );
+    let isIonic = false;
+    const webProjects = [
+      '@ionic/vue',
+      '@ionic/angular',
+      '@ionic/react',
+      'react',
+      'vue',
+      'svelte',
+      '@capacitor/core',
+      '@capacitor/ios',
+      '@capacitor/android',
+    ];
+    for (const project of webProjects) {
+      if (pck.dependencies?.[project]) {
+        isIonic = true;
+        break;
+      }
+      if (pck.devDependencies?.[project]) {
+        isIonic = true;
+        break;
+      }
+    }
+
     return isIonic
       ? FolderType.hasIonic
       : pck.dependencies || pck.devDependencies

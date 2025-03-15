@@ -30,19 +30,17 @@
     <div class="bar">
       <div class="w-100">
         <p>Framework</p>
-        <div class="rows">
+        <div class="rows fb-wrap">
           @for (framework of frameworks; track framework) {
-            <div class="gap">
-              <vscode-button appearance="icon" [class]="framework.appearance" (click)="select(framework)">
-                <div class="framework">
-                  <img class="ionicon" [src]="assetsUri + '/logo-' + framework.icon" />
-                  @if (framework.icon2) {
-                    <img class="ionicon overlap" [src]="assetsUri + '/logo-' + framework.icon2" />
-                  }
-                  <p>{{ framework.name }}</p>
-                </div>
-              </vscode-button>
-            </div>
+            <vscode-button appearance="icon" [class]="framework.appearance" (click)="select(framework)">
+              <div class="framework">
+                <img class="ionicon" [src]="assetsUri + '/logo-' + framework.icon" />
+                @if (framework.icon2) {
+                  <img class="ionicon overlap" [src]="assetsUri + '/logo-' + framework.icon2" />
+                }
+                <p>{{ framework.name }}</p>
+              </div>
+            </vscode-button>
           }
         </div>
       </div>
@@ -66,9 +64,9 @@
         </div>
       }
       @if (frameworkTemplates.length > 0) {
-        <div class="w-100 fb-wrap">
+        <div class="w-100">
           <p>Template</p>
-          <div class="rows">
+          <div class="rows fb-wrap">
             @for (template of frameworkTemplates; track template) {
               <div class="gap">
                 <vscode-button

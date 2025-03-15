@@ -172,12 +172,12 @@ export class AppComponent implements OnInit {
     for (const template of templates) {
       template.title = template.name;
       template.appearance = 'unselected';
-      template.icon = this.templateIcon(template.name);
+      template.icon = template.icon ? `logo-${template.icon}` : this.templateIcon(template.name);
     }
     templates.sort((a, b) => (a.name > b.name ? 1 : -1));
     this.templates = templates;
     frameworks.map((f) => (f.appearance = 'unselected'));
-    this.frameworks = frameworks;
+    this.frameworks = frameworks.sort((a, b) => (a.name > b.name ? 1 : -1));
     this.targetSets = targetSet;
     this.ready = true;
   }
