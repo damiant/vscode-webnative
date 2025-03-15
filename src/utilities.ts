@@ -294,6 +294,7 @@ export async function run(
               '➜ Local:', // Nuxt with Vite
               '- Local:', // Vue
               'Listening on ', // Tanstack start
+              '┃ Local', // Astro
             ]);
             if (url) {
               findLocalUrl = false;

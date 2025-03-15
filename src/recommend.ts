@@ -44,7 +44,8 @@ import { ExtensionContext, Uri, commands, env } from 'vscode';
 export async function getRecommendations(project: Project, context: ExtensionContext, packages: any): Promise<void> {
   tStart('getRecommendations');
 
-  const isWebProject = exists('@angular/core') || exists('react') || exists('vue') || exists('svelte');
+  const isWebProject =
+    exists('@angular/core') || exists('react') || exists('vue') || exists('svelte') || exists('astro');
 
   if (project.isCapacitor || isWebProject) {
     project.setGroup(`Run`, `Press ${alt('R')} to run the last chosen platform or Web.`, TipType.WebNative, true);

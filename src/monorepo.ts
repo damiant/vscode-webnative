@@ -393,6 +393,7 @@ function checkFolder(filename: string): FolderType {
       '@ionic/angular',
       '@ionic/react',
       'react',
+      'astro',
       'vue',
       'svelte',
       '@capacitor/core',

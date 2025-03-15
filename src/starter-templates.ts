@@ -279,6 +279,16 @@ export const starterTemplates: Template[] = [
     url: 'https://nuxt.com/docs/getting-started/installation',
     commands: [`npm create nuxt $(project-name) -- --packageManager npm --gitInit false --modules '@nuxt/eslint'`],
   },
+  {
+    type: 'astro',
+    typeName: 'New Astro Project',
+    name: 'Astro',
+    description: 'A starter Astro project',
+    url: 'https://astro.build/docs/getting-started/installation',
+    commands: [
+      `npm create astro@latest $(project-name) -- --add react --add tailwind --template basics --skip-houston --no-install --no-git --yes`,
+    ],
+  },
   // Seems to be tied to older vue-cli-service and doesnt run
   // {
   //   type: 'nuxt-ionic',
@@ -301,6 +311,7 @@ export const frameworks = [
   { name: 'Solid', icon: 'solid.svg', icon2: 'vite.svg', type: 'vite-solid' },
   { name: 'React', icon: 'react.svg', icon2: 'vite.svg', type: 'vite-react' },
   { name: 'Nuxt', icon: 'nuxt.svg', type: 'nuxt' },
+  { name: 'Astro', icon: 'astro.svg', type: 'astro' },
   { name: 'Nuxt', icon: 'nuxt.svg', icon2: 'ionic.svg', type: 'nuxt-ionic' },
   { name: 'React+Ionic', icon: 'react.svg', icon2: 'ionic.svg', type: 'react' },
   { name: 'Qwik', icon: 'qwik.svg', icon2: 'vite.svg', type: 'vite-qwik' },
