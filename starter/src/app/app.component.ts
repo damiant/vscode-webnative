@@ -9,6 +9,7 @@ import { BrowserModule } from '@angular/platform-browser';
 interface Framework {
   name: string;
   icon: string;
+  icon2?: string;
   appearance: string;
   type: string;
   targets: string; // Name of a TargetSet
@@ -93,6 +94,12 @@ export class AppComponent implements OnInit {
 
     const targetSet = this.targetSets.find((t) => t.name === template.targets);
     this.targets = targetSet ? targetSet.targets : [];
+  }
+
+  public info() {
+    const template = this.selectedTemplate();
+    const url = template?.url ?? 'https://ionicframework.com/docs/components';
+    sendMessage(MessageType.openUrl, url);
   }
 
   public create() {

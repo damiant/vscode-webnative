@@ -9,7 +9,7 @@ import {
   commands,
   workspace,
 } from 'vscode';
-import { isWindows, replaceAll, run, showMessage, toTitleCase } from './utilities';
+import { isWindows, openUri, replaceAll, run, showMessage, toTitleCase } from './utilities';
 import { writeWN } from './logging';
 import { homedir } from 'os';
 import { ExtensionSetting, GlobalSetting, getExtSetting, getGlobalSetting, setGlobalSetting } from './workspace-state';
@@ -23,6 +23,7 @@ interface Template {
   type: string;
   typeName: string;
   name: string;
+  url?: string;
   commands?: string[];
   description: string;
 }
@@ -33,6 +34,7 @@ enum MessageType {
   createProject = 'createProject',
   chooseFolder = 'chooseFolder',
   creatingProject = 'creatingProject',
+  openUrl = 'openUrl',
 }
 
 export class IonicStartPanel {
@@ -126,6 +128,10 @@ export class IonicStartPanel {
             const templates: Template[] = starterTemplates;
             const assetsUri = getUri(webview, extensionUri, ['starter', 'build', 'assets']).toString();
             webview.postMessage({ command, templates, assetsUri, frameworks, targets });
+            break;
+          }
+          case MessageType.openUrl: {
+            openUri(message.text);
             break;
           }
           case MessageType.getProjectsFolder: {

@@ -6,6 +6,7 @@ export enum MessageType {
   getProjectsFolder = 'getProjectsFolder',
   chooseFolder = 'chooseFolder',
   creatingProject = 'creatingProject',
+  openUrl = 'openUrl',
 }
 
 export function sendMessage(command: MessageType, value: string) {

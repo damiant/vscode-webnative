@@ -3,6 +3,7 @@ export interface Template {
   typeName: string;
   title: string;
   name: string;
+  url?: string;
   description: string;
   appearance?: string;
   targets: string;

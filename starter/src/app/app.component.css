@@ -5,10 +5,21 @@
   padding-bottom: 10px;
 }
 
+.overlap {
+  position: absolute;
+  margin-left: -23px;
+  width: 23px;
+  height: 23px;
+  background-color: #333;
+  border-radius: 23px;
+  padding: 5px;
+}
+
 .rows {
   display: flex;
   flex-direction: row;
-  justify-content: flex-start;
+  align-items: center;
+  justify-content: center;
   border-radius: 0.5rem;
   margin: 0.5rem;
   background-color: rgba(255, 255, 255, 0.02);
@@ -36,8 +47,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-left: 1rem;
-  margin-right: 1rem;
+  width: 96px;
 }
 
 .gap {
@@ -47,6 +57,7 @@
 .bar-end {
   display: flex;
   justify-content: flex-end;
+  gap: 0.75rem;
 }
 
 main {
@@ -111,7 +122,6 @@ h3 {
   background-color: var(--vscode-editor-background);
   color: var(--vscode-button-foreground);
   text-align: center;
-  opacity: 0.5;
   padding: 1rem;
   border-radius: 6px;
   line-height: 150%;
@@ -119,6 +129,10 @@ h3 {
   top: 96px;
   margin-left: -45px;
   z-index: 1;
+}
+
+.w-100 {
+  width: 100%;
 }
 
 /* Show the tooltip text when you mouse over the tooltip container */

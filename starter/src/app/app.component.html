@@ -28,7 +28,7 @@
       >
     </div>
     <div class="bar">
-      <div>
+      <div class="w-100">
         <p>Framework</p>
         <div class="rows">
           @for (framework of frameworks; track framework) {
@@ -36,6 +36,9 @@
               <vscode-button appearance="icon" [class]="framework.appearance" (click)="select(framework)">
                 <div class="framework">
                   <img class="ionicon" [src]="assetsUri + '/logo-' + framework.icon + '.svg'" />
+                  @if (framework.icon2) {
+                    <img class="ionicon overlap" [src]="assetsUri + '/logo-' + framework.icon2 + '.svg'" />
+                  }
                   <p>{{ framework.name }}</p>
                 </div>
               </vscode-button>
@@ -44,51 +47,55 @@
         </div>
       </div>
     </div>
-    @if (targets && targets.length > 0) {
-      <div>
-        <p>Targets</p>
-        <div class="rows">
-          @for (target of targets; track target) {
-            <div class="gap">
-              <vscode-button appearance="icon" [class]="target.appearance" (click)="selectTarget(target)">
-                <div class="framework">
-                  <img class="ionicon" [src]="assetsUri + '/' + target.icon + '.svg'" />
-                  <p>{{ target.name }}</p>
-                </div>
-              </vscode-button>
-            </div>
-          }
+    <div class="bar">
+      @if (targets && targets.length > 0) {
+        <div>
+          <p>Targets</p>
+          <div class="rows">
+            @for (target of targets; track target) {
+              <div class="gap">
+                <vscode-button appearance="icon" [class]="target.appearance" (click)="selectTarget(target)">
+                  <div class="framework">
+                    <img class="ionicon" [src]="assetsUri + '/' + target.icon + '.svg'" />
+                    <p>{{ target.name }}</p>
+                  </div>
+                </vscode-button>
+              </div>
+            }
+          </div>
         </div>
-      </div>
-    }
-    @if (frameworkTemplates.length > 0) {
-      <div>
-        <p>Template</p>
-        <div class="rows">
-          @for (template of frameworkTemplates; track template) {
-            <div class="gap">
-              <vscode-button
-                class="tooltip"
-                appearance="icon"
-                [class]="template.appearance"
-                (click)="selectTemplate(template)"
-              >
-                <div class="framework">
-                  <img class="ionicon" [src]="assetsUri + '/' + template.icon + '.svg'" />
-                  <p>{{ template.title }}</p>
-                </div>
-                <span class="tooltiptext">{{ template.description }}</span>
-              </vscode-button>
-            </div>
-          }
+      }
+      @if (frameworkTemplates.length > 0) {
+        <div class="w-100">
+          <p>Template</p>
+          <div class="rows">
+            @for (template of frameworkTemplates; track template) {
+              <div class="gap">
+                <vscode-button
+                  class="tooltip"
+                  appearance="icon"
+                  [class]="template.appearance"
+                  (click)="selectTemplate(template)"
+                >
+                  <div class="framework">
+                    <img class="ionicon" [src]="assetsUri + '/' + template.icon + '.svg'" />
+
+                    <p>{{ template.title }}</p>
+                  </div>
+                  <span class="tooltiptext">{{ template.description }}</span>
+                </vscode-button>
+              </div>
+            }
+          </div>
+          <div class="pad-top"></div>
+          <vscode-divider></vscode-divider>
+          <div class="bar-end pad-top">
+            <vscode-button appearance="secondary" (click)="info()">About Template</vscode-button>
+            <vscode-button (click)="create()">Create Project</vscode-button>
+          </div>
         </div>
-        <div class="pad-top"></div>
-        <vscode-divider></vscode-divider>
-        <div class="bar-end pad-top">
-          <vscode-button (click)="create()">Create Project</vscode-button>
-        </div>
-      </div>
-    }
+      }
+    </div>
   } @else {
     <div class="flex">
       <div class="progress">
