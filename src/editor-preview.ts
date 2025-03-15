@@ -2,7 +2,7 @@ import { debug, DebugConfiguration, Uri, ViewColumn, WebviewPanel, window } from
 import { cancelLastOperation } from './tasks';
 import { exState } from './wn-tree-provider';
 import { debugSkipFiles } from './utilities';
-import { getSetting, WorkspaceSetting } from './workspace-state';
+import { getSetting, setSetting, WorkspaceSetting } from './workspace-state';
 import { join } from 'path';
 
 interface device {
@@ -14,7 +14,7 @@ interface device {
 
 const devices: Array<device> = [
   { name: 'Web', width: 0, height: 0, type: 'web' },
-  { name: 'Mobile', width: 0, height: 0, type: 'mobile' },
+  { name: 'Mobile Responsive', width: 0, height: 0, type: 'mobile' },
   { name: 'iPhone SE', width: 375, height: 667, type: 'ios' },
   { name: 'iPhone XR', width: 414, height: 896, type: 'ios' },
   { name: 'iPhone 12 Pro', width: 390, height: 844, type: 'ios' },
@@ -43,10 +43,16 @@ export function viewInEditor(url: string, active?: boolean, existingPanel?: bool
 
   panel.webview.html = getWebviewContent(url);
   panel.iconPath = iconFor('globe');
+  const device = getSetting(WorkspaceSetting.emulator);
+  if (device) {
+    panel.title = device.name;
+    panel.webview.postMessage(device);
+  }
 
   panel.webview.onDidReceiveMessage(async (message) => {
     const device = await selectMockDevice();
     if (!device) return;
+    setSetting(WorkspaceSetting.emulator, device);
     panel.title = device.name;
     panel.webview.postMessage(device);
   });
@@ -94,8 +100,15 @@ export async function debugBrowser(url: string, stopWebServerAfter: boolean) {
 }
 
 async function selectMockDevice(): Promise<device> {
+  const last = getSetting(WorkspaceSetting.emulator);
   const selected = await window.showQuickPick(
-    devices.map((device) => (device.width == 0 ? device.name : `${device.name} (${device.width} x ${device.height})`)),
+    devices.map((device) => {
+      let name = device.width == 0 ? device.name : `${device.name} (${device.width} x ${device.height})`;
+      if (device.name == last?.name) {
+        name += ' $(check)';
+      }
+      return name;
+    }),
     { placeHolder: 'Select Emulated Device' },
   );
   if (!selected) return;
@@ -120,6 +133,13 @@ function getWebviewContent(url: string): string {
 	<script>
 	const vscode = acquireVsCodeApi();
 	const baseUrl = '${url}';
+  let device = localStorage.getItem('device');
+  if (device) {
+     device = JSON.parse(device);
+  }
+  function e(name) {
+     return document.getElementById(name);
+  }
 
 	window.addEventListener('message', event => {
 		const device = event.data;		
@@ -127,44 +147,56 @@ function getWebviewContent(url: string): string {
     let width = device.width + 'px';
     let dHeight = (device.height + 50) + 'px';
     let height = device.height + 'px';
+    let devFrameDisplay = 'block';
+    let bodyHeight = '100vh';
+    let bodyMarginTop = '0';
+    let bodyDisplay = 'flex';
+    let devFrameAspectRatio = 'unset';
+    let webWidth = '100%';
+    let webHeight = '0';
+    let webSrc = 'about:blank';
+    let frameSrc = 'about:blank';
+    let webDisplay = 'none';
 		if (device.type == 'ios') { newurl += '?ionic:mode=ios'; }
     if (device.type == 'web') {
        width = '100%'; 
        dHeight = '100%';
        height = '100%';
-       document.getElementById('body').style.height = '100vh';
-       document.getElementById('body').style.margin = '0';
-       document.getElementById('body').style.display = 'block';
-       document.getElementById('devFrame').style.display = 'none';
-       document.getElementById('frame').src ='about:blank';
-       document.getElementById('web').width ='100%';
-       document.getElementById('web').src =newurl;
+       devFrameDisplay = 'none';
+       webDisplay = 'block';
+       webSrc = newurl;
+       webHeight = '100%';
     } else {
       if (device.type == 'mobile') {
          width = 'unset';
          height = '100%';
          dHeight = '100%';
-         document.getElementById('body').style.height = '90vh';
-         document.getElementById('devFrame').style.aspectRatio = '2/3.6';
-      } else {
-         document.getElementById('devFrame').style.aspectRatio = 'unset';
+         bodyHeight = '90vh';
+         devFrameAspectRatio = '2/3.6';
       }
-       document.getElementById('devFrame').style.display = 'block';
-       document.getElementById('web').src ='about:blank';
-       document.getElementById('web').width ='0';
-       document.getElementById('body').style.marginTop = '20px';
-       document.getElementById('frame').src = newurl;
+      frameSrc = newurl;
+      webWidth = '0';
+      bodyMarginTop = '20px';
     }
-		document.getElementById('devFrame').style.width = width;
-		document.getElementById('devFrame').style.height = dHeight;
-		console.log(device);
+    e('frame').src = frameSrc;
+    e('web').src = webSrc;
+    e('web').width = webWidth;
+    e('web').height = webHeight;
+    e('web').style.display = webDisplay;
+    e('body').style.display = bodyDisplay;
+    e('body').style.height = bodyHeight;
+    e('body').style.marginTop = bodyMarginTop;
+    e('devFrame').style.aspectRatio = devFrameAspectRatio;
+    e('devFrame').style.display = devFrameDisplay;
+		e('devFrame').style.width = width;
+		e('devFrame').style.height = dHeight;
 	});
 	
 	function change() {
 	    vscode.postMessage({url: document.getElementById('frame').src});
 	}
 	</script>
-	<body id="body" class="body">
+	<body onclick="change()" id="body" class="body">
     <iframe id="web" src="" width="0" height="100%" frameBorder="0"></iframe>
 		  <div id="devFrame" style="width: 375px; height: 610px; border: 2px solid #333; border-radius:10px; padding:10px; display: flex; align-items: center; flex-direction: column;">		   
 		     <div id="frameContainer" style="width: 100%; height: calc(100% - 50px);">

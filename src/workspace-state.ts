@@ -12,6 +12,7 @@ export enum WorkspaceSetting {
   tips = 'tipsShown',
   lastIPAddress = 'lastIPAddress',
   debugBrowser = 'debugBrowser',
+  emulator = 'emulator',
   cocoaPods = 'cocoaPods2',
 }
 

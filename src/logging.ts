@@ -5,7 +5,7 @@ let channel: OutputChannel = undefined;
 function getOutputChannel(): OutputChannel {
   if (!channel) {
     channel = window.createOutputChannel('WebNative');
-    channel.show();
+    //channel.show();
   }
   return channel;
 }
@@ -13,13 +13,13 @@ function getOutputChannel(): OutputChannel {
 export function clearOutput(): OutputChannel {
   const channel = getOutputChannel();
   channel.clear();
-  channel.show();
+  showOutput();
   return channel;
 }
 
 export function showOutput() {
   const channel = getOutputChannel();
-  channel.show();
+  //channel.show();
 }
 
 export function write(message: string) {

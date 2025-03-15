@@ -17,6 +17,7 @@ import { ChildProcess, exec, ExecException, ExecOptionsWithStringEncoding, spawn
 import { startStopLogServer } from './log-server';
 import { qrView } from './nexus-browser';
 import { CancellationToken, ProgressLocation, Uri, commands, window, workspace } from 'vscode';
+import { uncolor } from './uncolor';
 
 export interface CancelObject {
   proc: ChildProcess;
@@ -336,10 +337,7 @@ export async function run(
               write(logLine.replace('[capacitor]', ''));
             }
           } else if (logLine && !suppressInfo) {
-            const uncolored = logLine.replace(
-              /[\033\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g,
-              '',
-            );
+            const uncolored = uncolor(logLine);
             if (passesFilter(uncolored, logFilters, false)) {
               write(uncolored);
             }
@@ -351,7 +349,7 @@ export async function run(
 
     proc.stderr.on('data', (data) => {
       if (!suppressInfo) {
-        const uncolored = data.replace(/[\033\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g, '');
+        const uncolored = uncolor(data);
         if (passesFilter(uncolored, logFilters, false)) {
           write(uncolored);
         }
