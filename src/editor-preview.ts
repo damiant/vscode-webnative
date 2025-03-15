@@ -14,6 +14,7 @@ interface device {
 
 const devices: Array<device> = [
   { name: 'Web', width: 0, height: 0, type: 'web' },
+  { name: 'Mobile', width: 0, height: 0, type: 'mobile' },
   { name: 'iPhone SE', width: 375, height: 667, type: 'ios' },
   { name: 'iPhone XR', width: 414, height: 896, type: 'ios' },
   { name: 'iPhone 12 Pro', width: 390, height: 844, type: 'ios' },
@@ -124,12 +125,12 @@ function getWebviewContent(url: string): string {
 		const device = event.data;		
 		let newurl = baseUrl;
     let width = device.width + 'px';
-    let deviceWidth = (device.height + 50) + 'px';
+    let dHeight = (device.height + 50) + 'px';
     let height = device.height + 'px';
 		if (device.type == 'ios') { newurl += '?ionic:mode=ios'; }
     if (device.type == 'web') {
        width = '100%'; 
-       deviceWidth = '100%';
+       dHeight = '100%';
        height = '100%';
        document.getElementById('body').style.height = '100vh';
        document.getElementById('body').style.margin = '0';
@@ -139,6 +140,15 @@ function getWebviewContent(url: string): string {
        document.getElementById('web').width ='100%';
        document.getElementById('web').src =newurl;
     } else {
+      if (device.type == 'mobile') {
+         width = 'unset';
+         height = '100%';
+         dHeight = '100%';
+         document.getElementById('body').style.height = '90vh';
+         document.getElementById('devFrame').style.aspectRatio = '2/3.6';
+      } else {
+         document.getElementById('devFrame').style.aspectRatio = 'unset';
+      }
        document.getElementById('devFrame').style.display = 'block';
        document.getElementById('web').src ='about:blank';
        document.getElementById('web').width ='0';
@@ -146,8 +156,7 @@ function getWebviewContent(url: string): string {
        document.getElementById('frame').src = newurl;
     }
 		document.getElementById('devFrame').style.width = width;
-		document.getElementById('devFrame').style.height = deviceWidth;
-		document.getElementById('frameContainer').style.height = height;
+		document.getElementById('devFrame').style.height = dHeight;
 		console.log(device);
 	});
 	
@@ -157,16 +166,16 @@ function getWebviewContent(url: string): string {
 	</script>
 	<body id="body" class="body">
     <iframe id="web" src="" width="0" height="100%" frameBorder="0"></iframe>
-		<div id="devFrame" style="width: 375px; height: 717px; border: 2px solid #333; border-radius:10px; padding:10px; display: flex; align-items: center; flex-direction: column;">		   
-		   <div id="frameContainer" style="width: 100%; height: 667px;">
-		        <div onclick="change()"  style="border: 2px solid #333; width:5px; height: 70px; cursor: pointer; margin-top:20px; margin-left:-19px; position: absolute"></div>
-				<iframe id="frame" src="${url}" width="100%" height="100%" frameBorder="0"></iframe>
-		   </div>
-		  <div style="width: 100%; height: 50px; display: flex; align-items: center; justify-content: space-between;">
-      <div style="cursor: pointer; height: 25px; width:25px; padding:5px" onclick="history.back()"><svg viewBox="0 0 512 512"><path fill="none" stroke="#333" stroke-linecap="round" stroke-linejoin="round" stroke-width="48" d="M244 400L100 256l144-144M120 256h292"/></svg></div>
-			<div style="background-color: #333; cursor: pointer; height: 25px; width:25px; border-radius:30px; padding:5px" onclick="document.getElementById('frame').src = '${url}'"></div>
-      <div style="cursor: pointer; height: 25px; width:25px; padding:5px" onclick="change()"><svg fill="#333" viewBox="0 0 512 512"><circle cx="256" cy="256" r="48"/><circle cx="416" cy="256" r="48"/><circle cx="96" cy="256" r="48"/></svg></div>
-		  </div>  
+		  <div id="devFrame" style="width: 375px; height: 610px; border: 2px solid #333; border-radius:10px; padding:10px; display: flex; align-items: center; flex-direction: column;">		   
+		     <div id="frameContainer" style="width: 100%; height: calc(100% - 50px);">
+		         <div onclick="change()" style="border: 2px solid #333; width:5px; height: 70px; cursor: pointer; margin-top:20px; margin-left:-19px; position: absolute"></div>
+				     <iframe id="frame" src="${url}" width="100%" height="100%" frameBorder="0"></iframe>
+		     </div>
+		     <div style="width: 100%; height: 50px; display: flex; align-items: center; justify-content: space-between;">
+            <div style="cursor: pointer; height: 25px; width:25px; padding:5px" onclick="history.back()"><svg viewBox="0 0 512 512"><path fill="none" stroke="#333" stroke-linecap="round" stroke-linejoin="round" stroke-width="48" d="M244 400L100 256l144-144M120 256h292"/></svg></div>
+			      <div style="background-color: #333; cursor: pointer; height: 25px; width:25px; border-radius:30px; padding:5px" onclick="document.getElementById('frame').src = '${url}'"></div>
+            <div style="cursor: pointer; height: 25px; width:25px; padding:5px" onclick="change()"><svg fill="#333" viewBox="0 0 512 512"><circle cx="256" cy="256" r="48"/><circle cx="416" cy="256" r="48"/><circle cx="96" cy="256" r="48"/></svg></div>
+		     </div>  
 		 </div>
 	</body>
 	</html>`;
