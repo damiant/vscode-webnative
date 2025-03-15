@@ -54,6 +54,9 @@ export function viewInEditor(url: string, active?: boolean, existingPanel?: bool
     panel.title = device.name;
     panel.webview.postMessage(device);
   }
+  if (existingPanel) {
+    panel.webview.postMessage('stop-spinner');
+  }
 
   panel.webview.onDidReceiveMessage(async (message) => {
     console.log(message);
@@ -134,6 +137,7 @@ async function selectMockDevice(): Promise<device> {
     openUri(lastUrl);
     return;
   }
+
   return devices.find((device) => selected.includes(device.name));
 }
 
@@ -150,6 +154,25 @@ function getWebviewContent(url: string, id: string): string {
        align-items: center; justify-content: center;
        margin: 0;
     }
+    .loader {
+       width: 48px;
+       height: 48px;
+       border: 5px solid #555;
+       border-bottom-color: transparent;
+       border-radius: 50%;
+       display: inline-block;
+       box-sizing: border-box;
+       animation: rotation 1s linear infinite;
+    }
+
+    @keyframes rotation {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+    } 
     </style>
 	</head>
 	<script>
@@ -165,6 +188,10 @@ function getWebviewContent(url: string, id: string): string {
 
 	window.addEventListener('message', event => {
     console.log('editor message',event.data);
+    if (event.data == 'stop-spinner') {
+       hideSpinner();
+       return;
+    }
 		const device = event.data;		
 		let newurl = baseUrl;
     let width = device.width + 'px';
@@ -198,6 +225,7 @@ function getWebviewContent(url: string, id: string): string {
          devFrameAspectRatio = '2/3.6';
       }
       frameSrc = newurl;
+      
       webWidth = '0';
       bodyMarginTop = '20px';
     }
@@ -218,8 +246,12 @@ function getWebviewContent(url: string, id: string): string {
 	function change() {
 	    vscode.postMessage({id: "${id}", url: document.getElementById('frame').src});
 	}
+  function hideSpinner() {
+    document.querySelector('.loader').style.display = 'none';
+  }
 	</script>
 	<body onclick="change()" id="body" class="body">
+    <span style="position: absolute; left: auto; right: auto" class="loader"></span>
     <iframe id="web" src="" width="0" height="100%" frameBorder="0"></iframe>
 		  <div id="devFrame" style="width: 375px; height: 610px; border: 2px solid #333; border-radius:10px; padding:10px; display: flex; align-items: center; flex-direction: column;">		   
 		     <div id="frameContainer" style="width: 100%; height: calc(100% - 50px);">
