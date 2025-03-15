@@ -1,8 +1,9 @@
-import { debug, DebugConfiguration, ViewColumn, WebviewPanel, window } from 'vscode';
+import { debug, DebugConfiguration, Uri, ViewColumn, WebviewPanel, window } from 'vscode';
 import { cancelLastOperation } from './tasks';
 import { exState } from './wn-tree-provider';
 import { debugSkipFiles } from './utilities';
 import { getSetting, WorkspaceSetting } from './workspace-state';
+import { join } from 'path';
 
 interface device {
   name: string;
@@ -25,6 +26,13 @@ const devices: Array<device> = [
   { name: 'Samsung Galaxy Tab S4', width: 712, height: 1138, type: 'android' },
 ];
 
+function iconFor(name: string) {
+  return {
+    light: Uri.file(join(__filename, '..', '..', 'resources', 'light', name + '.svg')),
+    dark: Uri.file(join(__filename, '..', '..', 'resources', 'dark', name + '.svg')),
+  };
+}
+
 export function viewInEditor(url: string, active?: boolean, existingPanel?: boolean): WebviewPanel {
   const panel = existingPanel
     ? exState.webView
@@ -33,9 +41,11 @@ export function viewInEditor(url: string, active?: boolean, existingPanel?: bool
       });
 
   panel.webview.html = getWebviewContent(url);
+  panel.iconPath = iconFor('globe');
 
   panel.webview.onDidReceiveMessage(async (message) => {
     const device = await selectMockDevice();
+    if (!device) return;
     panel.title = device.name;
     panel.webview.postMessage(device);
   });

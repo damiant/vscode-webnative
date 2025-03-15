@@ -63,7 +63,9 @@ async function runServe(
   const webConfig: WebConfigSetting = getWebConfiguration();
   const externalIP = !getExtSetting(ExtensionSetting.internalAddress);
   const defaultPort: number | undefined = workspace.getConfiguration(WorkspaceSection).get('defaultPort');
-  exState.webView = viewInEditor('about:blank');
+  if (webConfig.includes(WebConfigSetting.editor)) {
+    exState.webView = viewInEditor('about:blank', true);
+  }
   let serveFlags = '';
   if ([WebConfigSetting.editor, WebConfigSetting.nexus, WebConfigSetting.none].includes(webConfig) || dontOpenBrowser) {
     serveFlags += ' --no-open';
