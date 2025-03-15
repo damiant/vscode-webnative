@@ -6,8 +6,8 @@ import { Tip, TipType } from './tip';
 import { getPackageJSON, PackageFile, toTitleCase } from './utilities';
 
 // Look in package.json for scripts and add options to execute
-export function addScripts(project: Project) {
-  const expand = !(exists('@capacitor/core') || exists('cordova-ios') || exists('cordova-android'));
+export function addScripts(project: Project, isWeb: boolean) {
+  const expand = !(exists('@capacitor/core') || exists('cordova-ios') || exists('cordova-android') || isWeb);
   project.setGroup(`Scripts`, `The scripts from package.json`, TipType.Files, expand);
 
   addScriptsFrom(getPackageJSON(project.projectFolder()), project);

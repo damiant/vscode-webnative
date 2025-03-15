@@ -43,7 +43,10 @@ import { ExtensionContext, Uri, commands, env } from 'vscode';
 
 export async function getRecommendations(project: Project, context: ExtensionContext, packages: any): Promise<void> {
   tStart('getRecommendations');
-  if (project.isCapacitor) {
+
+  const isWebProject = exists('@angular/core') || exists('react') || exists('vue');
+
+  if (project.isCapacitor || isWebProject) {
     project.setGroup(`Run`, `Press ${alt('R')} to run the last chosen platform or Web.`, TipType.WebNative, true);
 
     const hasCapIos = project.hasCapacitorProject(CapacitorPlatform.ios);
@@ -243,7 +246,7 @@ export async function getRecommendations(project: Project, context: ExtensionCon
   }
 
   // Script Running
-  addScripts(project);
+  addScripts(project, isWebProject);
 
   if (project.isCapacitor || project.hasACapacitorProject()) {
     // Capacitor Configure Features

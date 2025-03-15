@@ -121,18 +121,26 @@ export const starterTemplates = [
   {
     type: 'custom-angular',
     typeName: 'New Angular Project',
-    name: 'blank',
+    name: 'Starter',
     description: 'A empty starter project for Angular',
     commands: ['npm install -g @angular/cli', 'ng new $(project-name)'],
     targets: '',
   },
+  {
+    type: 'custom-svelte',
+    typeName: 'New Svelte Project',
+    name: 'Starter',
+    description: 'A starter project for Svelte',
+    commands: ['npx sv create $(project-name)', 'cd $(project-name)', 'npm install'],
+  },
 ];
 
 export const frameworks = [
-  { name: 'Ionic Angular', icon: 'angular', type: 'angular-standalone' },
-  { name: 'Ionic React', icon: 'react', type: 'react' },
-  { name: 'Ionic Vue', icon: 'vue', type: 'vue' },
+  { name: 'Ionic Angular', icon: 'ionic', type: 'angular-standalone' },
+  { name: 'Ionic React', icon: 'ionic', type: 'react' },
+  { name: 'Ionic Vue', icon: 'ionic', type: 'vue' },
   { name: 'Angular', icon: 'angular', type: 'custom-angular' },
+  { name: 'Svelte', icon: 'svelte', type: 'custom-svelte' },
   { name: 'Capacitor Plugin', icon: 'capacitor', type: 'plugin' },
 ];
 

@@ -1,7 +1,8 @@
 .ionicon {
   width: 56px;
   height: 56px;
-  filter: invert(0.5);
+  padding-top: 10px;
+  padding-bottom: 10px;
 }
 
 .rows {
@@ -97,7 +98,7 @@ h3 {
 
 .pulse {
   transform: scale(1);
-  animation: pulse 10s infinite;
+  animation: pulse 5s infinite;
   width: 128px;
   height: 128px;
   margin: 10px;
@@ -127,22 +128,22 @@ h3 {
 
 @keyframes pulse {
   0% {
-    transform: scale(0.85) rotate(0deg);
+    transform: scale(0.85);
   }
 
   25% {
-    transform: scale(1) rotate(90deg);
+    transform: scale(1);
   }
 
   50% {
-    transform: scale(0.85) rotate(180deg);
+    transform: scale(0.85);
   }
 
   75% {
-    transform: scale(1) rotate(270deg);
+    transform: scale(1);
   }
 
   100% {
-    transform: scale(0.85) rotate(365deg);
+    transform: scale(0.85);
   }
 }

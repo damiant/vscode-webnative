@@ -41,6 +41,8 @@ export class AppComponent implements OnInit {
   frameworkTemplates: Template[] = [];
   assetsUri = '';
   creating = false;
+  creatingIcon = '';
+  creatingMessage = '';
   ready = false;
   nameError = false;
   projectsFolder = '';
@@ -88,6 +90,7 @@ export class AppComponent implements OnInit {
       t.appearance = 'unselected';
     }
     template.appearance = template.appearance == 'selected' ? 'unselected' : 'selected';
+
     const targetSet = this.targetSets.find((t) => t.name === template.targets);
     this.targets = targetSet ? targetSet.targets : [];
   }
@@ -114,6 +117,9 @@ export class AppComponent implements OnInit {
       if (!template) {
         return;
       }
+      const framework = this.frameworks.find((f) => f.type == template.type);
+      this.creatingIcon = framework?.icon ? `logo-${framework.icon}` : 'webnative';
+      this.creatingMessage = `Creating ${framework?.name} project...`;
       const project = { type: template.type, template: template.name, name, targets };
       sendMessage(MessageType.createProject, JSON.stringify(project));
     } else {
