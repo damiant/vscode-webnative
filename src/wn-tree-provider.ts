@@ -20,7 +20,7 @@ import {
 } from 'vscode';
 import { accessSync } from 'fs';
 import { join } from 'path';
-import { IonicStartPanel } from './ionic-start';
+import { IonicStartPanel } from './starter';
 
 interface ExState {
   view: TreeView<any>;

@@ -11,6 +11,12 @@ interface Framework {
   icon: string;
   appearance: string;
   type: string;
+  targets: string; // Name of a TargetSet
+}
+
+interface TargetSet {
+  name: string;
+  targets: Target[];
 }
 
 interface Target {
@@ -29,20 +35,16 @@ interface Target {
 export class AppComponent implements OnInit {
   private templates: Template[] = [];
   frameworks: Framework[] = [];
+  targetSets: TargetSet[] = []; // All the target sets
+  targets: Target[] = []; // The targets of the selected framework
   projectName = '';
   frameworkTemplates: Template[] = [];
   assetsUri = '';
   creating = false;
   ready = false;
-  showTargets = true;
   nameError = false;
   projectsFolder = '';
   projectFolder = '';
-  targets: Target[] = [
-    { name: 'Web', icon: 'web', appearance: 'selected' },
-    { name: 'iOS', icon: 'apple', appearance: 'unselected' },
-    { name: 'Android', icon: 'android', appearance: 'unselected' },
-  ];
 
   async ngOnInit() {
     window.addEventListener('message', this.onMessage.bind(this));
@@ -60,7 +62,6 @@ export class AppComponent implements OnInit {
   }
 
   public select(framework: Framework) {
-    this.showTargets = framework.type !== 'plugin';
     if (framework.type === 'plugin' && this.projectName.trim() === '') {
       this.projectName = 'capacitor-';
       document.getElementById('projectName')?.focus();
@@ -73,7 +74,8 @@ export class AppComponent implements OnInit {
     for (const f of this.frameworkTemplates) {
       f.appearance = 'unselected';
     }
-    this.frameworkTemplates[0].appearance = 'selected';
+    this.selectTemplate(this.frameworkTemplates[0]);
+    //    this.frameworkTemplates[0].appearance = 'selected';
   }
 
   public selectTarget(target: Target) {
@@ -86,6 +88,8 @@ export class AppComponent implements OnInit {
       t.appearance = 'unselected';
     }
     template.appearance = template.appearance == 'selected' ? 'unselected' : 'selected';
+    const targetSet = this.targetSets.find((t) => t.name === template.targets);
+    this.targets = targetSet ? targetSet.targets : [];
   }
 
   public create() {
@@ -99,7 +103,7 @@ export class AppComponent implements OnInit {
       return;
     }
     const targets: string[] = [];
-    if (this.showTargets) {
+    if (this.targets) {
       this.targets.map((target) => {
         if (target.appearance == 'selected') {
           targets.push(target.name.toLowerCase());
@@ -134,7 +138,7 @@ export class AppComponent implements OnInit {
   async onMessage(event: any) {
     switch (event.data.command) {
       case MessageType.getTemplates:
-        this.setup(event.data.templates, event.data.assetsUri);
+        this.setup(event.data.templates, event.data.assetsUri, event.data.frameworks, event.data.targets);
         break;
       case MessageType.getProjectsFolder:
         this.projectsFolder = event.data.folder;
@@ -150,7 +154,7 @@ export class AppComponent implements OnInit {
     }
   }
 
-  setup(templates: Template[], assetsUri: string) {
+  setup(templates: Template[], assetsUri: string, frameworks: Framework[], targetSet: TargetSet[]) {
     this.assetsUri = assetsUri;
     for (const template of templates) {
       template.title = this.titleCase(template.name);
@@ -159,12 +163,9 @@ export class AppComponent implements OnInit {
     }
     templates.sort((a, b) => (a.name > b.name ? 1 : -1));
     this.templates = templates;
-    this.frameworks = [
-      { name: 'Angular', icon: 'angular', type: 'angular-standalone', appearance: 'unselected' },
-      { name: 'React', icon: 'react', type: 'react', appearance: 'unselected' },
-      { name: 'Vue', icon: 'vue', type: 'vue', appearance: 'unselected' },
-      { name: 'Plugin', icon: 'capacitor', type: 'plugin', appearance: 'unselected' },
-    ];
+    frameworks.map((f) => (f.appearance = 'unselected'));
+    this.frameworks = frameworks;
+    this.targetSets = targetSet;
     this.ready = true;
   }
 

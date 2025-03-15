@@ -9,20 +9,21 @@ import {
   commands,
   workspace,
 } from 'vscode';
-import { asAppId, getRunOutput, isWindows, replaceAll, run, toTitleCase } from './utilities';
+import { isWindows, replaceAll, run, showMessage, toTitleCase } from './utilities';
 import { writeWN } from './logging';
 import { homedir } from 'os';
 import { ExtensionSetting, GlobalSetting, getExtSetting, getGlobalSetting, setGlobalSetting } from './workspace-state';
 import { join } from 'path';
 import { existsSync, readdirSync } from 'fs';
 import { CapacitorPlatform } from './capacitor-platform';
-import { npmInstall, npx } from './node-commands';
-import { ionicTemplates } from './starter-templates';
+import { npmInstall } from './node-commands';
+import { frameworks, starterTemplates, targets } from './starter-templates';
 
 interface Template {
   type: string;
   typeName: string;
   name: string;
+  commands?: string[];
   description: string;
 }
 
@@ -87,56 +88,6 @@ export class IonicStartPanel {
     }
   }
 
-  public async getTemplates(): Promise<Template[]> {
-    //const out = await getRunOutput('npx ionic start -l', this.path);
-    return this.parseIonicStart(ionicTemplates);
-  }
-
-  private parseIonicStart(text: string): Array<Template> {
-    const lines = text.split('\n');
-    let type = undefined;
-    let typeName = undefined;
-    let result = [];
-    for (const line of lines) {
-      if (line.includes('--type=')) {
-        const t = line.split('=');
-        typeName = t[1].replace(')', '');
-        type = typeName;
-        switch (typeName) {
-          case 'ionic-angular':
-            typeName = 'ionic2';
-            break;
-          case 'angular':
-            typeName = 'New Angular Project (Legacy)';
-            break;
-          case 'angular-standalone':
-            typeName = 'New Angular Project';
-            break;
-          case 'react':
-            typeName = 'New React Project';
-            break;
-          case 'vue':
-            typeName = 'New Vue Project';
-            break;
-        }
-      }
-      if (line.includes('|')) {
-        const t = line.split('|');
-        const name = t[0].trim();
-        const description = t[1].trim();
-        if (name != 'name') {
-          result.push({ type: type, typeName: typeName, name: name, description: description });
-        }
-      }
-    }
-    result = result.filter((project) => {
-      // Max doesnt like the my-first-app which is more of a demo and not really good for a new project
-      return project.type != 'ionic1' && project.type != 'ionic-angular' && project.name != 'my-first-app';
-    });
-    result = result.sort((a, b) => (a.typeName > b.typeName ? 1 : -1));
-    return result;
-  }
-
   private getWebviewContent(webview: Webview, extensionUri: Uri) {
     const stylesUri = getUri(webview, extensionUri, ['starter', 'build', 'styles.css']);
     const runtimeUri = getUri(webview, extensionUri, ['starter', 'build', 'runtime.js']);
@@ -172,9 +123,9 @@ export class IonicStartPanel {
         const command = message.command;
         switch (command) {
           case MessageType.getTemplates: {
-            const templates = await this.getTemplates();
+            const templates: Template[] = starterTemplates;
             const assetsUri = getUri(webview, extensionUri, ['starter', 'build', 'assets']).toString();
-            webview.postMessage({ command, templates, assetsUri });
+            webview.postMessage({ command, templates, assetsUri, frameworks, targets });
             break;
           }
           case MessageType.getProjectsFolder: {
@@ -289,38 +240,48 @@ function getPackageId(name: string): string {
   return packageId.trim();
 }
 
-async function createProject(project: Project, webview: Webview, panel: IonicStartPanel) {
-  const name = getProjectName(project.name);
-  const packageId = getPackageId(name);
-  const cmds: string[] = [];
-  const noGit = !isWindows();
-  // Example: npx ionic start "my-app" list --type=angular-standalone --capacitor --package-id=my.app --no-git
-  // to: npm create ionic@beta my-app -- tabs --type angular-standalone --no-git --package-id=my.app
-  cmds.push(
-    `npm create ionic@beta "${name}" -- ${project.template} --type ${project.type} --no-git --capacitor --package-id ${packageId}`,
-  );
-  // cmds.push(
-  //   `npx ionic start "${name}" ${project.template} --type=${project.type} --capacitor --package-id=${packageId} ${
-  //     noGit ? '--no-git' : ''
-  //   }`,
-  // );
+interface ProjectOptions {
+  noGit: boolean; // Do not initialize a git repo
+  folder: string; // Project folder
+  packageId: string; // Package Id
+  name: string;
+}
 
-  const folder = join(getProjectsFolder(), name);
-  if (existsSync(folder)) {
-    // Folder already exists
-    window.showInformationMessage(`The folder "${folder}" already exists. Please choose a unique name.`, 'OK');
-    return;
+function getCommands(project: Project, options: ProjectOptions, commands?: string[]): string[] {
+  const isIonic = ['angular-standalone', 'angular', 'react', 'vue'].includes(project.type);
+  if (isIonic) return getIonicTemplateCommands(project, options);
+  if (project.type == 'plugin') {
+    return getCapacitorPluginCommands(project, options);
   }
-  webview.postMessage({ command: MessageType.creatingProject });
-  cmds.push('#' + folder);
+  commands.push('#' + options.folder);
+  return commands.map((c) => {
+    let r = replaceAll(c, '$(project-name)', options.name);
+    r = replaceAll(r, '$(package-id)', options.packageId);
+    return r;
+  });
+}
+
+function getCapacitorPluginCommands(project: Project, options: ProjectOptions): string[] {
+  const nmt = replaceAll(toTitleCase(replaceAll(options.name, '-', ' ')), ' ', '');
+  const nm = replaceAll(options.name, ' ', '').toLowerCase();
+  const nmp = replaceAll(nm, '-', '.');
+  return [
+    `npx @capacitor/create-plugin "${nm}" --name "${nm}" --package-id "com.mycompany.${nmp}" --class-name "${nmt}" --author "me" --license MIT --repo https://github.com --description "${nmt} Capacitor Plugin"`,
+  ];
+}
+
+function getIonicTemplateCommands(project: Project, options: ProjectOptions): string[] {
+  const cmds: string[] = [];
+  cmds.push(
+    `npm create ionic@beta "${options.name}" -- ${project.template} --type ${project.type} --no-git --capacitor --package-id ${options.packageId}`,
+  );
+  cmds.push('#' + options.folder);
 
   // Cap Init
   if (project.targets.includes(CapacitorPlatform.android) || project.targets.includes(CapacitorPlatform.ios)) {
     cmds.push(npmInstall(`@capacitor/core`));
     cmds.push(npmInstall(`@capacitor/cli`));
     cmds.push(npmInstall(`@capacitor/app @capacitor/haptics @capacitor/keyboard @capacitor/status-bar`));
-    //cmds.push(`npx capacitor init "${project.name}" "${asAppId(project.name)}"`);
-    // May need  --web-dir ${outFolder}
   }
 
   // Create Platforms
@@ -333,16 +294,32 @@ async function createProject(project: Project, webview: Webview, panel: IonicSta
     cmds.push('npx cap add ios');
   }
 
-  if (project.type == 'plugin') {
-    const nmt = replaceAll(toTitleCase(replaceAll(name, '-', ' ')), ' ', '');
-    const nm = replaceAll(name, ' ', '').toLowerCase();
-    const nmp = replaceAll(nm, '-', '.');
-    cmds[0] = `npx @capacitor/create-plugin "${nm}" --name "${nm}" --package-id "com.mycompany.${nmp}" --class-name "${nmt}" --author "me" --license MIT --repo https://github.com --description "${nmt} Capacitor Plugin"`;
-  }
-
-  if (noGit) {
+  if (options.noGit) {
     cmds.push('git init');
   }
+  return cmds;
+}
+
+async function createProject(project: Project, webview: Webview, panel: IonicStartPanel) {
+  const name = getProjectName(project.name);
+  const packageId = getPackageId(name);
+  const noGit = !isWindows();
+  const folder = join(getProjectsFolder(), name);
+  const templates: Template[] = starterTemplates;
+  const template = templates.find((t) => t.name == project.template && t.type == project.type);
+  if (!template) {
+    window.showErrorMessage(`Cannot find template ${project.template} of type ${project.type}`, 'OK');
+    return;
+  }
+  const projectOptions: ProjectOptions = { noGit, folder, packageId, name };
+  const cmds: string[] = getCommands(project, projectOptions, template.commands);
+
+  if (existsSync(folder)) {
+    // Folder already exists
+    window.showInformationMessage(`The folder "${folder}" already exists. Please choose a unique name.`, 'OK');
+    return;
+  }
+  webview.postMessage({ command: MessageType.creatingProject });
 
   try {
     await runCommands(cmds);

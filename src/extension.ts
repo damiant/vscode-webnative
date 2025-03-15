@@ -39,7 +39,7 @@ import {
   waitForOtherActions,
 } from './tasks';
 import { buildAction, debugOnWeb } from './recommend';
-import { IonicStartPanel } from './ionic-start';
+import { IonicStartPanel } from './starter';
 import {
   CancellationToken,
   ProgressLocation,

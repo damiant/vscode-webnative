@@ -43,7 +43,7 @@
           }
         </div>
       </div>
-      <div [ngClass]="showTargets ? 'show' : 'hide'">
+      @if (targets && targets.length > 0) {
         <p>Targets</p>
         <div class="rows">
           @for (target of targets; track target) {
@@ -57,7 +57,7 @@
             </div>
           }
         </div>
-      </div>
+      }
     </div>
     @if (frameworkTemplates.length > 0) {
       <div>
@@ -84,15 +84,6 @@
         <vscode-divider></vscode-divider>
         <div class="bar-end pad-top">
           <vscode-button (click)="create()">Create Project</vscode-button>
-        </div>
-      </div>
-    }
-    @if (!showTargets) {
-      <div>
-        <div class="pad-top"></div>
-        <vscode-divider></vscode-divider>
-        <div class="bar-end pad-top">
-          <vscode-button (click)="create()">Create Plugin</vscode-button>
         </div>
       </div>
     }
