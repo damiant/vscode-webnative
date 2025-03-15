@@ -249,11 +249,20 @@ export const starterTemplates: Template[] = [
   {
     type: 'vite-solid',
     typeName: 'New Vite Solid Project',
-    name: 'Solid',
-    description: 'A starter Solid project with Solid',
+    name: 'Typescript',
+    description: 'A starter Solid project with Typescript',
     url: 'https://vite.dev/guide/#trying-vite-online',
     commands: ['npm create vite@latest $(project-name) -- --template solid-ts'],
   },
+  {
+    type: 'vite-solid',
+    typeName: 'New Vite Solid Project',
+    name: 'Javascript',
+    description: 'A starter Solid project with Javascript',
+    url: 'https://vite.dev/guide/#trying-vite-online',
+    commands: ['npx degit solidjs/templates/js $(project-name)'],
+  },
+
   {
     type: 'vite-qwik',
     typeName: 'New Vite Solid Project',
