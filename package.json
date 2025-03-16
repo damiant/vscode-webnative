@@ -303,18 +303,18 @@
       },
       {
         "command": "webnative.webNexus",
-        "title": "Open in Nexus Browser",
+        "title": "Show Preview Window",
         "icon": {
-          "light": "resources/light/nexus.svg",
-          "dark": "resources/dark/nexus.svg"
+          "light": "resources/light/webnative.svg",
+          "dark": "resources/dark/webnative.svg"
         }
       },
       {
         "command": "webnative.webNexusSelected",
-        "title": "Open in Nexus Browser",
+        "title": "Show Preview Window",
         "icon": {
-          "light": "resources/light/nexus-select.svg",
-          "dark": "resources/dark/nexus-select.svg"
+          "light": "resources/light/webnative-select.svg",
+          "dark": "resources/dark/webnative-select.svg"
         }
       },
       {

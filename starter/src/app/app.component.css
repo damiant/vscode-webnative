@@ -134,14 +134,13 @@ h3 {
   margin-left: -45px;
   z-index: 1;
 }
-
-.w-100 {
-  width: 100%;
-}
-
 /* Show the tooltip text when you mouse over the tooltip container */
 .tooltip:hover .tooltiptext {
   visibility: visible;
+}
+
+.w-100 {
+  width: 100%;
 }
 
 @keyframes pulse {

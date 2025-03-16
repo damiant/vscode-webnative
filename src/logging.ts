@@ -13,7 +13,7 @@ function getOutputChannel(): OutputChannel {
 export function clearOutput(): OutputChannel {
   const channel = getOutputChannel();
   channel.clear();
-  showOutput();
+  //showOutput();
   return channel;
 }
 

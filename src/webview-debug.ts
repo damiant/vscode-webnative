@@ -24,17 +24,21 @@ export function qrWebView(webview: Webview, externalUrl: string, localUrl: strin
     troubleshootPlugins();
   }
 
+  const id = `${Math.random()}`;
   const shortUrl = externalUrl ? externalUrl?.replace('https://', '').replace('http://', '') : undefined;
   if (!externalUrl) {
-    webview.html = localUrl ? getWebviewQR(`<a href="${localUrl}">${localUrl}</a>`, localUrl, '') : getWebviewInitial();
+    webview.html = localUrl
+      ? getWebviewQR(`<a href="${localUrl}">${localUrl}</a>`, localUrl, '', id)
+      : getWebviewInitial();
   } else {
     const qrUrl = exState.projectRef.isCapacitor
       ? `https://nexusbrowser.com/` + encodeURIComponent(shortUrl)
       : externalUrl;
-    webview.html = getWebviewQR(shortUrl, qrUrl, `${qrSrc}`);
+    webview.html = getWebviewQR(shortUrl, qrUrl, `${qrSrc}`, id);
   }
-  webview.onDidReceiveMessage(async (message) => {
-    switch (message) {
+  webview.onDidReceiveMessage(async (data) => {
+    if (data.from !== id) return;
+    switch (data.message) {
       case 'troubleshoot':
         troubleshootPlugins();
         break;
@@ -43,6 +47,9 @@ export function qrWebView(webview: Webview, externalUrl: string, localUrl: strin
         break;
       case 'debug':
         debugBrowser(externalUrl, false);
+        break;
+      case 'logs':
+        commands.executeCommand(CommandName.ShowLogs);
         break;
       case 'browser':
         openUri(localUrl);
@@ -59,7 +66,7 @@ export function qrWebView(webview: Webview, externalUrl: string, localUrl: strin
         //stop(panel);
         break;
       default:
-        window.showInformationMessage(message);
+        window.showInformationMessage(data.message);
     }
   });
   return shortUrl;
@@ -129,7 +136,7 @@ export async function troubleshootPlugins() {
   }
 }
 
-function getWebviewQR(shortUrl: string, externalUrl: string, qrSrc: string): string {
+function getWebviewQR(shortUrl: string, externalUrl: string, qrSrc: string, id: string): string {
   return (
     `
 	<!DOCTYPE html>
@@ -138,7 +145,7 @@ function getWebviewQR(shortUrl: string, externalUrl: string, qrSrc: string): str
 	<script>
 	  const vscode = acquireVsCodeApi();
 	  function action(msg) {
-		  vscode.postMessage(msg);
+		  vscode.postMessage({ message: msg, from: "${id}"});
 		}
 	</script>
 	<style>
@@ -160,6 +167,25 @@ function getWebviewQR(shortUrl: string, externalUrl: string, qrSrc: string): str
 	  margin-right: 20px;
 	  text-align: center; 
 	}
+  .tooltip .tooltiptext {
+     visibility: hidden;
+     min-width: 180px;
+     min-height: 20px;
+     background-color: var(--vscode-editor-background);
+     color: var(--vscode-button-foreground);
+     text-align: center;
+     padding: 1rem;
+     border-radius: 6px;
+     line-height: 150%;
+     position: absolute;
+     top: 0px;
+     margin-left: -45px;
+     z-index: 1;
+  }
+
+  .tooltip:hover .tooltiptext {
+     visibility: visible;
+  } 
 
 	a {
 	  cursor: pointer;
@@ -167,16 +193,20 @@ function getWebviewQR(shortUrl: string, externalUrl: string, qrSrc: string): str
 	</style>
 	<body>
 	  <div class="container">
-		 <div class="row">
+		 <div class="row tooltip">
      ` +
     (qrSrc !== ''
-      ? `<a alt="Scan to view in a mobile browser" href="https://capacitor.nexusbrowser.com"><canvas id="qr" (onClick)></canvas></a>`
+      ? `
+       <span class="tooltiptext">Scan to view in a mobile browser</span>
+      <canvas alt="Scan to view in a mobile browser" id="qr" (onClick)></canvas>
+     `
       : ``) +
     `</div>
       <div class="row">
       <i>${shortUrl}</i>
       <p>Open in a <a onclick="action('browser')">Browser</a> or <a onclick="action('editor')">Editor</a><br/>
-      <a onclick="action('stop')">Stop</a> or <a onclick="action('restart')">Restart</a> the dev server
+      <a onclick="action('stop')">Stop</a> or <a onclick="action('restart')">Restart</a> the dev server<br/>
+      <a onclick="action('logs')">Show Logs</a>
       </p>			
 		 </div>
 	  </div>    

@@ -382,8 +382,14 @@ export async function getRecommendations(project: Project, context: ExtensionCon
   }
 
   project.add(new Tip('Settings', '', TipType.Settings).setQueuedAction(settings));
+  project.add(new Tip('Show Logs', '', TipType.Files).setQueuedAction(showLogs));
 
   tEnd('reviewPackages');
+}
+
+async function showLogs(queueFunction: QueueFunction) {
+  queueFunction();
+  await commands.executeCommand(CommandName.ShowLogs);
 }
 
 async function settings(queueFunction: QueueFunction) {

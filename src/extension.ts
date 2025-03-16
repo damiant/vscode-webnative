@@ -95,6 +95,7 @@ export async function fixIssue(
   let msg = tip.commandProgress ? tip.commandProgress : tip.commandTitle ? tip.commandTitle : command;
   if (title) msg = title;
   let failed = false;
+  let cancelled = false;
   await window.withProgress(
     {
       location: tip.progressDialog ? ProgressLocation.Notification : ProgressLocation.Window,
@@ -176,6 +177,9 @@ export async function fixIssue(
             }
           }
         } finally {
+          if (cancelObject?.cancelled) {
+            cancelled = true;
+          }
           finishCommand(tip);
         }
       }
@@ -189,7 +193,7 @@ export async function fixIssue(
     write(successMessage);
   }
   if (tip.title) {
-    if (failed) {
+    if (failed && !cancelled) {
       writeError(`${tip.title} Failed.`);
       showOutput();
     } else {
@@ -328,6 +332,10 @@ export async function activate(context: ExtensionContext) {
   });
   commands.registerCommand(CommandName.RunForWeb, async () => {
     await findAndRun(ionicProvider, rootPath, CommandTitle.RunForWeb);
+  });
+  commands.registerCommand(CommandName.ShowLogs, async () => {
+    exState.channelFocus = true;
+    showOutput();
   });
   commands.registerCommand(CommandName.Sync, async () => {
     await findAndRun(ionicProvider, rootPath, CommandTitle.Sync);

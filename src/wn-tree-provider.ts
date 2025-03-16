@@ -81,7 +81,7 @@ export const exState: ExState = {
   packageManager: PackageManager.npm,
   workspace: undefined,
   outputIsFocused: false,
-  channelFocus: true,
+  channelFocus: false,
   hasNodeModules: undefined,
   nodeModulesFolder: undefined,
   hasPackageJson: undefined,
