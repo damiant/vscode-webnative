@@ -49,8 +49,14 @@ export async function getRecommendations(project: Project, context: ExtensionCon
     (exists('@angular/core') || exists('react') || exists('vue') || exists('svelte') || exists('astro'));
 
   if (project.isCapacitor || isWebProjectOnly) {
-    const group = isWebProjectOnly ? 'Project' : 'Run';
-    project.setGroup(group, `Press ${alt('R')} to run the last chosen platform or Web.`, TipType.WebNative, true);
+    if (isWebProjectOnly) {
+      project
+        .setGroup('Project', 'Project Actions', TipType.WebNative, true)
+        .setData(project)
+        .setContext(Context.selectAction);
+    } else {
+      project.setGroup('Run', `Press ${alt('R')} to run the last chosen platform or Web.`, TipType.WebNative, true);
+    }
 
     const hasCapIos = project.hasCapacitorProject(CapacitorPlatform.ios);
     const hasCapAndroid = project.hasCapacitorProject(CapacitorPlatform.android);
