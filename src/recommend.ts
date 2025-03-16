@@ -44,17 +44,19 @@ import { ExtensionContext, Uri, commands, env } from 'vscode';
 export async function getRecommendations(project: Project, context: ExtensionContext, packages: any): Promise<void> {
   tStart('getRecommendations');
 
-  const isWebProject =
-    exists('@angular/core') || exists('react') || exists('vue') || exists('svelte') || exists('astro');
+  const isWebProjectOnly =
+    !exists('@capacitor/core') &&
+    (exists('@angular/core') || exists('react') || exists('vue') || exists('svelte') || exists('astro'));
 
-  if (project.isCapacitor || isWebProject) {
-    project.setGroup(`Run`, `Press ${alt('R')} to run the last chosen platform or Web.`, TipType.WebNative, true);
+  if (project.isCapacitor || isWebProjectOnly) {
+    const group = isWebProjectOnly ? 'Project' : 'Run';
+    project.setGroup(group, `Press ${alt('R')} to run the last chosen platform or Web.`, TipType.WebNative, true);
 
     const hasCapIos = project.hasCapacitorProject(CapacitorPlatform.ios);
     const hasCapAndroid = project.hasCapacitorProject(CapacitorPlatform.android);
-
+    const title = isWebProjectOnly ? 'Run' : CommandTitle.RunForWeb;
     const runWeb = new Tip(
-      CommandTitle.RunForWeb,
+      title,
       '',
       TipType.Run,
       'Serve',
@@ -81,7 +83,7 @@ export async function getRecommendations(project: Project, context: ExtensionCon
       .setVSCommand(CommandName.RunForWeb)
       .canAnimate()
       .setTooltip(`Run a development server and open using the default web browser (${alt('R')})`);
-    project.add(runWeb);
+    project.add(runWeb, CommandTitle.RunForWeb);
     exState.runWeb = runWeb;
 
     const runPoints: Array<RunPoint> = [
@@ -149,25 +151,31 @@ export async function getRecommendations(project: Project, context: ExtensionCon
       exState.runIOS = runIos;
     }
 
-    const r = project.setGroup(
-      'Debug',
-      `Running Ionic applications you can debug (${alt('D')})`,
-      TipType.WebNative,
-      exState.refreshDebugDevices || isWebProject,
-      Context.refreshDebug,
-    );
+    if (isWebProjectOnly) {
+      project.add(debugOnWeb(project, 'Debug'));
+    } else {
+      const r = project.setGroup(
+        'Debug',
+        `Running Ionic applications you can debug (${alt('D')})`,
+        TipType.WebNative,
+        exState.refreshDebugDevices || isWebProjectOnly,
+        Context.refreshDebug,
+      );
 
-    r.whenExpanded = async () => {
-      return [
-        project.asRecommendation(debugOnWeb(project)),
-        ...(await getAndroidWebViewList(hasCapAndroid, project.getDistFolder())),
-      ];
-    };
+      r.whenExpanded = async () => {
+        return [
+          project.asRecommendation(debugOnWeb(project, 'Web')),
+          ...(await getAndroidWebViewList(hasCapAndroid, project.getDistFolder())),
+        ];
+      };
+    }
 
-    project
-      .setGroup('Project', 'Capacitor Features', TipType.Capacitor, true)
-      .setData(project)
-      .setContext(Context.selectAction);
+    if (!isWebProjectOnly) {
+      project
+        .setGroup('Project', 'Capacitor Features', TipType.Capacitor, true)
+        .setData(project)
+        .setContext(Context.selectAction);
+    }
     if (project.isCapacitor) {
       if (exists('@angular/core')) {
         project.setSubGroup('New', TipType.Add, 'Create new Angular Components, Pages and more');
@@ -252,7 +260,7 @@ export async function getRecommendations(project: Project, context: ExtensionCon
   }
 
   // Script Running
-  addScripts(project, isWebProject);
+  addScripts(project, isWebProjectOnly);
 
   if (project.isCapacitor || project.hasACapacitorProject()) {
     // Capacitor Configure Features
@@ -299,7 +307,7 @@ export async function getRecommendations(project: Project, context: ExtensionCon
     `Recommendations`,
     `The following recommendations were made by analyzing the package.json file of your ${project.type} app.`,
     TipType.Idea,
-    !isWebProject,
+    !isWebProjectOnly,
   );
 
   // General Rules around node modules (eg Jquery)
@@ -347,7 +355,7 @@ export async function getRecommendations(project: Project, context: ExtensionCon
   // Package Upgrade Features
   reviewPackages(packages, project);
 
-  project.setGroup(`Settings`, 'Settings', TipType.Settings, false);
+  project.setGroup(`Advanced`, 'Advanced Options', TipType.Settings, false);
   if (project.isCapacitor) {
     // if (exists('@capacitor/ios') || exists('@capacitor/android')) {
     //   project.add(liveReload());
@@ -362,18 +370,18 @@ export async function getRecommendations(project: Project, context: ExtensionCon
     );
   }
 
-  project.add(new Tip('Advanced', '', TipType.Settings).setQueuedAction(settings));
+  project.add(new Tip('Settings', '', TipType.Settings).setQueuedAction(settings));
 
   tEnd('reviewPackages');
 }
 
 async function settings(queueFunction: QueueFunction) {
   queueFunction();
-  await commands.executeCommand('workbench.action.openSettings', "WebNative'");
+  await commands.executeCommand('workbench.action.openSettings', '@ext:webnative.webnative');
 }
 
-export function debugOnWeb(project: Project): Tip {
-  return new Tip('Web', `(${getDebugBrowserName()})`, TipType.Debug, 'Serve', undefined, 'Debugging', `Project Served`)
+export function debugOnWeb(project: Project, title: string): Tip {
+  return new Tip(title, `(${getDebugBrowserName()})`, TipType.Debug, 'Serve', undefined, 'Debugging', `Project Served`)
     .setDynamicCommand(serve, project, true, true)
     .setFeatures([TipFeature.debugOnWeb])
     .setRunPoints([

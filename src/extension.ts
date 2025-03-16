@@ -5,7 +5,7 @@ import { exState, ExTreeProvider } from './wn-tree-provider';
 import { clearRefreshCache } from './process-packages';
 import { Recommendation } from './recommendation';
 import { installPackage, reviewProject } from './project';
-import { Command, RunStatus, Tip, TipFeature } from './tip';
+import { Command, Tip, TipFeature } from './tip';
 import { CancelObject, run, estimateRunTime, openUri } from './utilities';
 import { ignore } from './ignore';
 import { ActionResult, CommandName, InternalCommand } from './command-name';
@@ -452,7 +452,7 @@ export async function activate(context: ExtensionContext) {
   });
 
   commands.registerCommand(CommandName.Debug, async () => {
-    runAction(debugOnWeb(exState.projectRef), ionicProvider, rootPath);
+    runAction(debugOnWeb(exState.projectRef, 'Web'), ionicProvider, rootPath);
   });
 
   commands.registerCommand(CommandName.Build, async () => {
@@ -521,7 +521,7 @@ function findRecursive(label: string, items: Recommendation[]): Recommendation |
         return found;
       }
     }
-    if (item.label == label) {
+    if (item.label == label || item.id == label) {
       return item;
     }
   }

@@ -110,8 +110,8 @@
       "wn-recommendation": [
         {
           "id": "wn-tree",
-          "name": "",
-          "contextualTitle": ""
+          "name": "WebNative",
+          "contextualTitle": "WebNative"
         },
         {
           "id": "webnative-devserver",
@@ -155,7 +155,7 @@
     "commands": [
       {
         "command": "webnative.refresh",
-        "title": "WebNative:Refresh",
+        "title": "Refresh",
         "icon": {
           "light": "resources/light/refresh.svg",
           "dark": "resources/dark/refresh.svg"
@@ -573,11 +573,6 @@
           "type": "boolean",
           "default": false,
           "description": "Use the production configuration when building the application."
-        },
-        "webnative.ignoreIonicCLIConfig": {
-          "type": "boolean",
-          "default": false,
-          "description": "Ignore the settings in Ionic CLI config."
         },
         "webnative.javaHome": {
           "type": "string",

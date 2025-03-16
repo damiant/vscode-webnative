@@ -210,8 +210,7 @@ export function getGlobalIonicConfig(): IonicConfig {
     }
     return data;
   } else {
-    const ignoreIonicCLI: boolean = workspace.getConfiguration(WorkspaceSection).get('ignoreIonicCLIConfig');
-    return { telemetry: !ignoreIonicCLI, sessionId: generateUUID(), type: 'unknown' };
+    return { telemetry: false, sessionId: generateUUID(), type: 'unknown' };
   }
 }
 

@@ -280,9 +280,12 @@ export class Project {
     return this.ignored.includes(txt);
   }
 
-  public add(tip: Tip) {
+  public add(tip: Tip, id?: string) {
     const r = this.asRecommendation(tip);
     if (!r) return;
+    if (id) {
+      r.id = id;
+    }
 
     if (this.subgroup) {
       this.subgroup.children.push(r);
