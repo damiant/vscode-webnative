@@ -195,13 +195,7 @@ function getListData(list: string): NpmPackage {
 export function reviewPackages(packages: object, project: Project) {
   if (!packages || Object.keys(packages).length == 0) return;
 
-  listPackages(
-    project,
-    'Packages',
-    `Your ${project.type} project relies on these packages. Consider packages which have not had updates in more than a year to be a candidate for replacement in favor of a project that is actively maintained.`,
-    packages,
-    [PackageType.Dependency],
-  );
+  listPackages(project, 'Packages', `Your project relies on these packages.`, packages, [PackageType.Dependency]);
 
   listPackages(
     project,
