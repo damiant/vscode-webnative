@@ -26,7 +26,7 @@ export class DevServerProvider implements WebviewViewProvider {
       webviewView.show(true);
     });
 
-    commands.registerCommand(CommandName.hideDevServer, () => {
+    commands.registerCommand(CommandName.HideDevServer, () => {
       // THERE IS NO API TO HIDE/COLLAPSE A VIEW
       const shortUrl = qrWebView(webviewView.webview, undefined);
       //webviewView.show(true);

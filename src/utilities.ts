@@ -208,7 +208,10 @@ export async function run(
         openUri(localUrl);
         //}
         break;
+      case WebConfigSetting.nexus:
+        break;
       default: {
+        openUri(localUrl);
         //qrView(externalUrl);
         //viewAsQR(localUrl, externalUrl);
         break;

@@ -226,21 +226,22 @@ export function reviewPackages(packages: object, project: Project) {
 export function reviewPluginsWithHooks(packages: object): Tip[] {
   const tips = [];
   // List of packages that don't need to be reported to the user because they would be dropped in a Capacitor migration
-  const dontReport = [
+  // Using a Set for O(1) lookups instead of an array with O(n) includes() method
+  const dontReportSet = new Set([
     'cordova-plugin-add-swift-support',
     'cordova-plugin-androidx',
     'cordova-plugin-androidx-adapter',
     'cordova-plugin-ionic', // Works for Capacitor
     'phonegap-plugin-push', // This has a hook for browser which is not applicable
     'cordova-plugin-push', // This has a hook for browser which is not applicable
-  ];
+  ]);
 
   if (Object.keys(packages).length == 0) return;
   for (const library of Object.keys(packages)) {
     if (
       packages[library].plugin &&
       packages[library].plugin.hasHooks &&
-      !dontReport.includes(library) &&
+      !dontReportSet.has(library) && // O(1) lookup operation with Set
       !library.startsWith('@ionic-enterprise')
     ) {
       let msg = 'contains Cordova hooks that may require manual migration to use with Capacitor.';

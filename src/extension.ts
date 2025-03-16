@@ -106,7 +106,7 @@ export async function fixIssue(
           tip.cancelRequested = false;
           writeWN(`Stopped "${tip.title}"`);
           if (tip.features.includes(TipFeature.welcome)) {
-            commands.executeCommand(CommandName.hideDevServer);
+            commands.executeCommand(CommandName.HideDevServer);
           }
 
           if (tip.title.toLowerCase() == CapacitorPlatform.ios) {
@@ -184,11 +184,11 @@ export async function fixIssue(
   if (tip.title) {
     if (failed) {
       writeError(`${tip.title} Failed.`);
+      showOutput();
     } else {
       writeWN(`${tip.title} Completed.`);
     }
     write('');
-    showOutput();
   }
 
   if (tip.syncOnSuccess) {
@@ -225,10 +225,10 @@ export async function activate(context: ExtensionContext) {
   // Quick Fixes
 
   // Dev Server Running Panel
-  const ionicDevServerProvider = new DevServerProvider(rootPath, context);
+  const devServerProvider = new DevServerProvider(rootPath, context);
 
   context.subscriptions.push(
-    window.registerWebviewViewProvider('webnative-devserver', ionicDevServerProvider, {
+    window.registerWebviewViewProvider('webnative-devserver', devServerProvider, {
       webviewOptions: { retainContextWhenHidden: false },
     }),
   );

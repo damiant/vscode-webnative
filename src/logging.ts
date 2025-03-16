@@ -19,7 +19,7 @@ export function clearOutput(): OutputChannel {
 
 export function showOutput() {
   const channel = getOutputChannel();
-  //channel.show();
+  channel.show();
 }
 
 export function write(message: string) {

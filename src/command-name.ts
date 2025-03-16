@@ -42,7 +42,7 @@ export enum CommandName {
   OpenInXCode = 'webnative.openXcode',
   OpenInAndroidStudio = 'webnative.openAndroidStudio',
   ViewDevServer = 'webnative.viewDevServer', // View the dev server window
-  hideDevServer = 'webnative.hideDevServer', // Hide the dev server window
+  HideDevServer = 'webnative.hideDevServer', // Hide the dev server window
 }
 
 export enum InternalCommand {
