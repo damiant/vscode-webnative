@@ -20,7 +20,7 @@ import { addScripts } from './scripts';
 import { Context } from './context-variables';
 import { exState } from './wn-tree-provider';
 import { getAndroidWebViewList } from './android-debug-list';
-import { getDebugBrowserName } from './editor-preview';
+import { getDebugBrowserName } from './webview-preview';
 import { checkIonicNativePackages } from './rules-ionic-native';
 import { alt, getRunOutput, showProgress, tEnd, tStart } from './utilities';
 import { startStopLogServer } from './log-server';
@@ -59,7 +59,7 @@ export async function getRecommendations(project: Project, context: ExtensionCon
       TipType.Run,
       'Serve',
       undefined,
-      'Running on Web',
+      'Running', // Status Bar Text
       `Project Served`,
     )
       .setDynamicCommand(serve, project, false)
@@ -69,6 +69,8 @@ export async function getRecommendations(project: Project, context: ExtensionCon
       .setFeatures([TipFeature.welcome])
       .setRunStatus((status) => {
         exState.runStatusBar.text = status == RunStatus.Running ? '$(debug-stop)' : '$(play)';
+        exState.openEditorStatusBar.hide();
+        exState.openWebStatusBar.hide();
       })
       .setRunPoints([
         { title: 'Building...', text: 'Generating browser application bundles' },
@@ -151,7 +153,7 @@ export async function getRecommendations(project: Project, context: ExtensionCon
       'Debug',
       `Running Ionic applications you can debug (${alt('D')})`,
       TipType.WebNative,
-      exState.refreshDebugDevices,
+      exState.refreshDebugDevices || isWebProject,
       Context.refreshDebug,
     );
 
@@ -297,7 +299,7 @@ export async function getRecommendations(project: Project, context: ExtensionCon
     `Recommendations`,
     `The following recommendations were made by analyzing the package.json file of your ${project.type} app.`,
     TipType.Idea,
-    true,
+    !isWebProject,
   );
 
   // General Rules around node modules (eg Jquery)
@@ -367,7 +369,7 @@ export async function getRecommendations(project: Project, context: ExtensionCon
 
 async function settings(queueFunction: QueueFunction) {
   queueFunction();
-  await commands.executeCommand('workbench.action.openSettings', "Ionic'");
+  await commands.executeCommand('workbench.action.openSettings', "WebNative'");
 }
 
 export function debugOnWeb(project: Project): Tip {

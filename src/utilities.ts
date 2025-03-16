@@ -1,5 +1,5 @@
 import { RunPoint, TipFeature } from './tip';
-import { debugBrowser, viewInEditor } from './editor-preview';
+import { debugBrowser, viewInEditor } from './webview-preview';
 import { handleError } from './error-handler';
 import { exState, ExTreeProvider } from './wn-tree-provider';
 import { getMonoRepoFolder, getPackageJSONFilename } from './monorepo';
@@ -15,7 +15,7 @@ import { join } from 'path';
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { ChildProcess, exec, ExecException, ExecOptionsWithStringEncoding, spawn } from 'child_process';
 import { startStopLogServer } from './log-server';
-import { qrView } from './nexus-browser';
+import { qrView } from './webview-debug';
 import { CancellationToken, ProgressLocation, Uri, commands, window, workspace } from 'vscode';
 import { uncolor } from './uncolor';
 
@@ -187,7 +187,7 @@ export async function run(
       }
       pub.start().then(() => {
         if (config == WebConfigSetting.nexus) {
-          qrView(externalUrl);
+          qrView(externalUrl, localUrl);
         }
       });
     }
@@ -302,6 +302,9 @@ export async function run(
             if (url) {
               findLocalUrl = false;
               localUrl = url;
+              exState.localUrl = localUrl;
+              exState.openWebStatusBar.show();
+              exState.openEditorStatusBar.show();
               launchUrl();
             }
           }
@@ -319,6 +322,7 @@ export async function run(
             if (url) {
               findExternalUrl = false;
               externalUrl = url;
+              exState.externalUrl = externalUrl;
               launchUrl();
             }
           }

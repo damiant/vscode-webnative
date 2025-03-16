@@ -52,13 +52,13 @@ import {
   TextDocument,
   languages,
   StatusBarAlignment,
-  StatusBarItem,
-  ThemeColor,
 } from 'vscode';
 import { existsSync } from 'fs';
 import { CommandTitle } from './command-title';
 import { autoFixOtherImports } from './imports-icons';
 import { setSetting, WorkspaceSection, WorkspaceSetting } from './workspace-state';
+import { viewInEditor } from './webview-preview';
+import { qrView } from './webview-debug';
 
 /**
  * Runs the command while showing a vscode window that can be cancelled
@@ -229,23 +229,42 @@ export async function activate(context: ExtensionContext) {
   const projectsProvider = new ProjectsProvider(rootPath, context);
   const projectsView = window.createTreeView('webnative-zprojects', { treeDataProvider: projectsProvider });
 
+  const statusBarBuild = window.createStatusBarItem(StatusBarAlignment.Left, 1000);
+  statusBarBuild.command = CommandName.Debug;
+  statusBarBuild.text = `$(debug-alt)`;
+  statusBarBuild.tooltip = 'Debug the current project';
+  statusBarBuild.show();
+  context.subscriptions.push(statusBarBuild);
+
   const statusBarRun = window.createStatusBarItem(StatusBarAlignment.Left, 1000);
-  statusBarRun.command = CommandName.RunForWeb; // CommandName.StatusRun;
+  statusBarRun.command = CommandName.RunForWeb;
   statusBarRun.text = `$(play)`;
   statusBarRun.tooltip = 'Run the current project';
   statusBarRun.show();
   context.subscriptions.push(statusBarRun);
   exState.runStatusBar = statusBarRun;
 
-  const statusBarBuild = window.createStatusBarItem(StatusBarAlignment.Left, 1000);
-  statusBarBuild.command = CommandName.Debug; // CommandName.StatusRun;
-  statusBarBuild.text = `$(debug-alt)`;
-  statusBarBuild.tooltip = 'Debug the current project';
-  statusBarBuild.show();
-  context.subscriptions.push(statusBarBuild);
-  // context.subscriptions.push(commands.registerCommand(CommandName.StatusRun, () => {
-  // 	window.showInformationMessage(`Yeah!`);
-  // }));
+  const statusBarOpenWeb = window.createStatusBarItem(StatusBarAlignment.Left, 100);
+  statusBarOpenWeb.command = CommandName.OpenWeb;
+  statusBarOpenWeb.text = `$(globe)`;
+  statusBarOpenWeb.tooltip = 'Open the current project in a browser';
+  statusBarOpenWeb.hide();
+  context.subscriptions.push(statusBarOpenWeb);
+  exState.openWebStatusBar = statusBarOpenWeb;
+  commands.registerCommand(CommandName.OpenWeb, async () => {
+    openUri(exState.localUrl);
+  });
+
+  const statusBarOpenEditor = window.createStatusBarItem(StatusBarAlignment.Left, 100);
+  statusBarOpenEditor.command = CommandName.OpenEditor;
+  statusBarOpenEditor.text = `$(search-new-editor)`;
+  statusBarOpenEditor.tooltip = 'Open the current project in an editor window';
+  statusBarOpenEditor.hide();
+  context.subscriptions.push(statusBarOpenEditor);
+  exState.openEditorStatusBar = statusBarOpenEditor;
+  commands.registerCommand(CommandName.OpenEditor, async () => {
+    viewInEditor(exState.localUrl ?? 'https://webnative.dev', true, false, true, true);
+  });
 
   // Dev Server Running Panel
   const devServerProvider = new DevServerProvider(rootPath, context);
@@ -464,6 +483,9 @@ export async function activate(context: ExtensionContext) {
       showTips();
     }
   }
+
+  // Ensures the Dev Server is Showing
+  //qrView(undefined, undefined);
 }
 
 async function runAgain(ionicProvider: ExTreeProvider, rootPath: string) {

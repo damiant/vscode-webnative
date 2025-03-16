@@ -37,6 +37,8 @@ export enum CommandName {
   RunForIOS = 'webnative.runIOS',
   RunForAndroid = 'webnative.runAndroid',
   RunForWeb = 'webnative.runWeb',
+  OpenWeb = 'webnative.openWeb',
+  OpenEditor = 'webnative.openEditor',
   Sync = 'webnative.capSync',
   Debug = 'webnative.debug',
   Build = 'webnative.build',

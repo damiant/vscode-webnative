@@ -22,7 +22,7 @@ import { window, workspace } from 'vscode';
 import { write, writeError } from './logging';
 import { createServer } from 'http';
 import { join } from 'path';
-import { viewInEditor } from './editor-preview';
+import { viewInEditor } from './webview-preview';
 
 /**
  * Create the ionic serve command

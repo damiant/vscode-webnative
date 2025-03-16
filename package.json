@@ -50,7 +50,7 @@
     "Other"
   ],
   "activationEvents": [
-    "onView:ionic",
+    "onView:webnative",
     "onStartupFinished"
   ],
   "main": "./out/extension.js",
@@ -556,12 +556,12 @@
       ]
     },
     "configuration": {
-      "title": "Ionic",
+      "title": "WebNative",
       "properties": {
         "webnative.defaultPort": {
           "type": "number",
           "default": 8100,
-          "description": "The default port number used when serving your Ionic app (default is 8100)."
+          "description": "The default port number used when serving your app (default is 8100)."
         },
         "webnative.shellPath": {
           "type": "string",

@@ -321,7 +321,6 @@ export const frameworks = [
   { name: 'Nuxt', icon: 'nuxt.svg', type: 'nuxt' },
   { name: 'Astro', icon: 'astro.svg', type: 'astro' },
   { name: 'Next.js', icon: 'nextjs.svg', type: 'nextjs' },
-  { name: 'Nuxt', icon: 'nuxt.svg', icon2: 'ionic.svg', type: 'nuxt-ionic' },
   { name: 'React+Ionic', icon: 'react.svg', icon2: 'ionic.svg', type: 'react' },
   { name: 'Qwik', icon: 'qwik.svg', icon2: 'vite.svg', type: 'vite-qwik' },
   { name: 'Lit', icon: 'lit.svg', icon2: 'vite.svg', type: 'vite-lit' },

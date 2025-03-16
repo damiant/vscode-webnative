@@ -61,11 +61,19 @@ interface ExState {
   lastRun: CapacitorPlatform;
   projectRef: Project;
   runStatusBar: StatusBarItem | undefined;
+  openWebStatusBar: StatusBarItem | undefined;
+  openEditorStatusBar: StatusBarItem | undefined;
+  localUrl: string | undefined; // URL for the local browser
+  externalUrl: string | undefined; // URL for the external browser
 }
 export const exState: ExState = {
   view: undefined,
   context: undefined,
   runStatusBar: undefined,
+  openWebStatusBar: undefined,
+  openEditorStatusBar: undefined,
+  localUrl: undefined,
+  externalUrl: undefined,
   skipAuth: false,
   projects: [],
   projectsView: undefined,
