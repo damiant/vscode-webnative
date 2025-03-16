@@ -289,6 +289,14 @@ export const starterTemplates: Template[] = [
       `npm create astro@latest $(project-name) -- --add react --add tailwind --template basics --skip-houston --no-install --no-git --yes`,
     ],
   },
+  {
+    type: 'nextjs',
+    typeName: 'New Next.js Project',
+    name: 'Next.js',
+    description: 'A starter Next.js project',
+    url: 'https://nextjs.org/docs/getting-started',
+    commands: [`npx create-next-app@latest $(project-name) --skip-install --yes --ts --eslint`],
+  },
   // Seems to be tied to older vue-cli-service and doesnt run
   // {
   //   type: 'nuxt-ionic',
@@ -312,6 +320,7 @@ export const frameworks = [
   { name: 'React', icon: 'react.svg', icon2: 'vite.svg', type: 'vite-react' },
   { name: 'Nuxt', icon: 'nuxt.svg', type: 'nuxt' },
   { name: 'Astro', icon: 'astro.svg', type: 'astro' },
+  { name: 'Next.js', icon: 'nextjs.svg', type: 'nextjs' },
   { name: 'Nuxt', icon: 'nuxt.svg', icon2: 'ionic.svg', type: 'nuxt-ionic' },
   { name: 'React+Ionic', icon: 'react.svg', icon2: 'ionic.svg', type: 'react' },
   { name: 'Qwik', icon: 'qwik.svg', icon2: 'vite.svg', type: 'vite-qwik' },
