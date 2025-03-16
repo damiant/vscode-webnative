@@ -12,6 +12,7 @@ import {
   Event,
   EventEmitter,
   ExtensionContext,
+  StatusBarItem,
   TreeDataProvider,
   TreeItem,
   TreeView,
@@ -59,10 +60,12 @@ interface ExState {
   runWeb: Tip;
   lastRun: CapacitorPlatform;
   projectRef: Project;
+  runStatusBar: StatusBarItem | undefined;
 }
 export const exState: ExState = {
   view: undefined,
   context: undefined,
+  runStatusBar: undefined,
   skipAuth: false,
   projects: [],
   projectsView: undefined,

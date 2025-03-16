@@ -4,7 +4,7 @@ import { build } from './build';
 import { serve } from './ionic-serve';
 import { Project } from './project';
 import { addSplashAndIconFeatures } from './splash-icon';
-import { QueueFunction, RunPoint, Tip, TipFeature, TipType } from './tip';
+import { QueueFunction, RunPoint, RunStatus, Tip, TipFeature, TipType } from './tip';
 import { capacitorMigrationChecks as checkCapacitorMigrationRules } from './rules-capacitor-migration';
 import { reviewPackages } from './process-packages';
 import { capacitorDevicesCommand, capacitorRun } from './capacitor-run';
@@ -67,6 +67,9 @@ export async function getRecommendations(project: Project, context: ExtensionCon
       .setData(project.name)
       .setContextValue(Context.webConfig)
       .setFeatures([TipFeature.welcome])
+      .setRunStatus((status) => {
+        exState.runStatusBar.text = status == RunStatus.Running ? '$(debug-stop)' : '$(play)';
+      })
       .setRunPoints([
         { title: 'Building...', text: 'Generating browser application bundles' },
         { title: 'Serving', text: 'Development server running' },

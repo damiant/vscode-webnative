@@ -5,7 +5,7 @@ import { exState, ExTreeProvider } from './wn-tree-provider';
 import { clearRefreshCache } from './process-packages';
 import { Recommendation } from './recommendation';
 import { installPackage, reviewProject } from './project';
-import { Command, Tip, TipFeature } from './tip';
+import { Command, RunStatus, Tip, TipFeature } from './tip';
 import { CancelObject, run, estimateRunTime, openUri } from './utilities';
 import { ignore } from './ignore';
 import { ActionResult, CommandName, InternalCommand } from './command-name';
@@ -32,6 +32,7 @@ import { ImportQuickFixProvider } from './quick-fix';
 import {
   cancelIfRunning,
   finishCommand,
+  isRunning,
   markActionAsCancelled,
   markActionAsRunning,
   markOperationAsRunning,
@@ -50,6 +51,9 @@ import {
   debug,
   TextDocument,
   languages,
+  StatusBarAlignment,
+  StatusBarItem,
+  ThemeColor,
 } from 'vscode';
 import { existsSync } from 'fs';
 import { CommandTitle } from './command-title';
@@ -81,7 +85,10 @@ export async function fixIssue(
 
   // If the task is already running then cancel it
   const didCancel = await cancelIfRunning(tip);
-  if (didCancel) return;
+  if (didCancel) {
+    finishCommand(tip);
+    return;
+  }
 
   markOperationAsRunning(tip);
 
@@ -222,7 +229,23 @@ export async function activate(context: ExtensionContext) {
   const projectsProvider = new ProjectsProvider(rootPath, context);
   const projectsView = window.createTreeView('webnative-zprojects', { treeDataProvider: projectsProvider });
 
-  // Quick Fixes
+  const statusBarRun = window.createStatusBarItem(StatusBarAlignment.Left, 1000);
+  statusBarRun.command = CommandName.RunForWeb; // CommandName.StatusRun;
+  statusBarRun.text = `$(play)`;
+  statusBarRun.tooltip = 'Run the current project';
+  statusBarRun.show();
+  context.subscriptions.push(statusBarRun);
+  exState.runStatusBar = statusBarRun;
+
+  const statusBarBuild = window.createStatusBarItem(StatusBarAlignment.Left, 1000);
+  statusBarBuild.command = CommandName.Debug; // CommandName.StatusRun;
+  statusBarBuild.text = `$(debug-alt)`;
+  statusBarBuild.tooltip = 'Debug the current project';
+  statusBarBuild.show();
+  context.subscriptions.push(statusBarBuild);
+  // context.subscriptions.push(commands.registerCommand(CommandName.StatusRun, () => {
+  // 	window.showInformationMessage(`Yeah!`);
+  // }));
 
   // Dev Server Running Panel
   const devServerProvider = new DevServerProvider(rootPath, context);
@@ -506,10 +529,17 @@ async function runAction(tip: Tip, ionicProvider: ExTreeProvider, rootPath: stri
   if (await waitForOtherActions(tip)) {
     return; // Canceled
   }
-  if (tip.stoppable) {
+  if (tip.stoppable || tip.contextValue == Context.stop) {
+    if (isRunning(tip)) {
+      cancelIfRunning(tip);
+      markActionAsCancelled(tip);
+      ionicProvider.refresh();
+      return;
+    }
     markActionAsRunning(tip);
     ionicProvider.refresh();
   }
+
   await tip.generateCommand();
   tip.generateTitle();
   if (tip.command) {
@@ -538,6 +568,7 @@ async function runAction(tip: Tip, ionicProvider: ExTreeProvider, rootPath: stri
     if (command) {
       execute(tip, exState.context);
       fixIssue(command, rootPath, ionicProvider, tip);
+
       return;
     }
   } else {
