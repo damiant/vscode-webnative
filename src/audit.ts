@@ -65,7 +65,6 @@ function analyzeAudit(dependencies: string[], audit: Audit): SecurityVulnerabili
 
 function drillDown(name: string, audit: Audit): Source | undefined {
   for (const source of audit.vulnerabilities[name].via) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     if (!(source as any).title) {
       return drillDown(source as string, audit);
     } else {

@@ -88,7 +88,7 @@ function processAndroidXML(folder: string) {
   });
 }
 
-function getAndroidManifestIntent(actionName) {
+function getAndroidManifestIntent(name: string) {
   function matches(attribute, value, array) {
     return array.find((element) => element[attribute] == value) != undefined;
   }

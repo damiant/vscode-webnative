@@ -235,7 +235,7 @@ function angularUsingESBuild(project: Project): boolean {
       }
     }
     return false;
-  } catch (error) {
+  } catch (err) {
     return false;
   }
 }
