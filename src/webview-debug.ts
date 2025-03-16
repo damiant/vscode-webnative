@@ -26,9 +26,12 @@ export function qrWebView(webview: Webview, externalUrl: string, localUrl: strin
 
   const shortUrl = externalUrl ? externalUrl?.replace('https://', '').replace('http://', '') : undefined;
   if (!externalUrl) {
-    webview.html = getWebviewInitial();
+    webview.html = localUrl ? getWebviewQR(`<a href="${localUrl}">${localUrl}</a>`, localUrl, '') : getWebviewInitial();
   } else {
-    webview.html = getWebviewQR(shortUrl, externalUrl, qrSrc);
+    const qrUrl = exState.projectRef.isCapacitor
+      ? `https://nexusbrowser.com/` + encodeURIComponent(shortUrl)
+      : externalUrl;
+    webview.html = getWebviewQR(shortUrl, qrUrl, `${qrSrc}`);
   }
   webview.onDidReceiveMessage(async (message) => {
     switch (message) {
@@ -36,7 +39,7 @@ export function qrWebView(webview: Webview, externalUrl: string, localUrl: strin
         troubleshootPlugins();
         break;
       case 'editor':
-        viewInEditor(localUrl, false);
+        viewInEditor(localUrl, true, false, true, true);
         break;
       case 'debug':
         debugBrowser(externalUrl, false);
@@ -126,9 +129,9 @@ export async function troubleshootPlugins() {
   }
 }
 
-function getWebviewQR(shortUrl: string, externalUrl: string, qrSrc: Uri): string {
-  externalUrl = `https://nexusbrowser.com/` + encodeURIComponent(shortUrl);
-  return `
+function getWebviewQR(shortUrl: string, externalUrl: string, qrSrc: string): string {
+  return (
+    `
 	<!DOCTYPE html>
 	<html>
 	<script src="${qrSrc}"></script>
@@ -164,9 +167,12 @@ function getWebviewQR(shortUrl: string, externalUrl: string, qrSrc: Uri): string
 	</style>
 	<body>
 	  <div class="container">
-		 <div class="row">          
-			<a alt="Scan to view in a mobile browser" href="https://capacitor.nexusbrowser.com"><canvas id="qr" (onClick)></canvas></a>
-      </div>
+		 <div class="row">
+     ` +
+    (qrSrc !== ''
+      ? `<a alt="Scan to view in a mobile browser" href="https://capacitor.nexusbrowser.com"><canvas id="qr" (onClick)></canvas></a>`
+      : ``) +
+    `</div>
       <div class="row">
       <i>${shortUrl}</i>
       <p>Open in a <a onclick="action('browser')">Browser</a> or <a onclick="action('editor')">Editor</a><br/>
@@ -185,7 +191,8 @@ function getWebviewQR(shortUrl: string, externalUrl: string, qrSrc: Uri): string
 	  </script>
 	</body>
 	</html>
-	`;
+	`
+  );
 }
 
 function getWebviewInitial(): string {

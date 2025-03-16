@@ -510,22 +510,22 @@
         },
         {
           "command": "webnative.webOpenBrowser",
-          "when": "view == wn-tree && viewItem == webConfig && webConfig !== WebConfigWebBrowser && webConfig",
+          "when": "view == wn-tree && viewItem == webConfig && webConfig !== WebConfigWebBrowser",
           "group": "inline"
         },
         {
           "command": "webnative.webOpenBrowserSelected",
-          "when": "view == wn-tree && viewItem == webConfig && (webConfig == WebConfigWebBrowser || !webConfig)",
+          "when": "view == wn-tree && viewItem == webConfig && webConfig == WebConfigWebBrowser",
           "group": "inline"
         },
         {
           "command": "webnative.webNexus",
-          "when": "view == wn-tree && viewItem == webConfig && webConfig !== WebConfigNexusBrowser",
+          "when": "view == wn-tree && viewItem == webConfig && (webConfig !== WebConfigNexusBrowser && webConfig)",
           "group": "inline"
         },
         {
           "command": "webnative.webNexusSelected",
-          "when": "view == wn-tree && viewItem == webConfig && webConfig == WebConfigNexusBrowser",
+          "when": "view == wn-tree && viewItem == webConfig && (webConfig == WebConfigNexusBrowser || !webConfig)",
           "group": "inline"
         },
         {

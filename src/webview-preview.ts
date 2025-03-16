@@ -52,7 +52,7 @@ export function viewInEditor(
         retainContextWhenHidden: true,
       });
   lastUrl = url;
-  panel.webview.html = getWebviewContent(url, id);
+  panel.webview.html = url ? getWebviewContent(url, id) : '';
   panel.iconPath = iconFor('globe');
   let device = getSetting(WorkspaceSetting.emulator);
 

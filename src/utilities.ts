@@ -179,11 +179,12 @@ export async function run(
 
   function launch(localUrl: string, externalUrl: string) {
     const config: WebConfigSetting = getWebConfiguration();
-    if (externalUrl) {
+    const url = externalUrl ?? localUrl;
+    if (url) {
       if (pub) {
         pub.stop();
       } else {
-        pub = new Publisher('devapp', auxData, portFrom(externalUrl), externalUrl.startsWith('https'));
+        pub = new Publisher('devapp', auxData, portFrom(url), url.startsWith('https'));
       }
       pub.start().then(() => {
         if (config == WebConfigSetting.nexus) {

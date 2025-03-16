@@ -20,8 +20,8 @@ export class DevServerProvider implements WebviewViewProvider {
   resolveWebviewView(webviewView: WebviewView, context: WebviewViewResolveContext, token: CancellationToken) {
     if (this.registered) return;
     this.registered = true;
-    commands.registerCommand(CommandName.ViewDevServer, (url: string, localUrl: string) => {
-      const shortUrl = qrWebView(webviewView.webview, url, localUrl);
+    commands.registerCommand(CommandName.ViewDevServer, (externalUrl: string, localUrl: string) => {
+      const shortUrl = qrWebView(webviewView.webview, externalUrl, localUrl);
       //webviewView.description = shortUrl;
       webviewView.show(true);
     });

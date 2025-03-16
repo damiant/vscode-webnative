@@ -46,7 +46,12 @@ export async function getRecommendations(project: Project, context: ExtensionCon
 
   const isWebProjectOnly =
     !exists('@capacitor/core') &&
-    (exists('@angular/core') || exists('react') || exists('vue') || exists('svelte') || exists('astro'));
+    (exists('@angular/core') ||
+      exists('react') ||
+      exists('vue') ||
+      exists('svelte') ||
+      exists('astro') ||
+      exists('vite'));
 
   if (project.isCapacitor || isWebProjectOnly) {
     if (isWebProjectOnly) {

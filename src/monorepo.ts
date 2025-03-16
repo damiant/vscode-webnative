@@ -395,6 +395,7 @@ function checkFolder(filename: string): FolderType {
       'react',
       'astro',
       'vue',
+      'vite',
       'svelte',
       '@capacitor/core',
       '@capacitor/ios',
