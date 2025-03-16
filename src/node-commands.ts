@@ -174,6 +174,7 @@ export async function suggestInstallAll(project: Project) {
   }
   showProgress(`Installing....`, async () => {
     await project.runAtRoot(npmInstallAll());
+    exState.view.reveal(undefined, { focus: true, expand: true });
     commands.executeCommand(CommandName.Refresh);
   });
 }
