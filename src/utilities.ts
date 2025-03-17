@@ -184,7 +184,10 @@ export async function run(
       if (pub) {
         pub.stop();
       } else {
-        pub = new Publisher('devapp', auxData, portFrom(url), url.startsWith('https'));
+        if (!auxData) {
+          console.error(`auxData not set for launch of ${localUrl} ${externalUrl}`);
+        }
+        pub = new Publisher('devapp', auxData ?? '', portFrom(url), url.startsWith('https'));
       }
       pub.start().then(() => {
         if (config == WebConfigSetting.nexus) {
