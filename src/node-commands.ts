@@ -139,7 +139,11 @@ export async function suggestInstallAll(project: Project) {
   const isNpm = hasPackageLock(project);
   let message = `Would you like to install node modules for this project?`;
   const options = [];
+  let noMessage = 'no';
   if (!isNpm) {
+    if (isVersionGreaterOrEqual(await getVersion('npm -v'), '0.0.0')) {
+      options.push('npm');
+    }
     if (isVersionGreaterOrEqual(await getVersion('pnpm -v'), '0.0.0')) {
       options.push('pnpm');
     }
@@ -150,17 +154,22 @@ export async function suggestInstallAll(project: Project) {
       options.push('bun');
     }
     if (options.length > 1) {
-      message = `Which package manager would you like to use?`;
+      message = `Install using which package manager?`;
+      noMessage = 'None of these';
     }
   } else {
     options.push('Yes');
   }
-  const res = await window.showInformationMessage(message, ...options, 'No', 'Never');
+  const res = await window.showInformationMessage(message, ...options, noMessage, 'Never');
   if (res == 'Never') {
     setGlobalSetting(GlobalSetting.suggestNPMInstall, 'no');
     return;
   }
-  if (!res || res == 'No') return;
+  if (!res || res == noMessage) return;
+  if (res == 'npm') {
+    exState.repoType = MonoRepoType.npm;
+    exState.packageManager = PackageManager.npm;
+  }
   if (res == 'pnpm') {
     exState.repoType = MonoRepoType.pnpm;
     exState.packageManager = PackageManager.pnpm;
