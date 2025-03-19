@@ -40,6 +40,7 @@ import { cancelLastOperation } from './tasks';
 import { CommandName } from './command-name';
 import { CommandTitle } from './command-title';
 import { ExtensionContext, Uri, commands, env } from 'vscode';
+import { checkBuilderIntegration } from './integrations-builder';
 
 export async function getRecommendations(project: Project, context: ExtensionContext, packages: any): Promise<void> {
   tStart('getRecommendations');
@@ -357,6 +358,7 @@ export async function getRecommendations(project: Project, context: ExtensionCon
     project.tips(await capacitorRecommendations(project, false));
     tEnd('capacitorRecommendations');
   }
+  project.tips(checkBuilderIntegration(project));
   tStart('reviewPackages');
   if (!project.isCapacitor && !project.isCordova) {
     // The project is not using Cordova or Capacitor

@@ -35,6 +35,18 @@ export class Recommendation extends TreeItem {
     };
   }
 
+  public setSingleIcon(name: string) {
+    if (name === 'none') {
+      this.iconPath = undefined;
+      return;
+    }
+    this.iconName = name;
+    this.iconPath = {
+      light: join(__filename, '..', '..', 'resources', name + '.svg'),
+      dark: join(__filename, '..', '..', 'resources', name + '.svg'),
+    };
+  }
+
   public setData(data: any): Recommendation {
     this.data = data;
     return this;

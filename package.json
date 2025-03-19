@@ -597,6 +597,17 @@
           "default": "",
           "description": "Whether to automatically import ion-icons for this project."
         },
+        "webnative.openBrowserOnRun": {
+          "type": "string",
+          "scope": "workspace",
+          "enum": [
+            "yes",
+            "no",
+            ""
+          ],
+          "default": "",
+          "description": "Whether to open a browser whenever you click run."
+        },
         "webnative.manualNewProjects": {
           "type": "boolean",
           "scope": "application",

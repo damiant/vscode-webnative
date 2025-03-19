@@ -228,7 +228,7 @@ export async function run(
     if (tmp.length < 3) return 8100;
     return parseInt(tmp[2]);
   }
-
+  let answered = '';
   const logFilters: string[] = getSetting(WorkspaceSetting.logFilter);
   let logs: Array<string> = [];
   return new Promise((resolve, reject) => {
@@ -337,6 +337,19 @@ export async function run(
           for (const runPoint of runPoints) {
             if (data.includes(runPoint.text)) {
               progress.report({ message: runPoint.title });
+
+              if (runPoint.action) {
+                if (answered !== '') {
+                  data = data.replace(answered, '');
+                }
+                if (data.includes(runPoint.text)) {
+                  runPoint.action(runPoint.text).then((keystrokes) => {
+                    proc.stdin.write(keystrokes);
+                    writeWN(`Answered.`);
+                    answered = runPoint.text;
+                  });
+                }
+              }
               if (runPoint.refresh && ionicProvider) {
                 ionicProvider.refresh();
               }

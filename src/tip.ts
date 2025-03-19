@@ -313,6 +313,7 @@ export enum TipType {
   Comment,
   Settings,
   Files,
+  Builder,
   Sync,
   Add,
   Dependency,
@@ -326,4 +327,5 @@ export interface RunPoint {
   text: string; // Search text in the log entry
   title: string; // Title used for progress
   refresh?: boolean; // Refresh the tree view
+  action?: (message: string) => Promise<string>; // Action to take
 }

@@ -4,11 +4,14 @@ import {
   WebviewView,
   WebviewViewProvider,
   WebviewViewResolveContext,
+  workspace,
 } from 'vscode';
 
 import { commands } from 'vscode';
 import { CommandName } from './command-name';
 import { qrWebView } from './webview-debug';
+import { openUri } from './utilities';
+import { WorkspaceSection } from './workspace-state';
 
 export class DevServerProvider implements WebviewViewProvider {
   registered = false;
@@ -24,6 +27,10 @@ export class DevServerProvider implements WebviewViewProvider {
       const shortUrl = qrWebView(webviewView.webview, externalUrl, localUrl);
       //webviewView.description = shortUrl;
       webviewView.show(true);
+      const value: string = workspace.getConfiguration(WorkspaceSection).get('openBrowserOnRun');
+      if (value !== 'no') {
+        openUri(localUrl);
+      }
     });
 
     commands.registerCommand(CommandName.HideDevServer, () => {
