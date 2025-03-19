@@ -14,7 +14,7 @@ export function checkBuilderIntegration(project: Project): Tip[] {
   )
     tips.push(
       new Tip(
-        'Integrate with Builder',
+        'Integrate Builder',
         '',
         TipType.Builder,
         'Integrate Builder.io into this project?',

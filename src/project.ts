@@ -225,6 +225,9 @@ export class Project {
       case TipType.Capacitor:
         r.setIcon('capacitor');
         break;
+      case TipType.Capacitor2:
+        r.setSingleIcon('logo-capacitor');
+        break;
       case TipType.React:
         r.setIcon('react');
         break;

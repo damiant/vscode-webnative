@@ -319,7 +319,8 @@ export async function getRecommendations(project: Project, context: ExtensionCon
     `Recommendations`,
     `The following recommendations were made by analyzing the package.json file of your ${project.type} app.`,
     TipType.Idea,
-    !isWebProjectOnly,
+    true,
+    // !isWebProjectOnly, TODO: Having this expanded is a little annoying maybe remember if the user closes it
   );
 
   // General Rules around node modules (eg Jquery)

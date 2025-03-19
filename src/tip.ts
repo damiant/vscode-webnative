@@ -297,6 +297,7 @@ export enum TipType {
   Warning,
   Idea,
   Capacitor,
+  Capacitor2, // Colored
   Cordova,
   Check,
   CheckMark,
