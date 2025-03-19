@@ -51,7 +51,7 @@ export class Tip {
     public readonly message: string,
     public readonly type?: TipType,
     public readonly description?: string,
-    public command?: string | string[],
+    public command?: string | string[] | any[],
     public commandTitle?: string,
     public readonly commandSuccess?: string,
     public url?: string,

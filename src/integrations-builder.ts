@@ -18,7 +18,7 @@ export function checkBuilderIntegration(project: Project): Tip[] {
         '',
         TipType.Builder,
         'Integrate Builder.io into this project?',
-        ['npm init builder.io@latest'],
+        ['npm init builder.io@latest', runApp],
         'Add Builder',
         'Builder support added to your project. Click Run to complete the integration.',
         undefined,
@@ -41,15 +41,13 @@ export function checkBuilderIntegration(project: Project): Tip[] {
           },
         ])
         .showProgressDialog()
-        .setQueuedAction(runApp, undefined)
         .canIgnore(),
     );
   return tips;
 }
 
-function runApp(queueFunction: QueueFunction): Promise<void> {
+function runApp(): Promise<void> {
   return new Promise((resolve) => {
-    queueFunction();
     showOutput();
     commands.executeCommand(CommandName.RunForWeb);
     resolve();

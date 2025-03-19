@@ -143,44 +143,48 @@ export async function fixIssue(
         }
       }, 1000);
 
-      const commandList = Array.isArray(command) ? command : [command];
+      const commandList: string[] | any[] = Array.isArray(command) ? command : [command];
 
       let clear = true;
       for (const cmd of commandList) {
-        startCommand(tip, cmd, clear);
-        clear = false;
-        const secondsTotal = estimateRunTime(cmd);
-        if (secondsTotal) {
-          increment = 100.0 / secondsTotal;
-          percentage = 0;
-        }
-        try {
-          let retry = true;
-          while (retry) {
-            try {
-              retry = await run(
-                rootPath,
-                cmd,
-                cancelObject,
-                tip.features,
-                tip.runPoints,
-                progress,
-                ionicProvider,
-                undefined,
-                undefined,
-                tip.data,
-              );
-            } catch (err) {
-              retry = false;
-              failed = true;
-              writeError(err);
+        if (cmd instanceof Function) {
+          await cmd();
+        } else {
+          startCommand(tip, cmd, clear);
+          clear = false;
+          const secondsTotal = estimateRunTime(cmd);
+          if (secondsTotal) {
+            increment = 100.0 / secondsTotal;
+            percentage = 0;
+          }
+          try {
+            let retry = true;
+            while (retry) {
+              try {
+                retry = await run(
+                  rootPath,
+                  cmd,
+                  cancelObject,
+                  tip.features,
+                  tip.runPoints,
+                  progress,
+                  ionicProvider,
+                  undefined,
+                  undefined,
+                  tip.data,
+                );
+              } catch (err) {
+                retry = false;
+                failed = true;
+                writeError(err);
+              }
             }
+          } finally {
+            if (cancelObject?.cancelled) {
+              cancelled = true;
+            }
+            finishCommand(tip);
           }
-        } finally {
-          if (cancelObject?.cancelled) {
-            cancelled = true;
-          }
-          finishCommand(tip);
         }
       }
       return true;
