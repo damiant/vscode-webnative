@@ -7,7 +7,7 @@ import { Recommendation } from './recommendation';
 import { installPackage, reviewProject } from './project';
 import { Tip } from './tip';
 import { openUri } from './utilities';
-import { CommandName, InternalCommand } from './command-name';
+import { CommandName } from './command-name';
 import { packageUpgrade } from './rules-package-upgrade';
 import { ProjectsProvider } from './projects-provider';
 import { buildConfiguration } from './build-configuration';

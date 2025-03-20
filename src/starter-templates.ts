@@ -305,6 +305,14 @@ export const starterTemplates: Template[] = [
     ],
   },
   {
+    type: 'waku',
+    typeName: 'New Waku Project',
+    name: 'Waku',
+    description: 'A starter Waku project',
+    url: 'https://waku.gg/',
+    commands: [`npm create waku@latest -- --project-name "$(project-name)"`],
+  },
+  {
     type: 'nextjs',
     typeName: 'New Next.js Project',
     name: 'Next.js',
@@ -341,6 +349,7 @@ export const frameworks = [
   { name: 'Qwik', icon: 'qwik.svg', icon2: 'vite.svg', type: 'vite-qwik' },
   { name: 'Lit', icon: 'lit.svg', icon2: 'vite.svg', type: 'vite-lit' },
   { name: 'Vue', icon: 'vue.svg', icon2: 'vite.svg', type: 'vite-vue' },
+  { name: 'Waku', icon: 'waku.svg', type: 'waku' },
   { name: 'TanStack', icon: 'tanstack.png', type: 'tanstack-start' },
   { name: 'Capacitor Plugin', icon: 'capacitor.svg', type: 'plugin' },
 ];
