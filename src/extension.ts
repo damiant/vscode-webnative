@@ -503,7 +503,12 @@ export async function activate(context: ExtensionContext) {
     if (e.focused) {
       // Focused in this window
       const txt = await env.clipboard.readText();
-      if (txt.startsWith('npx')) {
+      let autoRun = exState.lastAutoRun !== txt;
+      if (!txt.startsWith('npx @builder-io')) autoRun = false;
+      // TODO: This is for demo purposes, it shouldnt really run
+      // things you put on the clipboard.
+      if (autoRun) {
+        exState.lastAutoRun = txt;
         runInTerminal(txt);
       }
     }

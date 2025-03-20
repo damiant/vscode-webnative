@@ -59,6 +59,7 @@ interface ExState {
   runAndroid: Tip;
   runWeb: Tip;
   lastRun: CapacitorPlatform;
+  lastAutoRun?: string; // Last command that automatically run via clipboard
   projectRef: Project;
   runStatusBar: StatusBarItem | undefined;
   openWebStatusBar: StatusBarItem | undefined;
