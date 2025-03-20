@@ -52,6 +52,7 @@ import {
   TextDocument,
   languages,
   StatusBarAlignment,
+  env,
 } from 'vscode';
 import { existsSync } from 'fs';
 import { CommandTitle } from './command-title';
@@ -59,6 +60,7 @@ import { autoFixOtherImports } from './imports-icons';
 import { setSetting, WorkspaceSection, WorkspaceSetting } from './workspace-state';
 import { viewInEditor } from './webview-preview';
 import { qrView } from './webview-debug';
+import { runInTerminal } from './terminal';
 
 /**
  * Runs the command while showing a vscode window that can be cancelled
@@ -495,6 +497,17 @@ export async function activate(context: ExtensionContext) {
       showTips();
     }
   }
+
+  window.onDidChangeWindowState(async (e) => {
+    writeWN(`Window state changed: ${e.focused}`);
+    if (e.focused) {
+      // Focused in this window
+      const txt = await env.clipboard.readText();
+      if (txt.startsWith('npx')) {
+        runInTerminal(txt);
+      }
+    }
+  });
 
   // Ensures the Dev Server is Showing
   //qrView(undefined, undefined);
