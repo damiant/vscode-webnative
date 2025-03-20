@@ -1,4 +1,4 @@
-import { fixIssue } from './extension';
+import { fixIssue } from './features/fix-issue';
 import { npmInstall } from './node-commands';
 import { Tip } from './tip';
 import { getRunOutput, showProgress } from './utilities';
