@@ -15,6 +15,7 @@ export enum CommandName {
   ProjectsRefresh = 'webnative.projectRefresh',
   ProjectSelect = 'webnative.projectSelect',
   BuildConfig = 'webnative.buildConfig',
+  StatusRun = 'webnative.statusRun',
 
   LiveReload = 'webnative.liveReload',
   LiveReloadSelected = 'webnative.liveReloadSelected',
@@ -36,13 +37,16 @@ export enum CommandName {
   RunForIOS = 'webnative.runIOS',
   RunForAndroid = 'webnative.runAndroid',
   RunForWeb = 'webnative.runWeb',
+  ShowLogs = 'webnative.showLogs',
+  OpenWeb = 'webnative.openWeb',
+  OpenEditor = 'webnative.openEditor',
   Sync = 'webnative.capSync',
   Debug = 'webnative.debug',
   Build = 'webnative.build',
   OpenInXCode = 'webnative.openXcode',
   OpenInAndroidStudio = 'webnative.openAndroidStudio',
   ViewDevServer = 'webnative.viewDevServer', // View the dev server window
-  hideDevServer = 'webnative.hideDevServer', // Hide the dev server window
+  HideDevServer = 'webnative.hideDevServer', // Hide the dev server window
 }
 
 export enum InternalCommand {

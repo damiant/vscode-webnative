@@ -13,13 +13,13 @@ function getOutputChannel(): OutputChannel {
 export function clearOutput(): OutputChannel {
   const channel = getOutputChannel();
   channel.clear();
-  showOutput();
+  //showOutput();
   return channel;
 }
 
 export function showOutput() {
   const channel = getOutputChannel();
-  //channel.show();
+  channel.show();
 }
 
 export function write(message: string) {

@@ -159,7 +159,6 @@ export class PluginService {
     any: boolean,
   ): Plugin[] {
     let count = 0;
-    const termsWithDash = this.replaceAll(terms, ' ', '-');
 
     const list = this.plugins.filter((plugin) => {
       try {

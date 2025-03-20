@@ -32,6 +32,7 @@ import { ImportQuickFixProvider } from './quick-fix';
 import {
   cancelIfRunning,
   finishCommand,
+  isRunning,
   markActionAsCancelled,
   markActionAsRunning,
   markOperationAsRunning,
@@ -50,11 +51,16 @@ import {
   debug,
   TextDocument,
   languages,
+  StatusBarAlignment,
+  env,
 } from 'vscode';
 import { existsSync } from 'fs';
 import { CommandTitle } from './command-title';
 import { autoFixOtherImports } from './imports-icons';
 import { setSetting, WorkspaceSection, WorkspaceSetting } from './workspace-state';
+import { viewInEditor } from './webview-preview';
+import { qrView } from './webview-debug';
+import { runInTerminal } from './terminal';
 
 /**
  * Runs the command while showing a vscode window that can be cancelled
@@ -81,13 +87,17 @@ export async function fixIssue(
 
   // If the task is already running then cancel it
   const didCancel = await cancelIfRunning(tip);
-  if (didCancel) return;
+  if (didCancel) {
+    finishCommand(tip);
+    return;
+  }
 
   markOperationAsRunning(tip);
 
   let msg = tip.commandProgress ? tip.commandProgress : tip.commandTitle ? tip.commandTitle : command;
   if (title) msg = title;
   let failed = false;
+  let cancelled = false;
   await window.withProgress(
     {
       location: tip.progressDialog ? ProgressLocation.Notification : ProgressLocation.Window,
@@ -106,7 +116,7 @@ export async function fixIssue(
           tip.cancelRequested = false;
           writeWN(`Stopped "${tip.title}"`);
           if (tip.features.includes(TipFeature.welcome)) {
-            commands.executeCommand(CommandName.hideDevServer);
+            commands.executeCommand(CommandName.HideDevServer);
           }
 
           if (tip.title.toLowerCase() == CapacitorPlatform.ios) {
@@ -135,41 +145,48 @@ export async function fixIssue(
         }
       }, 1000);
 
-      const commandList = Array.isArray(command) ? command : [command];
+      const commandList: string[] | any[] = Array.isArray(command) ? command : [command];
 
       let clear = true;
       for (const cmd of commandList) {
-        startCommand(tip, cmd, clear);
-        clear = false;
-        const secondsTotal = estimateRunTime(cmd);
-        if (secondsTotal) {
-          increment = 100.0 / secondsTotal;
-          percentage = 0;
-        }
-        try {
-          let retry = true;
-          while (retry) {
-            try {
-              retry = await run(
-                rootPath,
-                cmd,
-                cancelObject,
-                tip.features,
-                tip.runPoints,
-                progress,
-                ionicProvider,
-                undefined,
-                undefined,
-                tip.data,
-              );
-            } catch (err) {
-              retry = false;
-              failed = true;
-              writeError(err);
-            }
+        if (cmd instanceof Function) {
+          await cmd();
+        } else {
+          startCommand(tip, cmd, clear);
+          clear = false;
+          const secondsTotal = estimateRunTime(cmd);
+          if (secondsTotal) {
+            increment = 100.0 / secondsTotal;
+            percentage = 0;
           }
-        } finally {
-          finishCommand(tip);
+          try {
+            let retry = true;
+            while (retry) {
+              try {
+                retry = await run(
+                  rootPath,
+                  cmd,
+                  cancelObject,
+                  tip.features,
+                  tip.runPoints,
+                  progress,
+                  ionicProvider,
+                  undefined,
+                  undefined,
+                  tip.data,
+                );
+              } catch (err) {
+                retry = false;
+                failed = true;
+                writeError(err);
+              }
+            }
+          } finally {
+            if (cancelObject?.cancelled) {
+              cancelled = true;
+            }
+            finishCommand(tip);
+          }
         }
       }
       return true;
@@ -182,13 +199,13 @@ export async function fixIssue(
     write(successMessage);
   }
   if (tip.title) {
-    if (failed) {
+    if (failed && !cancelled) {
       writeError(`${tip.title} Failed.`);
+      showOutput();
     } else {
       writeWN(`${tip.title} Completed.`);
     }
     write('');
-    showOutput();
   }
 
   if (tip.syncOnSuccess) {
@@ -222,13 +239,48 @@ export async function activate(context: ExtensionContext) {
   const projectsProvider = new ProjectsProvider(rootPath, context);
   const projectsView = window.createTreeView('webnative-zprojects', { treeDataProvider: projectsProvider });
 
-  // Quick Fixes
+  const statusBarBuild = window.createStatusBarItem(StatusBarAlignment.Left, 1000);
+  statusBarBuild.command = CommandName.Debug;
+  statusBarBuild.text = `$(debug-alt)`;
+  statusBarBuild.tooltip = 'Debug the current project';
+  statusBarBuild.show();
+  context.subscriptions.push(statusBarBuild);
+
+  const statusBarRun = window.createStatusBarItem(StatusBarAlignment.Left, 1000);
+  statusBarRun.command = CommandName.RunForWeb;
+  statusBarRun.text = `$(play)`;
+  statusBarRun.tooltip = 'Run the current project';
+  statusBarRun.show();
+  context.subscriptions.push(statusBarRun);
+  exState.runStatusBar = statusBarRun;
+
+  const statusBarOpenWeb = window.createStatusBarItem(StatusBarAlignment.Left, 100);
+  statusBarOpenWeb.command = CommandName.OpenWeb;
+  statusBarOpenWeb.text = `$(globe)`;
+  statusBarOpenWeb.tooltip = 'Open the current project in a browser';
+  statusBarOpenWeb.hide();
+  context.subscriptions.push(statusBarOpenWeb);
+  exState.openWebStatusBar = statusBarOpenWeb;
+  commands.registerCommand(CommandName.OpenWeb, async () => {
+    openUri(exState.localUrl);
+  });
+
+  const statusBarOpenEditor = window.createStatusBarItem(StatusBarAlignment.Left, 100);
+  statusBarOpenEditor.command = CommandName.OpenEditor;
+  statusBarOpenEditor.text = `$(search-new-editor)`;
+  statusBarOpenEditor.tooltip = 'Open the current project in an editor window';
+  statusBarOpenEditor.hide();
+  context.subscriptions.push(statusBarOpenEditor);
+  exState.openEditorStatusBar = statusBarOpenEditor;
+  commands.registerCommand(CommandName.OpenEditor, async () => {
+    viewInEditor(exState.localUrl ?? 'https://webnative.dev', true, false, true, true);
+  });
 
   // Dev Server Running Panel
-  const ionicDevServerProvider = new DevServerProvider(rootPath, context);
+  const devServerProvider = new DevServerProvider(rootPath, context);
 
   context.subscriptions.push(
-    window.registerWebviewViewProvider('webnative-devserver', ionicDevServerProvider, {
+    window.registerWebviewViewProvider('webnative-devserver', devServerProvider, {
       webviewOptions: { retainContextWhenHidden: false },
     }),
   );
@@ -286,6 +338,10 @@ export async function activate(context: ExtensionContext) {
   });
   commands.registerCommand(CommandName.RunForWeb, async () => {
     await findAndRun(ionicProvider, rootPath, CommandTitle.RunForWeb);
+  });
+  commands.registerCommand(CommandName.ShowLogs, async () => {
+    exState.channelFocus = true;
+    showOutput();
   });
   commands.registerCommand(CommandName.Sync, async () => {
     await findAndRun(ionicProvider, rootPath, CommandTitle.Sync);
@@ -410,7 +466,7 @@ export async function activate(context: ExtensionContext) {
   });
 
   commands.registerCommand(CommandName.Debug, async () => {
-    runAction(debugOnWeb(exState.projectRef), ionicProvider, rootPath);
+    runAction(debugOnWeb(exState.projectRef, 'Web'), ionicProvider, rootPath);
   });
 
   commands.registerCommand(CommandName.Build, async () => {
@@ -441,6 +497,25 @@ export async function activate(context: ExtensionContext) {
       showTips();
     }
   }
+
+  window.onDidChangeWindowState(async (e) => {
+    writeWN(`Window state changed: ${e.focused}`);
+    if (e.focused) {
+      // Focused in this window
+      const txt = await env.clipboard.readText();
+      let autoRun = exState.lastAutoRun !== txt;
+      if (!txt.startsWith('npx @builder-io')) autoRun = false;
+      // TODO: This is for demo purposes, it shouldnt really run
+      // things you put on the clipboard.
+      if (autoRun) {
+        exState.lastAutoRun = txt;
+        runInTerminal(txt);
+      }
+    }
+  });
+
+  // Ensures the Dev Server is Showing
+  //qrView(undefined, undefined);
 }
 
 async function runAgain(ionicProvider: ExTreeProvider, rootPath: string) {
@@ -476,7 +551,7 @@ function findRecursive(label: string, items: Recommendation[]): Recommendation |
         return found;
       }
     }
-    if (item.label == label) {
+    if (item.label == label || item.id == label) {
       return item;
     }
   }
@@ -506,10 +581,17 @@ async function runAction(tip: Tip, ionicProvider: ExTreeProvider, rootPath: stri
   if (await waitForOtherActions(tip)) {
     return; // Canceled
   }
-  if (tip.stoppable) {
+  if (tip.stoppable || tip.contextValue == Context.stop) {
+    if (isRunning(tip)) {
+      cancelIfRunning(tip);
+      markActionAsCancelled(tip);
+      ionicProvider.refresh();
+      return;
+    }
     markActionAsRunning(tip);
     ionicProvider.refresh();
   }
+
   await tip.generateCommand();
   tip.generateTitle();
   if (tip.command) {
@@ -538,6 +620,7 @@ async function runAction(tip: Tip, ionicProvider: ExTreeProvider, rootPath: stri
     if (command) {
       execute(tip, exState.context);
       fixIssue(command, rootPath, ionicProvider, tip);
+
       return;
     }
   } else {

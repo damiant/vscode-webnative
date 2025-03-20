@@ -22,7 +22,7 @@ import { window, workspace } from 'vscode';
 import { write, writeError } from './logging';
 import { createServer } from 'http';
 import { join } from 'path';
-import { viewInEditor } from './editor-preview';
+import { viewInEditor } from './webview-preview';
 
 /**
  * Create the ionic serve command
@@ -137,10 +137,10 @@ function guessServeCommand(project: Project): string | undefined {
       return npmRun('ionic:serve');
     } else if (packageFile.scripts?.serve) {
       return npmRun('serve');
-    } else if (packageFile.scripts?.start) {
-      return npmRun('start');
     } else if (packageFile.scripts?.dev) {
       return npmRun('dev');
+    } else if (packageFile.scripts?.start) {
+      return npmRun('start');
     }
   }
   return undefined;

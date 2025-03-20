@@ -50,7 +50,7 @@
     "Other"
   ],
   "activationEvents": [
-    "onView:ionic",
+    "onView:webnative",
     "onStartupFinished"
   ],
   "main": "./out/extension.js",
@@ -110,8 +110,8 @@
       "wn-recommendation": [
         {
           "id": "wn-tree",
-          "name": "",
-          "contextualTitle": ""
+          "name": "WebNative",
+          "contextualTitle": "WebNative"
         },
         {
           "id": "webnative-devserver",
@@ -155,7 +155,7 @@
     "commands": [
       {
         "command": "webnative.refresh",
-        "title": "WebNative:Refresh",
+        "title": "Refresh",
         "icon": {
           "light": "resources/light/refresh.svg",
           "dark": "resources/dark/refresh.svg"
@@ -303,18 +303,18 @@
       },
       {
         "command": "webnative.webNexus",
-        "title": "Open in Nexus Browser",
+        "title": "Show Preview Window",
         "icon": {
-          "light": "resources/light/nexus.svg",
-          "dark": "resources/dark/nexus.svg"
+          "light": "resources/light/webnative.svg",
+          "dark": "resources/dark/webnative.svg"
         }
       },
       {
         "command": "webnative.webNexusSelected",
-        "title": "Open in Nexus Browser",
+        "title": "Show Preview Window",
         "icon": {
-          "light": "resources/light/nexus-select.svg",
-          "dark": "resources/dark/nexus-select.svg"
+          "light": "resources/light/webnative-select.svg",
+          "dark": "resources/dark/webnative-select.svg"
         }
       },
       {
@@ -510,22 +510,22 @@
         },
         {
           "command": "webnative.webOpenBrowser",
-          "when": "view == wn-tree && viewItem == webConfig && webConfig !== WebConfigWebBrowser && webConfig",
+          "when": "view == wn-tree && viewItem == webConfig && webConfig !== WebConfigWebBrowser",
           "group": "inline"
         },
         {
           "command": "webnative.webOpenBrowserSelected",
-          "when": "view == wn-tree && viewItem == webConfig && (webConfig == WebConfigWebBrowser || !webConfig)",
+          "when": "view == wn-tree && viewItem == webConfig && webConfig == WebConfigWebBrowser",
           "group": "inline"
         },
         {
           "command": "webnative.webNexus",
-          "when": "view == wn-tree && viewItem == webConfig && webConfig !== WebConfigNexusBrowser",
+          "when": "view == wn-tree && viewItem == webConfig && (webConfig !== WebConfigNexusBrowser && webConfig)",
           "group": "inline"
         },
         {
           "command": "webnative.webNexusSelected",
-          "when": "view == wn-tree && viewItem == webConfig && webConfig == WebConfigNexusBrowser",
+          "when": "view == wn-tree && viewItem == webConfig && (webConfig == WebConfigNexusBrowser || !webConfig)",
           "group": "inline"
         },
         {
@@ -556,12 +556,12 @@
       ]
     },
     "configuration": {
-      "title": "Ionic",
+      "title": "WebNative",
       "properties": {
         "webnative.defaultPort": {
           "type": "number",
           "default": 8100,
-          "description": "The default port number used when serving your Ionic app (default is 8100)."
+          "description": "The default port number used when serving your app (default is 8100)."
         },
         "webnative.shellPath": {
           "type": "string",
@@ -573,11 +573,6 @@
           "type": "boolean",
           "default": false,
           "description": "Use the production configuration when building the application."
-        },
-        "webnative.ignoreIonicCLIConfig": {
-          "type": "boolean",
-          "default": false,
-          "description": "Ignore the settings in Ionic CLI config."
         },
         "webnative.javaHome": {
           "type": "string",
@@ -601,6 +596,17 @@
           ],
           "default": "",
           "description": "Whether to automatically import ion-icons for this project."
+        },
+        "webnative.openBrowserOnRun": {
+          "type": "string",
+          "scope": "workspace",
+          "enum": [
+            "yes",
+            "no",
+            ""
+          ],
+          "default": "",
+          "description": "Whether to open a browser whenever you click run."
         },
         "webnative.manualNewProjects": {
           "type": "boolean",
@@ -628,18 +634,17 @@
   },
   "prettier": "@ionic/prettier-config",
   "devDependencies": {
-    "@ionic/eslint-config": "^0.3.0",
     "@ionic/prettier-config": "4.0.0",
-    "@types/glob": "7.2.0",
     "@types/netmask": "^2.0.5",
-    "@types/node": "18.19.26",
+    "@types/node": "22.13.10",
     "@types/vscode": "1.65.0",
-    "@typescript-eslint/eslint-plugin": "5.12.1",
-    "@typescript-eslint/parser": "5.12.1",
-    "esbuild": "0.14.23",
-    "eslint": "^7.32.0",
+    "@typescript-eslint/eslint-plugin": "8.26.1",
+    "@typescript-eslint/parser": "8.26.1",
+    "@webnativellc/eslint-config": "0.4.0",
+    "esbuild": "0.25.1",
+    "eslint": "9.22.0",
     "husky": "^7.0.0",
-    "typescript": "5.0.4"
+    "typescript": "5.8.2"
   },
   "dependencies": {
     "@trapezedev/configure": "7.1.3",
@@ -647,10 +652,11 @@
     "globule": "1.3.4",
     "htmlparser2": "^9.1.0",
     "netmask": "2.0.2",
-    "rimraf": "4.4.1",
-    "semver": "7.6.3",
+    "rimraf": "6.0.1",
+    "semver": "7.7.1",
     "simple-plist": "1.3.0",
-    "ts-morph": "23.0.0",
+    "ts-morph": "25.0.1",
+    "typescript-eslint": "^8.26.1",
     "xcode": "3.0.1"
   }
 }

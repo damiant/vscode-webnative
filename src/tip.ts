@@ -8,6 +8,11 @@ export enum TipFeature {
   welcome,
 }
 
+export enum RunStatus {
+  Running,
+  Idle,
+}
+
 export type QueueFunction = () => void;
 
 export class Tip {
@@ -33,6 +38,7 @@ export class Tip {
   public features: Array<TipFeature> = [];
   public relatedDependency: string;
 
+  private onRunStatus: (status: RunStatus) => void;
   private onAction: (...args) => Promise<ActionResult> | Promise<void>;
   private onQueuedAction: (...args) => Promise<ActionResult> | Promise<void>;
   private onCommand: (...args) => Promise<string>;
@@ -45,7 +51,7 @@ export class Tip {
     public readonly message: string,
     public readonly type?: TipType,
     public readonly description?: string,
-    public command?: string | string[],
+    public command?: string | string[] | any[],
     public commandTitle?: string,
     public readonly commandSuccess?: string,
     public url?: string,
@@ -151,6 +157,17 @@ export class Tip {
   setAction(func: (...argsIn) => Promise<ActionResult> | Promise<void>, ...args) {
     this.onAction = func;
     this.actionArgs = args;
+    return this;
+  }
+
+  applyRunStatus(status: RunStatus) {
+    if (this.onRunStatus) {
+      this.onRunStatus(status);
+    }
+  }
+
+  setRunStatus(func: (status: RunStatus) => void) {
+    this.onRunStatus = func;
     return this;
   }
 
@@ -280,6 +297,7 @@ export enum TipType {
   Warning,
   Idea,
   Capacitor,
+  Capacitor2, // Colored
   Cordova,
   Check,
   CheckMark,
@@ -296,6 +314,7 @@ export enum TipType {
   Comment,
   Settings,
   Files,
+  Builder,
   Sync,
   Add,
   Dependency,
@@ -309,4 +328,5 @@ export interface RunPoint {
   text: string; // Search text in the log entry
   title: string; // Title used for progress
   refresh?: boolean; // Refresh the tree view
+  action?: (message: string) => Promise<string>; // Action to take
 }

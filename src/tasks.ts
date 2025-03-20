@@ -3,7 +3,7 @@ import { InternalCommand } from './command-name';
 import { Context } from './context-variables';
 import { exState } from './wn-tree-provider';
 import { clearOutput, write, writeWN } from './logging';
-import { Tip } from './tip';
+import { RunStatus, Tip } from './tip';
 import { channelShow, replaceAll, stopPublishing } from './utilities';
 
 interface RunningAction {
@@ -52,6 +52,7 @@ function cancelRunning(tip: Tip): Promise<void> {
     if (tip.description == 'Serve') {
       stopPublishing();
     }
+    tip.applyRunStatus(RunStatus.Idle);
   }
   return new Promise((resolve) => setTimeout(resolve, 1000));
 }
@@ -75,6 +76,7 @@ export function finishCommand(tip: Tip) {
   runningActions = runningActions.filter((op: RunningAction) => {
     return !same(op, { tip, workspace: exState.workspace });
   });
+  tip.applyRunStatus(RunStatus.Idle);
 }
 
 export function startCommand(tip: Tip, cmd: string, clear?: boolean) {
@@ -91,6 +93,7 @@ export function startCommand(tip: Tip, cmd: string, clear?: boolean) {
         write(`> Workspace: ${exState.workspace}`);
       }
     }
+    tip.applyRunStatus(RunStatus.Running);
     write(`> ${replaceAll(command, InternalCommand.cwd, '')}`);
     channelShow();
   }

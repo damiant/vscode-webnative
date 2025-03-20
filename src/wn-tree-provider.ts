@@ -12,6 +12,7 @@ import {
   Event,
   EventEmitter,
   ExtensionContext,
+  StatusBarItem,
   TreeDataProvider,
   TreeItem,
   TreeView,
@@ -58,11 +59,22 @@ interface ExState {
   runAndroid: Tip;
   runWeb: Tip;
   lastRun: CapacitorPlatform;
+  lastAutoRun?: string; // Last command that automatically run via clipboard
   projectRef: Project;
+  runStatusBar: StatusBarItem | undefined;
+  openWebStatusBar: StatusBarItem | undefined;
+  openEditorStatusBar: StatusBarItem | undefined;
+  localUrl: string | undefined; // URL for the local browser
+  externalUrl: string | undefined; // URL for the external browser
 }
 export const exState: ExState = {
   view: undefined,
   context: undefined,
+  runStatusBar: undefined,
+  openWebStatusBar: undefined,
+  openEditorStatusBar: undefined,
+  localUrl: undefined,
+  externalUrl: undefined,
   skipAuth: false,
   projects: [],
   projectsView: undefined,
@@ -70,7 +82,7 @@ export const exState: ExState = {
   packageManager: PackageManager.npm,
   workspace: undefined,
   outputIsFocused: false,
-  channelFocus: true,
+  channelFocus: false,
   hasNodeModules: undefined,
   nodeModulesFolder: undefined,
   hasPackageJson: undefined,

@@ -3,10 +3,11 @@ import { CommandName, InternalCommand } from './command-name';
 import { exState } from './wn-tree-provider';
 import { getMonoRepoFolder, MonoRepoType } from './monorepo';
 import { Project } from './project';
-import { showProgress } from './utilities';
+import { getRunOutput, showProgress } from './utilities';
 import { existsSync } from 'fs';
 import { GlobalSetting, getGlobalSetting, setGlobalSetting } from './workspace-state';
-import { exists } from './analyzer';
+import { exists, isGreaterOrEqual, isVersionGreaterOrEqual } from './analyzer';
+import { hasPackageLock } from './package-lock';
 
 export enum PackageManager {
   npm,
@@ -120,6 +121,9 @@ export function preflightNPMCheck(project: Project): string {
   return preop;
 }
 
+async function getVersion(cmd: string): Promise<string> {
+  return await getRunOutput(cmd, '', undefined, true, true);
+}
 export async function suggestInstallAll(project: Project) {
   if (!exState || !exState.hasPackageJson) {
     return;
@@ -132,19 +136,54 @@ export async function suggestInstallAll(project: Project) {
   }
   if (getGlobalSetting(GlobalSetting.suggestNPMInstall) == 'no') return;
 
-  const res = await window.showInformationMessage(
-    `Would you like to install node modules for this project?`,
-    'Yes',
-    'No',
-    'Never',
-  );
+  const isNpm = hasPackageLock(project);
+  let message = `Would you like to install node modules for this project?`;
+  const options = [];
+  let noMessage = 'no';
+  if (!isNpm) {
+    if (isVersionGreaterOrEqual(await getVersion('npm -v'), '0.0.0')) {
+      options.push('npm');
+    }
+    if (isVersionGreaterOrEqual(await getVersion('pnpm -v'), '0.0.0')) {
+      options.push('pnpm');
+    }
+    if (isVersionGreaterOrEqual(await getVersion('yarn -v'), '0.0.0')) {
+      options.push('yarn');
+    }
+    if (isVersionGreaterOrEqual(await getVersion('bun -v'), '0.0.0')) {
+      options.push('bun');
+    }
+    if (options.length > 1) {
+      message = `Install using which package manager?`;
+      noMessage = 'None of these';
+    }
+  } else {
+    options.push('Yes');
+  }
+  const res = await window.showInformationMessage(message, ...options, noMessage, 'Never');
   if (res == 'Never') {
     setGlobalSetting(GlobalSetting.suggestNPMInstall, 'no');
     return;
   }
-  if (res != 'Yes') return;
+  if (!res || res == noMessage) return;
+  if (res == 'npm') {
+    exState.repoType = MonoRepoType.npm;
+    exState.packageManager = PackageManager.npm;
+  }
+  if (res == 'pnpm') {
+    exState.repoType = MonoRepoType.pnpm;
+    exState.packageManager = PackageManager.pnpm;
+  }
+  if (res == 'yarn') {
+    exState.repoType = MonoRepoType.yarn;
+    exState.packageManager = PackageManager.yarn;
+  }
+  if (res == 'bun') {
+    exState.packageManager = PackageManager.bun;
+  }
   showProgress(`Installing....`, async () => {
     await project.runAtRoot(npmInstallAll());
+    exState.view.reveal(undefined, { focus: true, expand: true });
     commands.executeCommand(CommandName.Refresh);
   });
 }

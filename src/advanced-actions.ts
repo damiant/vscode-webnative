@@ -19,6 +19,7 @@ enum Features {
   angularESBuild = '$(test-view-icon) Switch from WebPack to ESBuild (experimental)',
   showIgnoredRecommendations = '$(light-bulb) Show Ignored Recommendations',
   lintAndFormat = '$(test-view-icon) Lint and format on commit',
+  newProject = '$(plus) New Project',
 }
 
 interface AngularSchematic {
@@ -73,6 +74,7 @@ const angularSchematics: AngularSchematic[] = [
 
 export async function advancedActions(project: Project) {
   const picks: Array<QuickPickItem> = [];
+  picks.push({ label: Features.newProject });
   if (project.packageManager == PackageManager.npm) {
     picks.push({ label: Features.migrateToPNPM });
     picks.push({ label: Features.migrateToBun });
@@ -117,6 +119,9 @@ export async function advancedActions(project: Project) {
   const selection = await window.showQuickPick(picks, {});
   if (!selection) return;
   switch (selection.label) {
+    case Features.newProject:
+      commands.executeCommand(CommandName.NewProject);
+      break;
     case Features.migrateToPNPM:
       await runCommands(migrateToPNPM(), selection.label, project);
       break;
@@ -235,7 +240,7 @@ function angularUsingESBuild(project: Project): boolean {
       }
     }
     return false;
-  } catch (error) {
+  } catch (err) {
     return false;
   }
 }

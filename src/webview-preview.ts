@@ -42,6 +42,7 @@ export function viewInEditor(
   active?: boolean,
   existingPanel?: boolean,
   stopSpinner?: boolean,
+  overrideAsWeb?: boolean, // Force Web
 ): WebviewPanel {
   const id = `w${Math.random()}`;
   const panel = existingPanel
@@ -51,9 +52,13 @@ export function viewInEditor(
         retainContextWhenHidden: true,
       });
   lastUrl = url;
-  panel.webview.html = getWebviewContent(url, id);
+  panel.webview.html = url ? getWebviewContent(url, id) : '';
   panel.iconPath = iconFor('globe');
-  const device = getSetting(WorkspaceSetting.emulator);
+  let device = getSetting(WorkspaceSetting.emulator);
+
+  if (overrideAsWeb) {
+    device = devices[0];
+  }
 
   if (device) {
     panel.title = device.name;

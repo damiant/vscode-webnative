@@ -35,9 +35,9 @@ export function webProject(project: Project) {
   if (!project.isCapacitorPlugin) {
     project.tip(
       new Tip(
-        'Add Capacitor Integration',
+        'Integrate Capacitor',
         '',
-        TipType.Capacitor,
+        TipType.Capacitor2,
         'Integrate Capacitor with this project to make it native mobile?',
         [
           npmInstall(`@capacitor/core`),

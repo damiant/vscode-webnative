@@ -88,7 +88,7 @@ function processAndroidXML(folder: string) {
   });
 }
 
-function getAndroidManifestIntent(actionName) {
+function getAndroidManifestIntent(name: string) {
   function matches(attribute, value, array) {
     return array.find((element) => element[attribute] == value) != undefined;
   }
@@ -156,7 +156,7 @@ export async function load(fn: string, project: Project, context: ExtensionConte
 export const checkMinVersion = (library: string, minVersion: string, reason?: string, url?: string): Tip => {
   const v = coerce(allDependencies[library]);
   if (v && lt(v, minVersion)) {
-    const tip = writeMinVersionError(library, v, minVersion, reason).setRelatedDependency(library);
+    const tip = writeMinVersionError(library, v.version, minVersion, reason).setRelatedDependency(library);
     tip.url = url;
     return tip;
   }
@@ -165,7 +165,7 @@ export const checkMinVersion = (library: string, minVersion: string, reason?: st
 export const warnMinVersion = (library: string, minVersion: string, reason?: string, url?: string): Tip => {
   const v = coerce(allDependencies[library]);
   if (v && lt(v, minVersion)) {
-    const tip = writeMinVersionWarning(library, v, minVersion, reason, url).setRelatedDependency(library);
+    const tip = writeMinVersionWarning(library, v.version, minVersion, reason, url).setRelatedDependency(library);
     tip.url = url;
     return tip;
   }
@@ -339,9 +339,9 @@ export function checkConsistentVersions(lib1: string, lib2: string): Tip {
 
   if (v1 && v2 && compare(v1, v2)) {
     if (v1.major === v2.major) {
-      return writeConsistentVersionWarning(lib1, v1, lib2, v2);
+      return writeConsistentVersionWarning(lib1, v1.version, lib2, v2.version);
     } else {
-      return writeConsistentVersionError(lib1, v1, lib2, v2);
+      return writeConsistentVersionError(lib1, v1.version, lib2, v2.version);
     }
   }
 }

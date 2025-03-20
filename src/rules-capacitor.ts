@@ -420,9 +420,9 @@ export async function capacitorRecommendations(project: Project, forMigration: b
     const local = project.repoType != MonoRepoType.none ? InternalCommand.cwd : '';
     tips.push(
       new Tip(
-        'Add Capacitor Integration',
+        'Integrate Capacitor',
         '',
-        TipType.Capacitor,
+        TipType.Capacitor2,
         'Add the Capacitor integration to this project',
         [
           npmInstall('@capacitor/core@latest', '--save', '-E'),

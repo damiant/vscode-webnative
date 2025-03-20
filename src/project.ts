@@ -195,6 +195,9 @@ export class Project {
       case TipType.Files:
         r.setIcon('files');
         break;
+      case TipType.Builder:
+        r.setSingleIcon('logo-builder');
+        break;
       case TipType.Apple:
         r.setIcon('apple');
         break;
@@ -221,6 +224,9 @@ export class Project {
         break;
       case TipType.Capacitor:
         r.setIcon('capacitor');
+        break;
+      case TipType.Capacitor2:
+        r.setSingleIcon('logo-capacitor');
         break;
       case TipType.React:
         r.setIcon('react');
@@ -280,9 +286,12 @@ export class Project {
     return this.ignored.includes(txt);
   }
 
-  public add(tip: Tip) {
+  public add(tip: Tip, id?: string) {
     const r = this.asRecommendation(tip);
     if (!r) return;
+    if (id) {
+      r.id = id;
+    }
 
     if (this.subgroup) {
       this.subgroup.children.push(r);

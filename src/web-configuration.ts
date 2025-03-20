@@ -14,7 +14,7 @@ export function getWebConfiguration(): WebConfigSetting {
   if (setting) {
     return setting;
   } else {
-    return WebConfigSetting.browser;
+    return WebConfigSetting.nexus;
   }
 }
 

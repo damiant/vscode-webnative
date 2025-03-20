@@ -1,5 +1,5 @@
 import { RunPoint, TipFeature } from './tip';
-import { debugBrowser, viewInEditor } from './editor-preview';
+import { debugBrowser, viewInEditor } from './webview-preview';
 import { handleError } from './error-handler';
 import { exState, ExTreeProvider } from './wn-tree-provider';
 import { getMonoRepoFolder, getPackageJSONFilename } from './monorepo';
@@ -15,7 +15,7 @@ import { join } from 'path';
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { ChildProcess, exec, ExecException, ExecOptionsWithStringEncoding, spawn } from 'child_process';
 import { startStopLogServer } from './log-server';
-import { qrView } from './nexus-browser';
+import { qrView } from './webview-debug';
 import { CancellationToken, ProgressLocation, Uri, commands, window, workspace } from 'vscode';
 import { uncolor } from './uncolor';
 
@@ -179,15 +179,19 @@ export async function run(
 
   function launch(localUrl: string, externalUrl: string) {
     const config: WebConfigSetting = getWebConfiguration();
-    if (externalUrl) {
+    const url = externalUrl ?? localUrl;
+    if (url) {
       if (pub) {
         pub.stop();
       } else {
-        pub = new Publisher('devapp', auxData, portFrom(externalUrl), externalUrl.startsWith('https'));
+        if (!auxData) {
+          console.error(`auxData not set for launch of ${localUrl} ${externalUrl}`);
+        }
+        pub = new Publisher('devapp', auxData ?? '', portFrom(url), url.startsWith('https'));
       }
       pub.start().then(() => {
         if (config == WebConfigSetting.nexus) {
-          qrView(externalUrl);
+          qrView(externalUrl, localUrl);
         }
       });
     }
@@ -208,7 +212,10 @@ export async function run(
         openUri(localUrl);
         //}
         break;
+      case WebConfigSetting.nexus:
+        break;
       default: {
+        openUri(localUrl);
         //qrView(externalUrl);
         //viewAsQR(localUrl, externalUrl);
         break;
@@ -221,7 +228,7 @@ export async function run(
     if (tmp.length < 3) return 8100;
     return parseInt(tmp[2]);
   }
-
+  let answered = '';
   const logFilters: string[] = getSetting(WorkspaceSetting.logFilter);
   let logs: Array<string> = [];
   return new Promise((resolve, reject) => {
@@ -299,6 +306,9 @@ export async function run(
             if (url) {
               findLocalUrl = false;
               localUrl = url;
+              exState.localUrl = localUrl;
+              exState.openWebStatusBar.show();
+              exState.openEditorStatusBar.show();
               launchUrl();
             }
           }
@@ -316,6 +326,7 @@ export async function run(
             if (url) {
               findExternalUrl = false;
               externalUrl = url;
+              exState.externalUrl = externalUrl;
               launchUrl();
             }
           }
@@ -326,6 +337,19 @@ export async function run(
           for (const runPoint of runPoints) {
             if (data.includes(runPoint.text)) {
               progress.report({ message: runPoint.title });
+
+              if (runPoint.action) {
+                if (answered !== '') {
+                  data = data.replace(answered, '');
+                }
+                if (data.includes(runPoint.text)) {
+                  runPoint.action(runPoint.text).then((keystrokes) => {
+                    proc.stdin.write(keystrokes);
+                    writeWN(`Answered.`);
+                    answered = runPoint.text;
+                  });
+                }
+              }
               if (runPoint.refresh && ionicProvider) {
                 ionicProvider.refresh();
               }

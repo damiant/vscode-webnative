@@ -5,6 +5,10 @@ import { existsSync, readFileSync } from 'fs';
 import { tEnd, tStart } from './utilities';
 import { NpmPackage } from './npm-model';
 
+export function hasPackageLock(project: Project): boolean {
+  return existsSync(join(project.projectFolder(), 'package-lock.json'));
+}
+
 export function getVersionsFromPackageLock(project: Project): NpmPackage {
   if (project.packageManager != PackageManager.npm) return undefined;
   const lockFile = join(project.projectFolder(), 'package-lock.json');
