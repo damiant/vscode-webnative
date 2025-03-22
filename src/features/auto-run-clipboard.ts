@@ -11,8 +11,8 @@ export function autoRunClipboard() {
       const looksLikeCommand = txt.startsWith('npm ') || txt.startsWith('npx ');
       if (autoRun && looksLikeCommand) {
         const selection = await window.showInformationMessage(`Run "${txt}" in the terminal?`, 'Execute', 'Exit');
+        exState.lastAutoRun = txt;
         if (selection == 'Execute') {
-          exState.lastAutoRun = txt;
           runInTerminal(txt);
         }
       }

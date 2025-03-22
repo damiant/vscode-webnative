@@ -23,6 +23,7 @@ import { write, writeError } from './logging';
 import { createServer } from 'http';
 import { join } from 'path';
 import { viewInEditor } from './webview-preview';
+import { exists } from './analyzer';
 
 /**
  * Create the ionic serve command
@@ -61,8 +62,15 @@ async function runServe(
   const preop = preflightNPMCheck(project);
   const httpsForWeb = getSetting(WorkspaceSetting.httpsForWeb);
   const webConfig: WebConfigSetting = getWebConfiguration();
-  const externalIP = !getExtSetting(ExtensionSetting.internalAddress);
-  const defaultPort: number | undefined = workspace.getConfiguration(WorkspaceSection).get('defaultPort');
+  let externalIP = !getExtSetting(ExtensionSetting.internalAddress);
+  let defaultPort: number | undefined = workspace.getConfiguration(WorkspaceSection).get('defaultPort');
+
+  if (exists('next')) {
+    // Disable options for nextjs apps
+    externalIP = undefined;
+    defaultPort = undefined;
+  }
+
   if (webConfig.includes(WebConfigSetting.editor)) {
     exState.webView = viewInEditor('about:blank', true);
   }
