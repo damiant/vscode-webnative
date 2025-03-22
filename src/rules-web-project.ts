@@ -49,7 +49,7 @@ export function webProject(project: Project) {
         'Add Capacitor',
         'Capacitor added to this project',
         'https://capacitorjs.com',
-      ),
+      ).canIgnore(),
     );
   }
 }

@@ -434,7 +434,9 @@ export async function capacitorRecommendations(project: Project, forMigration: b
         'Capacitor added to this project',
         'https://capacitorjs.com/docs/cordova/migrating-from-cordova-to-capacitor',
         'Adding Capacitor to the project...',
-      ).showProgressDialog(),
+      )
+        .showProgressDialog()
+        .canIgnore(),
     );
   } else {
     if (!project.hasCapacitorProject(CapacitorPlatform.android) && exState.hasNodeModules) {
