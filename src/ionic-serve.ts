@@ -88,8 +88,6 @@ async function runServe(
 
   if (externalIP) {
     serveFlags += ` ${await externalArg(isNative)}`;
-  } else {
-    serveFlags += ` ${internalArg(project.frameworkType)}`;
   }
 
   if (defaultPort) {
@@ -190,15 +188,6 @@ async function isPortInUse(port: number, host: string | undefined): Promise<bool
 
     server.listen(port, host);
   });
-}
-
-function internalArg(framework: FrameworkType): string {
-  switch (framework) {
-    case 'angular-standalone':
-      return '';
-    default:
-      return '--host=localhost';
-  }
 }
 
 async function externalArg(isNative?: boolean): Promise<string> {
