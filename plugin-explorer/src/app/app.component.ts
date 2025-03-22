@@ -18,6 +18,7 @@ export class AppComponent implements OnInit {
   plugins: Plugin[] = [];
   terms = '';
   listTitle = '';
+  hasCapacitor = false;
   isInstalled: string | undefined = 'true';
   isCapOnly: string | undefined = 'false';
 
@@ -41,6 +42,9 @@ export class AppComponent implements OnInit {
         this.pluginService.calculatedUnknownPlugins();
         this.search();
         this.busy = false;
+        break;
+      case MessageType.init:
+        this.hasCapacitor = event.data?.capacitor;
         break;
       case MessageType.getPlugin:
         if (!event.data || !event.data.data || !event.data.data.name) break;

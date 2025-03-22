@@ -5,6 +5,7 @@ export enum MessageType {
   getPlugin = 'getPlugin',
   getInstalledDeps = 'getInstalledDeps',
   chooseVersion = 'choose-version',
+  init = 'init',
 }
 
 export function sendMessage(command: MessageType, value: string) {

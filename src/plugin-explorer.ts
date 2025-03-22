@@ -27,6 +27,7 @@ enum MessageType {
   getPlugin = 'getPlugin',
   uninstall = 'uninstall',
   chooseVersion = 'choose-version',
+  init = 'init',
 }
 
 export class PluginExplorerPanel {
@@ -49,6 +50,7 @@ export class PluginExplorerPanel {
     this.panel.onDidDispose(() => this.dispose(), null, this.disposables);
     this.panel.webview.html = this.getWebviewContent(this.panel.webview, extensionUri);
     this.setWebviewMessageListener(this.panel.webview, extensionUri, path, context);
+    this.panel.webview.postMessage({ command: MessageType.init, capacitor: exState.projectRef.isCapacitor });
   }
 
   public static init(extensionUri: Uri, path: string, context: ExtensionContext, provider: ExTreeProvider) {
@@ -62,7 +64,7 @@ export class PluginExplorerPanel {
         // Panel view type
         'pluginExplorer',
         // Panel title
-        'Plugins',
+        'Packages',
         ViewColumn.One,
         {
           enableScripts: true,
@@ -264,14 +266,28 @@ function getUri(webview: Webview, extensionUri: Uri, pathList: string[]) {
 async function getInstalledDeps(path: string, context: ExtensionContext): Promise<Dependency[]> {
   const summary: ProjectSummary = await inspectProject(path, context, undefined);
   const dependencies: Dependency[] = [];
-  for (const libType of ['Capacitor Plugin', 'Plugin']) {
-    for (const library of Object.keys(summary.packages).sort()) {
-      const pkg: PackageInfo = summary.packages[library];
-      if (pkg.depType == libType) {
-        dependencies.push({ name: library, version: pkg.version, latest: pkg.latest });
+  const capacitor = exState.projectRef.isCapacitor;
+  const libraries = [];
+  if (capacitor) {
+    for (const libType of ['Capacitor Plugin', 'Plugin']) {
+      for (const library of Object.keys(summary.packages).sort()) {
+        const pkg: PackageInfo = summary.packages[library];
+        if (pkg.depType == libType) {
+          libraries.push(library);
+        }
       }
     }
+  } else {
+    for (const library of Object.keys(summary.packages).sort()) {
+      libraries.push(library);
+    }
   }
+
+  for (const library of libraries) {
+    const pkg: PackageInfo = summary.packages[library];
+    dependencies.push({ name: library, version: pkg.version, latest: pkg.latest });
+  }
+
   return dependencies;
 }
 

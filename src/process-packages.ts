@@ -3,7 +3,7 @@ import { Command, Tip, TipType } from './tip';
 import { Project } from './project';
 import { getRunOutput, getStringFrom, setAllStringIn, stripJSON, tEnd, tStart } from './utilities';
 import { NpmDependency, NpmOutdatedDependency, NpmPackage, PackageType, PackageVersion } from './npm-model';
-import { listCommand, outdatedCommand, PackageManager } from './node-commands';
+import { listCommand, outdatedCommand } from './node-commands';
 import {
   CapProjectCache,
   LastManifestCheck,
