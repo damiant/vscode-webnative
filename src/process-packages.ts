@@ -16,7 +16,7 @@ import { exState } from './wn-tree-provider';
 import { write, writeError, writeWarning } from './logging';
 import { fixYarnV1Outdated, fixModernYarnList, fixYarnOutdated, MonoRepoType } from './monorepo';
 import { ExtensionContext, window } from 'vscode';
-import { existsSync, lstatSync, readFileSync, readdirSync } from 'fs';
+import { existsSync, lstatSync, readFileSync, readdirSync, writeFileSync } from 'fs';
 import { execSync } from 'child_process';
 import { getVersionsFromPackageLock } from './package-lock';
 
@@ -123,8 +123,10 @@ export async function processPackages(
       ]);
       versions = values[1];
       context.workspaceState.update(PackageCacheList(project), versions);
-
       context.workspaceState.update(PackageCacheModified(project), packagesModified.toUTCString());
+
+      // Recommend WebNative project
+      recommendWebNativeProject(project);
     } else {
       // Use the cached value
       // But also get a copy of the latest packages for updating later
@@ -174,6 +176,23 @@ export async function processPackages(
   inspectPackages(project.projectFolder() ? project.projectFolder() : folder, packages);
   tEnd('inspectPackages');
   return packages;
+}
+
+function recommendWebNativeProject(project: Project) {
+  if (!exState.replaceRecommendation) return;
+  const recFile = join(project.projectFolder(), '.vscode', 'extensions.json');
+  exState.replaceRecommendation = false;
+  if (existsSync(recFile)) {
+    const recs = JSON.parse(readFileSync(recFile, 'utf8'));
+    if (recs && recs.recommendations) {
+      if (!recs.recommendations.includes('Webnative.webnative')) {
+        recs.recommendations = recs.recommendations.filter((rec) => rec !== 'ionic.ionic');
+        recs.recommendations.push('Webnative.webnative');
+        writeFileSync(recFile, JSON.stringify(recs, null, 2));
+      }
+      return;
+    }
+  }
 }
 
 function getOutdatedData(outdated: string): any {

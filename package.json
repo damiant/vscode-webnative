@@ -2,7 +2,7 @@
   "name": "webnative",
   "displayName": "WebNative",
   "description": "Create and maintain web and native projects",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "icon": "media/webnative.png",
   "publisher": "WebNative",
   "keywords": [
@@ -13,6 +13,14 @@
     "React",
     "Vue",
     "Angular",
+    "Solid",
+    "Builder",
+    "Capacitor",
+    "Preact",
+    "Nuxt",
+    "Waku",
+    "Hydrogen",
+    "Ionic",
     "React Native",
     "Flutter"
   ],
