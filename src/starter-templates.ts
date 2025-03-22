@@ -305,6 +305,14 @@ export const starterTemplates: Template[] = [
     ],
   },
   {
+    type: 'waku',
+    typeName: 'New Waku Project',
+    name: 'Waku',
+    description: 'A starter Waku project',
+    url: 'https://waku.gg/',
+    commands: [`npm create waku@latest -- --project-name "$(project-name)"`],
+  },
+  {
     type: 'nextjs',
     typeName: 'New Next.js Project',
     name: 'Next.js',
@@ -312,6 +320,47 @@ export const starterTemplates: Template[] = [
     url: 'https://nextjs.org/docs/getting-started',
     commands: [`npx create-next-app@latest $(project-name) --skip-install --yes --ts --eslint`],
   },
+  {
+    type: 'hydrogen',
+    typeName: 'New Hydrogen Project',
+    name: 'Tailwind',
+    description: 'A starter Hydrogen project',
+    url: 'https://hydrogen.shopify.dev',
+    commands: [
+      `npm create @shopify/hydrogen@latest --  --path $(project-name) --mock-shop --language ts --shortcut --routes --markets none --styling tailwind --no-install-deps`,
+    ],
+  },
+  {
+    type: 'hydrogen',
+    typeName: 'New Hydrogen Project',
+    name: 'Vanilla',
+    description: 'A starter Hydrogen project',
+    url: 'https://hydrogen.shopify.dev',
+    commands: [
+      `npm create @shopify/hydrogen@latest --  --path $(project-name) --mock-shop --language ts --shortcut --routes --markets none --styling vanilla-extract --no-install-deps`,
+    ],
+  },
+  {
+    type: 'hydrogen',
+    typeName: 'New Hydrogen Project',
+    name: 'CSS Modules',
+    description: 'A starter Hydrogen project',
+    url: 'https://hydrogen.shopify.dev',
+    commands: [
+      `npm create @shopify/hydrogen@latest --  --path $(project-name) --mock-shop --language ts --shortcut --routes --markets none --styling css-modules --no-install-deps`,
+    ],
+  },
+  {
+    type: 'hydrogen',
+    typeName: 'New Hydrogen Project',
+    name: 'Post CSS',
+    description: 'A starter Hydrogen project',
+    url: 'https://hydrogen.shopify.dev',
+    commands: [
+      `npm create @shopify/hydrogen@latest --  --path $(project-name) --mock-shop --language ts --shortcut --routes --markets none --styling postcss --no-install-deps`,
+    ],
+  },
+
   // Seems to be tied to older vue-cli-service and doesnt run
   // {
   //   type: 'nuxt-ionic',
@@ -326,7 +375,8 @@ export const starterTemplates: Template[] = [
 export const frameworks = [
   { name: 'Angular', icon: 'angular.svg', type: 'custom-angular' },
   { name: 'Angular+Ionic', icon: 'angular.svg', icon2: 'ionic.svg', type: 'angular-standalone' },
-  { name: 'Vue+Ionic', icon: 'vue.svg', icon2: 'ionic.svg', type: 'vue' },
+  { name: 'Astro', icon: 'astro.svg', type: 'astro' },
+  { name: 'Hydrogen', icon: 'hydrogen.svg', type: 'hydrogen' },
   { name: 'Svelte+Ionic', icon: 'svelte.svg', icon2: 'ionic.svg', type: 'custom-ionic-svelte' },
   { name: 'Svelte', icon: 'svelte.svg', icon2: 'vite.svg', type: 'vite-svelte' },
   { name: 'Svelte', icon: 'svelte.svg', type: 'custom-svelte' },
@@ -335,14 +385,15 @@ export const frameworks = [
   { name: 'React', icon: 'react.svg', icon2: 'vite.svg', type: 'vite-react' },
   { name: 'Web', icon: 'web.svg', icon2: 'vite.svg', type: 'vite-web' },
   { name: 'Nuxt', icon: 'nuxt.svg', type: 'nuxt' },
-  { name: 'Astro', icon: 'astro.svg', type: 'astro' },
   { name: 'Next.js', icon: 'nextjs.svg', type: 'nextjs' },
   { name: 'React+Ionic', icon: 'react.svg', icon2: 'ionic.svg', type: 'react' },
   { name: 'Qwik', icon: 'qwik.svg', icon2: 'vite.svg', type: 'vite-qwik' },
   { name: 'Lit', icon: 'lit.svg', icon2: 'vite.svg', type: 'vite-lit' },
   { name: 'Vue', icon: 'vue.svg', icon2: 'vite.svg', type: 'vite-vue' },
+  { name: 'Waku', icon: 'waku.svg', type: 'waku' },
   { name: 'TanStack', icon: 'tanstack.png', type: 'tanstack-start' },
   { name: 'Capacitor Plugin', icon: 'capacitor.svg', type: 'plugin' },
+  { name: 'Vue+Ionic', icon: 'vue.svg', icon2: 'ionic.svg', type: 'vue' },
 ];
 
 export const targets = [

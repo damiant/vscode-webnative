@@ -67,10 +67,15 @@ async function runServe(
     exState.webView = viewInEditor('about:blank', true);
   }
   let serveFlags = '';
-  if ([WebConfigSetting.editor, WebConfigSetting.nexus, WebConfigSetting.none].includes(webConfig) || dontOpenBrowser) {
-    serveFlags += ' --no-open';
-  } else {
-    serveFlags += ' --open';
+  if (project.frameworkType === 'angular-standalone') {
+    if (
+      [WebConfigSetting.editor, WebConfigSetting.nexus, WebConfigSetting.none].includes(webConfig) ||
+      dontOpenBrowser
+    ) {
+      serveFlags += ' --no-open';
+    } else {
+      serveFlags += ' --open';
+    }
   }
 
   if (externalIP) {
@@ -120,7 +125,7 @@ function serveCmd(project: Project): string {
     case 'vue':
       return 'vue-cli-service serve';
     default: {
-      const cmd = guessServeCommand(project);
+      const cmd = guessServeCommand(project) + ' -- ';
       if (cmd) {
         return cmd;
       }
@@ -194,7 +199,7 @@ async function externalArg(isNative?: boolean): Promise<string> {
     const host = await selectExternalIPAddress();
     return `--host=${host}`;
   } else {
-    return '--host=0.0.0.0';
+    return '--host';
   }
   return `--host=${bestAddress()}`;
 }

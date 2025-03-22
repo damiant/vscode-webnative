@@ -13,13 +13,13 @@ import { checkForMonoRepo, FrameworkType, MonoRepoProject, MonoRepoType } from '
 import { CapacitorPlatform } from './capacitor-platform';
 import { addCommand, npmInstall, npmUninstall, PackageManager, saveDevArgument } from './node-commands';
 import { run } from './utilities';
-import { fixIssue } from './extension';
 import { getCapacitorConfigDistFolder } from './capacitor-config-file';
 import { Command, ExtensionContext, TreeItemCollapsibleState, commands, window } from 'vscode';
 import { join } from 'path';
 import { existsSync } from 'fs';
-import { write, writeError } from './logging';
+import { write } from './logging';
 import { Features } from './features';
+import { fixIssue } from './features/fix-issue';
 
 export class Project {
   name: string;
@@ -727,7 +727,7 @@ function guessFramework(project: Project) {
     project.frameworkType = 'angular-standalone';
   } else if (exists('react-scripts')) {
     project.frameworkType = 'react';
-  } else if (exists('vite')) {
+  } else if (exists('vite') && !exists('@remix-run/react')) {
     if (exists('react')) {
       project.frameworkType = 'react-vite';
     }

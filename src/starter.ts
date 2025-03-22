@@ -10,7 +10,7 @@ import {
   workspace,
 } from 'vscode';
 import { isWindows, openUri, replaceAll, run, showMessage, toTitleCase } from './utilities';
-import { writeWN } from './logging';
+import { showOutput, writeError, writeWN } from './logging';
 import { homedir } from 'os';
 import { ExtensionSetting, GlobalSetting, getExtSetting, getGlobalSetting, setGlobalSetting } from './workspace-state';
 import { join } from 'path';
@@ -18,6 +18,7 @@ import { existsSync, readdirSync } from 'fs';
 import { CapacitorPlatform } from './capacitor-platform';
 import { npmInstall } from './node-commands';
 import { frameworks, starterTemplates, targets, Template } from './starter-templates';
+import { runInTerminal } from './terminal';
 
 enum MessageType {
   getTemplates = 'getTemplates',
@@ -319,7 +320,9 @@ async function createProject(project: Project, webview: Webview, panel: IonicSta
   webview.postMessage({ command: MessageType.creatingProject });
 
   try {
-    await runCommands(cmds);
+    if (!(await runCommands(cmds))) {
+      return;
+    }
     const folderPathParsed = isWindows() ? folder : folder.split(`\\`).join(`/`);
     // Updated Uri.parse to Uri.file
     const folderUri = Uri.file(folderPathParsed);
@@ -329,7 +332,7 @@ async function createProject(project: Project, webview: Webview, panel: IonicSta
   }
 }
 
-async function runCommands(cmds: string[]) {
+async function runCommands(cmds: string[]): Promise<boolean> {
   let folder = getProjectsFolder();
   for (const cmd of cmds) {
     if (cmd.startsWith('#')) {
@@ -337,7 +340,14 @@ async function runCommands(cmds: string[]) {
       writeWN(`Folder changed to ${folder}`);
     } else {
       writeWN(cmd);
-      await run(folder, cmd, undefined, [], undefined, undefined);
+      try {
+        await run(folder, cmd, undefined, [], undefined, undefined);
+      } catch (e) {
+        writeError(e);
+        showOutput();
+        return false;
+      }
     }
   }
+  return true;
 }
