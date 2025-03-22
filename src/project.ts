@@ -727,7 +727,7 @@ function guessFramework(project: Project) {
     project.frameworkType = 'angular-standalone';
   } else if (exists('react-scripts')) {
     project.frameworkType = 'react';
-  } else if (exists('vite')) {
+  } else if (exists('vite') && !exists('@remix-run/react')) {
     if (exists('react')) {
       project.frameworkType = 'react-vite';
     }
