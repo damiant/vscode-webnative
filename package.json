@@ -2,7 +2,7 @@
   "name": "webnative",
   "displayName": "WebNative",
   "description": "Create and maintain web and native projects",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "icon": "media/webnative.png",
   "publisher": "WebNative",
   "keywords": [
