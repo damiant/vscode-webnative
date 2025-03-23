@@ -143,6 +143,7 @@ export async function run(
   suppressInfo?: boolean,
   auxData?: string,
   continousProgress?: boolean,
+  preventErrorFocus?: boolean,
 ): Promise<boolean> {
   if (command == InternalCommand.removeCordova) {
     return await removeCordovaFromPackageJSON(folder);
@@ -383,9 +384,11 @@ export async function run(
         }
       }
 
-      exState.channelFocus = true; // Allows the errors to show
-      focusOutput();
-      exState.channelFocus = false; // Reset so that if user fixes the error they dont see the logs again
+      if (!preventErrorFocus) {
+        exState.channelFocus = true; // Allows the errors to show
+        focusOutput();
+        exState.channelFocus = false; // Reset so that if user fixes the error they dont see the logs again
+      }
     });
 
     if (cancelObject) {

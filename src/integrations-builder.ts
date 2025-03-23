@@ -166,6 +166,7 @@ export function builderDevelopPrompt(project: Project): Tip {
           false,
           undefined,
           true,
+          true,
         );
       },
     );
