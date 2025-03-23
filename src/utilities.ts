@@ -142,6 +142,7 @@ export async function run(
   output?: RunResults,
   suppressInfo?: boolean,
   auxData?: string,
+  continousProgress?: boolean,
 ): Promise<boolean> {
   if (command == InternalCommand.removeCordova) {
     return await removeCordovaFromPackageJSON(folder);
@@ -216,8 +217,6 @@ export async function run(
         break;
       default: {
         openUri(localUrl);
-        //qrView(externalUrl);
-        //viewAsQR(localUrl, externalUrl);
         break;
       }
     }
@@ -312,6 +311,9 @@ export async function run(
               launchUrl();
             }
           }
+        }
+        if (continousProgress) {
+          progress.report({ message: uncolor(data.toString()) });
         }
         if (findExternalUrl) {
           if (data.includes('http')) {

@@ -1,4 +1,4 @@
-import { commands, Uri, window, workspace } from 'vscode';
+import { CancellationToken, commands, ProgressLocation, Uri, window, workspace } from 'vscode';
 import { exists } from './analyzer';
 import { CommandName } from './command-name';
 import { Project } from './project';
@@ -8,7 +8,7 @@ import { getSetting, setSetting, WorkspaceSetting } from './workspace-state';
 import { runInTerminal } from './terminal';
 import { join } from 'path';
 import { existsSync, writeFileSync } from 'fs';
-import { run, showProgress } from './utilities';
+import { CancelObject, run } from './utilities';
 import { exState } from './wn-tree-provider';
 
 export function checkBuilderIntegration(project: Project): Tip[] {
@@ -146,19 +146,29 @@ export function builderDevelopPrompt(project: Project): Tip {
       ignoreFocusOut: true,
     });
     if (!prompt) return undefined;
-    await showProgress(`Builder Developing...`, async () => {
-      await run(
-        project.projectFolder(),
-        `npx builder.io@latest code --prompt "${prompt}"`,
-        undefined,
-        [],
-        [],
-        undefined,
-        undefined,
-        undefined,
-        false,
-      );
-    });
+    await window.withProgress(
+      {
+        location: ProgressLocation.Notification,
+        title: `Builder`,
+        cancellable: true,
+      },
+      async (progress, token: CancellationToken) => {
+        const cancelObject: CancelObject = { proc: undefined, cancelled: false };
+        await run(
+          project.projectFolder(),
+          `npx builder.io@latest code --prompt "${prompt}"`,
+          cancelObject,
+          [],
+          [],
+          progress,
+          undefined,
+          undefined,
+          false,
+          undefined,
+          true,
+        );
+      },
+    );
     const view = 'View Response';
     const res = await window.showInformationMessage(`Builder Develop has Finished.`, 'OK', view);
     if (res == view) {
