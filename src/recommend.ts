@@ -42,9 +42,10 @@ import { CommandTitle } from './command-title';
 import { ExtensionContext, commands } from 'vscode';
 import {
   builderSettingsRules,
-  checkBuilderDevelop,
+  builderDevelopInteractive,
   checkBuilderIntegration,
-  checkBuilderIntegrationDevelop,
+  builderDevelopAuth,
+  builderDevelopPrompt,
 } from './integrations-builder';
 import { webProjectPackages } from './web-configuration';
 
@@ -214,7 +215,8 @@ export async function getRecommendations(project: Project, context: ExtensionCon
 
     project.add(buildAction(project));
 
-    project.add(checkBuilderDevelop(project));
+    project.add(builderDevelopInteractive(project));
+    project.add(builderDevelopPrompt(project));
 
     if (hasCapIos || hasCapAndroid) {
       project.add(
@@ -370,7 +372,7 @@ export async function getRecommendations(project: Project, context: ExtensionCon
     tEnd('capacitorRecommendations');
   }
   project.tips(checkBuilderIntegration(project));
-  project.tips(checkBuilderIntegrationDevelop(project));
+  project.tips(builderDevelopAuth(project));
   tStart('reviewPackages');
   if (!project.isCapacitor && !project.isCordova) {
     // The project is not using Cordova or Capacitor

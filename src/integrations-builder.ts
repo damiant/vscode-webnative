@@ -8,6 +8,8 @@ import { getSetting, setSetting, WorkspaceSetting } from './workspace-state';
 import { runInTerminal } from './terminal';
 import { join } from 'path';
 import { existsSync, writeFileSync } from 'fs';
+import { run, showProgress } from './utilities';
+import { exState } from './wn-tree-provider';
 
 export function checkBuilderIntegration(project: Project): Tip[] {
   const tips: Tip[] = [];
@@ -57,7 +59,7 @@ function runApp(): Promise<void> {
   });
 }
 
-export function checkBuilderIntegrationDevelop(project: Project): Tip[] {
+export function builderDevelopAuth(project: Project): Tip[] {
   const authed = getSetting(WorkspaceSetting.builderAuthenticated);
   if (authed) return [];
 
@@ -91,7 +93,7 @@ async function rememberAuth(): Promise<void> {
   await setSetting(WorkspaceSetting.builderAuthenticated, true);
 }
 
-export function checkBuilderDevelop(project: Project): Tip {
+export function builderDevelopInteractive(project: Project): Tip {
   const authed = getSetting(WorkspaceSetting.builderAuthenticated);
   if (!authed) return undefined;
 
@@ -110,6 +112,7 @@ export function checkBuilderDevelop(project: Project): Tip {
     .canRefreshAfter();
 }
 
+// Builder Rules File
 export function builderSettingsRules(project: Project): Tip {
   const authed = getSetting(WorkspaceSetting.builderAuthenticated);
   if (!authed) return undefined;
@@ -129,6 +132,39 @@ export function builderSettingsRules(project: Project): Tip {
     }
     const doc = await workspace.openTextDocument(Uri.file(file));
     await window.showTextDocument(doc);
+  });
+}
+
+// Builder Develop Prompt
+export function builderDevelopPrompt(project: Project): Tip {
+  const authed = getSetting(WorkspaceSetting.builderAuthenticated);
+  if (!authed) return undefined;
+  return new Tip('Chat', undefined, TipType.Builder, 'Chat with Builder Develop').setQueuedAction(async () => {
+    const prompt = await window.showInputBox({
+      title: 'Chat with Builder Develop',
+      placeHolder: 'Enter prompt (eg "Create a component called Pricing Page")',
+      ignoreFocusOut: true,
+    });
+    if (!prompt) return undefined;
+    await showProgress(`Builder Developing...`, async () => {
+      await run(
+        project.projectFolder(),
+        `npx builder.io@latest code --prompt "${prompt}"`,
+        undefined,
+        [],
+        [],
+        undefined,
+        undefined,
+        undefined,
+        false,
+      );
+    });
+    const view = 'View Response';
+    const res = await window.showInformationMessage(`Builder Develop has Finished.`, 'OK', view);
+    if (res == view) {
+      exState.channelFocus = true;
+      showOutput();
+    }
   });
 }
 
