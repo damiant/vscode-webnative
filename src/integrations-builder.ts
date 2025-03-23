@@ -140,41 +140,50 @@ export function builderDevelopPrompt(project: Project): Tip {
   const authed = getSetting(WorkspaceSetting.builderAuthenticated);
   if (!authed) return undefined;
   return new Tip('Chat', undefined, TipType.Builder, 'Chat with Builder Develop').setQueuedAction(async () => {
-    const prompt = await window.showInputBox({
-      title: 'Chat with Builder Develop',
-      placeHolder: 'Enter prompt (eg "Create a component called Pricing Page")',
-      ignoreFocusOut: true,
-    });
-    if (!prompt) return undefined;
-    await window.withProgress(
-      {
-        location: ProgressLocation.Notification,
-        title: `Builder`,
-        cancellable: true,
-      },
-      async (progress, token: CancellationToken) => {
-        const cancelObject: CancelObject = { proc: undefined, cancelled: false };
-        await run(
-          project.projectFolder(),
-          `npx builder.io@latest code --prompt "${prompt}"`,
-          cancelObject,
-          [],
-          [],
-          progress,
-          undefined,
-          undefined,
-          false,
-          undefined,
-          true,
-          true,
-        );
-      },
-    );
-    const view = 'View Response';
-    const res = await window.showInformationMessage(`Builder Develop has Finished.`, 'OK', view);
-    if (res == view) {
-      exState.channelFocus = true;
-      showOutput();
+    let chatting = true;
+    while (chatting) {
+      const prompt = await window.showInputBox({
+        title: 'Chat with Builder Develop',
+        placeHolder: 'Enter prompt (eg "Create a component called Pricing Page")',
+        ignoreFocusOut: true,
+      });
+      if (!prompt) return undefined;
+
+      await window.withProgress(
+        {
+          location: ProgressLocation.Notification,
+          title: `Builder`,
+          cancellable: true,
+        },
+        async (progress, token: CancellationToken) => {
+          const cancelObject: CancelObject = { proc: undefined, cancelled: false };
+          await run(
+            project.projectFolder(),
+            `npx builder.io@latest code --prompt "${prompt}"`,
+            cancelObject,
+            [],
+            [],
+            progress,
+            undefined,
+            undefined,
+            false,
+            undefined,
+            true,
+            true,
+          );
+        },
+      );
+      const view = 'View Response';
+      const chat = 'Chat More';
+      chatting = false;
+      const res = await window.showInformationMessage(`Builder Develop has Finished.`, chat, view, 'Exit');
+      if (res == view) {
+        exState.channelFocus = true;
+        showOutput();
+      }
+      if (res == chat) {
+        chatting = true;
+      }
     }
   });
 }
