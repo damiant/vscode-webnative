@@ -1,10 +1,13 @@
-import { commands } from 'vscode';
+import { commands, Uri, window, workspace } from 'vscode';
 import { exists } from './analyzer';
-import { ActionResult, CommandName } from './command-name';
-import { npmInstall } from './node-commands';
+import { CommandName } from './command-name';
 import { Project } from './project';
 import { QueueFunction, Tip, TipType } from './tip';
 import { showOutput } from './logging';
+import { getSetting, setSetting, WorkspaceSetting } from './workspace-state';
+import { runInTerminal } from './terminal';
+import { join } from 'path';
+import { existsSync, writeFileSync } from 'fs';
 
 export function checkBuilderIntegration(project: Project): Tip[] {
   const tips: Tip[] = [];
@@ -14,10 +17,10 @@ export function checkBuilderIntegration(project: Project): Tip[] {
   )
     tips.push(
       new Tip(
-        'Integrate Builder',
+        'Integrate Builder Publish',
         '',
         TipType.Builder,
-        'Integrate Builder.io into this project?',
+        'Integrate Builder.io Publish (Visual CMS) into this project?',
         ['npm init builder.io@latest', runApp],
         'Add Builder',
         'Builder support added to your project. Click Run to complete the integration.',
@@ -52,4 +55,84 @@ function runApp(): Promise<void> {
     commands.executeCommand(CommandName.RunForWeb);
     resolve();
   });
+}
+
+export function checkBuilderIntegrationDevelop(project: Project): Tip[] {
+  const authed = getSetting(WorkspaceSetting.builderAuthenticated);
+  if (authed) return [];
+
+  return [
+    new Tip(
+      'Authenticate for Builder Develop',
+      '',
+      TipType.Builder,
+      'Authenticate Builder.io Develop (AI Code Generation) for this project?',
+      ['npx builder.io auth', rememberAuth],
+      'Authenticate',
+      'Builder authenticated.',
+      undefined,
+      'Authenticating with Builder.io for this Project...',
+    )
+      .setRunPoints([
+        {
+          title: '',
+          text: 'Would you like to authenticate with Builder.io for this app?',
+          action: async (message) => {
+            return '\r\n'; // Just press enter
+          },
+        },
+      ])
+      .showProgressDialog()
+      .canIgnore(),
+  ];
+}
+
+async function rememberAuth(): Promise<void> {
+  await setSetting(WorkspaceSetting.builderAuthenticated, true);
+}
+
+export function checkBuilderDevelop(project: Project): Tip {
+  const authed = getSetting(WorkspaceSetting.builderAuthenticated);
+  if (!authed) return undefined;
+
+  return new Tip(
+    'Develop',
+    '',
+    TipType.Builder,
+    'Run Builder.io Develop',
+    undefined,
+    'Builder Develop',
+    '',
+    undefined,
+    'Builder Develop',
+  )
+    .setQueuedAction(develop)
+    .canRefreshAfter();
+}
+
+export function builderSettingsRules(project: Project): Tip {
+  const authed = getSetting(WorkspaceSetting.builderAuthenticated);
+  if (!authed) return undefined;
+  return new Tip(
+    'Builder Rules',
+    undefined,
+    TipType.Builder,
+    'Open the Builder Develop Rules file (custom instructions for the AI)',
+  ).setQueuedAction(async () => {
+    const file = join(project.projectFolder(), '.builderrules');
+    if (!existsSync(file)) {
+      writeFileSync(
+        file,
+        '# .builderrules (see https://www.builder.io/c/docs/cli-code-generation-best-practices#project-level-settings)\r\n\r\n',
+        { encoding: 'utf8' },
+      );
+    }
+    const doc = await workspace.openTextDocument(Uri.file(file));
+    await window.showTextDocument(doc);
+  });
+}
+
+async function develop(queueFunction: QueueFunction) {
+  queueFunction();
+  runInTerminal(`npx @builder.io/dev-tools@latest code`);
 }

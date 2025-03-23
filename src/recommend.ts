@@ -39,8 +39,13 @@ import { writeWN } from './logging';
 import { cancelLastOperation } from './tasks';
 import { CommandName } from './command-name';
 import { CommandTitle } from './command-title';
-import { ExtensionContext, Uri, commands, env } from 'vscode';
-import { checkBuilderIntegration } from './integrations-builder';
+import { ExtensionContext, commands } from 'vscode';
+import {
+  builderSettingsRules,
+  checkBuilderDevelop,
+  checkBuilderIntegration,
+  checkBuilderIntegrationDevelop,
+} from './integrations-builder';
 import { webProjectPackages } from './web-configuration';
 
 function hasWebPackages() {
@@ -209,6 +214,8 @@ export async function getRecommendations(project: Project, context: ExtensionCon
 
     project.add(buildAction(project));
 
+    project.add(checkBuilderDevelop(project));
+
     if (hasCapIos || hasCapAndroid) {
       project.add(
         new Tip(CommandTitle.Sync, '', TipType.Sync, 'Capacitor Sync', undefined, 'Syncing', undefined)
@@ -363,6 +370,7 @@ export async function getRecommendations(project: Project, context: ExtensionCon
     tEnd('capacitorRecommendations');
   }
   project.tips(checkBuilderIntegration(project));
+  project.tips(checkBuilderIntegrationDevelop(project));
   tStart('reviewPackages');
   if (!project.isCapacitor && !project.isCordova) {
     // The project is not using Cordova or Capacitor
@@ -388,6 +396,7 @@ export async function getRecommendations(project: Project, context: ExtensionCon
   }
 
   project.add(new Tip('Settings', '', TipType.Settings).setQueuedAction(settings));
+  project.add(builderSettingsRules(project));
   project.add(new Tip('Show Logs', '', TipType.Files).setQueuedAction(showLogs));
 
   tEnd('reviewPackages');
