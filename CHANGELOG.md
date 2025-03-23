@@ -2,6 +2,7 @@
 
 ### Version 0.0.7
 
+- Focus if command has errors
 - Fix --host for Angular projects
 
 ### Version 0.0.6

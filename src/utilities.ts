@@ -380,7 +380,10 @@ export async function run(
           write(uncolored);
         }
       }
+
+      exState.channelFocus = true; // Allows the errors to show
       focusOutput();
+      exState.channelFocus = false; // Reset so that if user fixes the error they dont see the logs again
     });
 
     if (cancelObject) {
