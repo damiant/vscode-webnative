@@ -67,6 +67,7 @@ interface ExState {
   localUrl: string | undefined; // URL for the local browser
   externalUrl: string | undefined; // URL for the external browser
   replaceRecommendation: boolean; // Whether to switch to this extension
+  dontOpenBrowser: boolean; // If true then avoid opening the browser
 }
 export const exState: ExState = {
   view: undefined,
@@ -104,6 +105,7 @@ export const exState: ExState = {
   servePort: 8100,
   project: undefined,
   debugged: false,
+  dontOpenBrowser: false,
   replaceRecommendation: true,
 };
 

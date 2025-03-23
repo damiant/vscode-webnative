@@ -75,6 +75,7 @@ async function runServe(
     exState.webView = viewInEditor('about:blank', true);
   }
   let serveFlags = '';
+  exState.dontOpenBrowser = dontOpenBrowser;
   if (project.frameworkType === 'angular-standalone') {
     if (
       [WebConfigSetting.editor, WebConfigSetting.nexus, WebConfigSetting.none].includes(webConfig) ||
@@ -199,6 +200,8 @@ async function externalArg(isNative?: boolean): Promise<string> {
     // Angular prefers --host=[ip]
     if (!exists('@angular/core')) {
       return '--host';
+    } else {
+      return '--host=0.0.0.0';
     }
   }
   return `--host=${bestAddress()}`;

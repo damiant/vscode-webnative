@@ -12,6 +12,7 @@ import { CommandName } from './command-name';
 import { qrWebView } from './webview-debug';
 import { openUri } from './utilities';
 import { WorkspaceSection } from './workspace-state';
+import { exState } from './wn-tree-provider';
 
 export class DevServerProvider implements WebviewViewProvider {
   registered = false;
@@ -28,7 +29,7 @@ export class DevServerProvider implements WebviewViewProvider {
       //webviewView.description = shortUrl;
       webviewView.show(true);
       const value: string = workspace.getConfiguration(WorkspaceSection).get('openBrowserOnRun');
-      if (value !== 'no') {
+      if (value !== 'no' && !exState.dontOpenBrowser) {
         openUri(localUrl);
       }
     });
