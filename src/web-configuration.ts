@@ -22,3 +22,15 @@ export async function setWebConfig(setting: WebConfigSetting) {
   setSetting(WorkspaceSetting.webAction, setting);
   commands.executeCommand(VSCommand.setContext, Context.webConfig, setting);
 }
+
+export const webProjectPackages = [
+  '@ionic/vue',
+  '@ionic/angular',
+  '@ionic/react',
+  '@angular/core',
+  'react',
+  'astro',
+  'vue',
+  'vite',
+  'svelte',
+];

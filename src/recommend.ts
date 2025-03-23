@@ -41,18 +41,21 @@ import { CommandName } from './command-name';
 import { CommandTitle } from './command-title';
 import { ExtensionContext, Uri, commands, env } from 'vscode';
 import { checkBuilderIntegration } from './integrations-builder';
+import { webProjectPackages } from './web-configuration';
+
+function hasWebPackages() {
+  for (const pkg of webProjectPackages) {
+    if (exists(pkg)) {
+      return true;
+    }
+  }
+  return false;
+}
 
 export async function getRecommendations(project: Project, context: ExtensionContext, packages: any): Promise<void> {
   tStart('getRecommendations');
 
-  const isWebProjectOnly =
-    !exists('@capacitor/core') &&
-    (exists('@angular/core') ||
-      exists('react') ||
-      exists('vue') ||
-      exists('svelte') ||
-      exists('astro') ||
-      exists('vite'));
+  const isWebProjectOnly = !exists('@capacitor/core') && hasWebPackages();
 
   if (project.isCapacitor || isWebProjectOnly) {
     if (isWebProjectOnly) {

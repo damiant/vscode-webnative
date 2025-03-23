@@ -196,7 +196,10 @@ async function externalArg(isNative?: boolean): Promise<string> {
     const host = await selectExternalIPAddress();
     return `--host=${host}`;
   } else {
-    return '--host';
+    // Angular prefers --host=[ip]
+    if (!exists('@angular/core')) {
+      return '--host';
+    }
   }
   return `--host=${bestAddress()}`;
 }

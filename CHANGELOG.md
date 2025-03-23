@@ -1,5 +1,9 @@
 ## Changelog
 
+### Version 0.0.7
+
+- Fix --host for Angular projects
+
 ### Version 0.0.6
 
 - Improve packages explorer for web projects

@@ -182,16 +182,20 @@ function recommendWebNativeProject(project: Project) {
   if (!exState.replaceRecommendation) return;
   const recFile = join(project.projectFolder(), '.vscode', 'extensions.json');
   exState.replaceRecommendation = false;
-  if (existsSync(recFile)) {
-    const recs = JSON.parse(readFileSync(recFile, 'utf8'));
-    if (recs && recs.recommendations) {
-      if (!recs.recommendations.includes('Webnative.webnative')) {
-        recs.recommendations = recs.recommendations.filter((rec) => rec !== 'ionic.ionic');
-        recs.recommendations.push('Webnative.webnative');
-        writeFileSync(recFile, JSON.stringify(recs, null, 2));
+  try {
+    if (existsSync(recFile)) {
+      const recs = JSON.parse(readFileSync(recFile, 'utf8'));
+      if (recs && recs.recommendations) {
+        if (!recs.recommendations.includes('Webnative.webnative')) {
+          recs.recommendations = recs.recommendations.filter((rec) => rec !== 'ionic.ionic');
+          recs.recommendations.push('Webnative.webnative');
+          writeFileSync(recFile, JSON.stringify(recs, null, 2));
+        }
+        return;
       }
-      return;
     }
+  } catch (e) {
+    console.error('Error updating extension recommendations', e);
   }
 }
 

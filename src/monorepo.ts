@@ -15,6 +15,7 @@ import { ExtensionContext, commands, window, workspace } from 'vscode';
 import { existsSync, readFileSync, readdirSync } from 'fs';
 import { QueueFunction, Tip, TipType } from './tip';
 import { getRunOutput, openUri } from './utilities';
+import { webProjectPackages } from './web-configuration';
 
 export interface MonoRepoProject {
   name: string;
@@ -232,9 +233,9 @@ function getFolderBasedProjects(prj: Project): Array<MonoRepoProject> {
   for (const project of projects) {
     const folderType = checkFolder(project.packageJson);
     if (folderType != FolderType.unknown) {
-      result.push({ name: project.name, folder: project.path, isIonic: folderType == FolderType.hasIonic });
+      result.push({ name: project.name, folder: project.path, isIonic: folderType == FolderType.isKnownWebProject });
     }
-    if (folderType == FolderType.hasIonic) {
+    if (folderType == FolderType.isKnownWebProject) {
       exampleFolder = project.path;
       likelyFolderBasedMonoRepo = true;
     }
@@ -243,7 +244,7 @@ function getFolderBasedProjects(prj: Project): Array<MonoRepoProject> {
   let subFolderWarning = false;
 
   const rootFolderType = checkFolder(join(prj.folder, 'package.json'));
-  if (rootFolderType == FolderType.hasIonic) {
+  if (rootFolderType == FolderType.isKnownWebProject) {
     if (projects.length == 0 || prj.folder == projects[0].path) {
       // Sub folder is the root folder (eg ionic multi-app without a root)
     } else {
@@ -377,7 +378,7 @@ function parseYarnFormat(data: string): string {
 
 enum FolderType {
   hasDependencies,
-  hasIonic,
+  isKnownWebProject, // Looks like a web project
   unknown,
 }
 
@@ -387,33 +388,23 @@ function checkFolder(filename: string): FolderType {
       return FolderType.unknown;
     }
     const pck = JSON.parse(readFileSync(filename, 'utf8'));
-    let isIonic = false;
-    const webProjects = [
-      '@ionic/vue',
-      '@ionic/angular',
-      '@ionic/react',
-      'react',
-      'astro',
-      'vue',
-      'vite',
-      'svelte',
-      '@capacitor/core',
-      '@capacitor/ios',
-      '@capacitor/android',
-    ];
-    for (const project of webProjects) {
+    let isKnownWebProject = false;
+
+    // Is it a web project or Capacitor Project
+    const packages = [...webProjectPackages, '@capacitor/core', '@capacitor/ios', '@capacitor/android'];
+    for (const project of packages) {
       if (pck.dependencies?.[project]) {
-        isIonic = true;
+        isKnownWebProject = true;
         break;
       }
       if (pck.devDependencies?.[project]) {
-        isIonic = true;
+        isKnownWebProject = true;
         break;
       }
     }
 
-    return isIonic
-      ? FolderType.hasIonic
+    return isKnownWebProject
+      ? FolderType.isKnownWebProject
       : pck.dependencies || pck.devDependencies
         ? FolderType.hasDependencies
         : FolderType.unknown;
