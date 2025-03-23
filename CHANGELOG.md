@@ -1,16 +1,11 @@
 ## Changelog
 
-### Version 0.0.7
+### Version 0.0.9
 
+- Builder progress messinges
 - Focus if command has errors
 - Fix --host for Angular projects
-
-### Version 0.0.6
-
 - Improve packages explorer for web projects
 - Can now ignore Capacitor integration
-
-### Version 0.0.1
-
 - Created SvelteKit starter
 - Created Angular starter
