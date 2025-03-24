@@ -8,10 +8,11 @@ import { getSetting, setSetting, WorkspaceSetting } from './workspace-state';
 import { runInTerminal } from './terminal';
 import { join } from 'path';
 import { existsSync, writeFileSync } from 'fs';
-import { CancelObject, run } from './utilities';
+import { CancelObject, openUri, run } from './utilities';
 import { exState } from './wn-tree-provider';
+import { viewInEditor } from './webview-preview';
 
-export function checkBuilderIntegration(project: Project): Tip[] {
+export function checkBuilderIntegration(): Tip[] {
   const tips: Tip[] = [];
   if (
     !exists('@builder.io/dev-tools') &&
@@ -59,7 +60,7 @@ function runApp(): Promise<void> {
   });
 }
 
-export function builderDevelopAuth(project: Project): Tip[] {
+export function builderDevelopAuth(): Tip[] {
   const authed = getSetting(WorkspaceSetting.builderAuthenticated);
   if (authed) return [];
 
@@ -67,7 +68,7 @@ export function builderDevelopAuth(project: Project): Tip[] {
     new Tip(
       'Authenticate for Builder Develop',
       '',
-      TipType.Builder,
+      TipType.None,
       'Authenticate Builder.io Develop (AI Code Generation) for this project?',
       ['npx builder.io auth', rememberAuth],
       'Authenticate',
@@ -93,14 +94,14 @@ async function rememberAuth(): Promise<void> {
   await setSetting(WorkspaceSetting.builderAuthenticated, true);
 }
 
-export function builderDevelopInteractive(project: Project): Tip {
+export function builderDevelopInteractive(): Tip {
   const authed = getSetting(WorkspaceSetting.builderAuthenticated);
   if (!authed) return undefined;
 
   return new Tip(
     'Chat',
     'Interactive',
-    TipType.Builder,
+    TipType.None,
     'Run Builder.io Develop',
     undefined,
     'Builder Develop',
@@ -118,9 +119,9 @@ export function builderSettingsRules(project: Project): Tip {
   const authed = getSetting(WorkspaceSetting.builderAuthenticated);
   if (!authed) return undefined;
   return new Tip(
-    'Builder Rules',
+    'Rules',
     '',
-    TipType.Builder,
+    TipType.None,
     'Open the Builder Develop Rules file (custom instructions for the AI)',
   ).setQueuedAction(async () => {
     const file = join(project.projectFolder(), '.builderrules');
@@ -136,11 +137,21 @@ export function builderSettingsRules(project: Project): Tip {
   });
 }
 
+// Open Builder
+export function builderOpen(): Tip {
+  const authed = getSetting(WorkspaceSetting.builderAuthenticated);
+  if (!authed) return undefined;
+  return new Tip('Open', '', TipType.None, '').setQueuedAction(async () => {
+    openUri('https://builder.io/content');
+    //viewInEditor('https://builder.io/content', true, false, true, true );
+  });
+}
+
 // Chat: Builder Develop Prompt
 export function builderDevelopPrompt(project: Project): Tip {
   const authed = getSetting(WorkspaceSetting.builderAuthenticated);
   if (!authed) return undefined;
-  return new Tip('Chat', '', TipType.Builder, 'Chat with Builder Develop')
+  return new Tip('Chat', '', TipType.None, 'Chat with Builder Develop')
     .setTooltip('Chat with Builder Develop to modify your project')
     .setQueuedAction(async () => {
       await chat(project.projectFolder());

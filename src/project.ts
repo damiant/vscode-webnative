@@ -136,6 +136,7 @@ export class Project {
     type?: TipType,
     expanded?: boolean,
     contextValue?: string,
+    overrideIcon?: boolean,
   ): Recommendation {
     // If the last group has no items in it then remove it (eg if there are no recommendations for a project)
     if (this.groups.length > 1 && this.groups[this.groups.length - 1].children.length == 0) {
@@ -155,7 +156,9 @@ export class Project {
     r.children = [];
     r.setIcon('none');
     this.setIcon(TipType.None, r);
-    //this.setIcon(type, r);
+    if (overrideIcon) {
+      this.setIcon(type, r);
+    }
     this.group = r;
     this.groups.push(this.group);
     return r;

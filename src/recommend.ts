@@ -46,6 +46,7 @@ import {
   checkBuilderIntegration,
   builderDevelopAuth,
   builderDevelopPrompt,
+  builderOpen,
 } from './integrations-builder';
 import { webProjectPackages } from './web-configuration';
 
@@ -215,9 +216,6 @@ export async function getRecommendations(project: Project, context: ExtensionCon
 
     project.add(buildAction(project));
 
-    project.add(builderDevelopInteractive(project));
-    project.add(builderDevelopPrompt(project));
-
     if (hasCapIos || hasCapAndroid) {
       project.add(
         new Tip(CommandTitle.Sync, '', TipType.Sync, 'Capacitor Sync', undefined, 'Syncing', undefined)
@@ -371,8 +369,17 @@ export async function getRecommendations(project: Project, context: ExtensionCon
     project.tips(await capacitorRecommendations(project, false));
     tEnd('capacitorRecommendations');
   }
-  project.tips(checkBuilderIntegration(project));
-  project.tips(builderDevelopAuth(project));
+  project.tips(checkBuilderIntegration());
+
+  // Builder
+  project.setGroup(`Builder`, `These tasks are available for Builder.io`, TipType.Builder, true, undefined, true);
+  project.add(builderDevelopInteractive());
+  project.add(builderDevelopPrompt(project));
+
+  project.tips(builderDevelopAuth());
+  project.add(builderSettingsRules(project));
+  project.add(builderOpen());
+
   tStart('reviewPackages');
   if (!project.isCapacitor && !project.isCordova) {
     // The project is not using Cordova or Capacitor
@@ -398,7 +405,6 @@ export async function getRecommendations(project: Project, context: ExtensionCon
   }
 
   project.add(new Tip('Settings', '', TipType.Settings).setQueuedAction(settings));
-  project.add(builderSettingsRules(project));
   project.add(new Tip('Show Logs', '', TipType.Files).setQueuedAction(showLogs));
 
   tEnd('reviewPackages');
