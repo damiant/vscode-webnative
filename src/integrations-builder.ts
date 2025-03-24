@@ -8,7 +8,7 @@ import { getSetting, setSetting, WorkspaceSetting } from './workspace-state';
 import { runInTerminal } from './terminal';
 import { join } from 'path';
 import { existsSync, writeFileSync } from 'fs';
-import { CancelObject, openUri, run } from './utilities';
+import { CancelObject, openUri, run, runWithProgress } from './utilities';
 import { exState } from './wn-tree-provider';
 import { viewInEditor } from './webview-preview';
 
@@ -20,9 +20,9 @@ export function checkBuilderIntegration(): Tip[] {
   )
     tips.push(
       new Tip(
-        'Integrate Builder Publish',
+        'Integrate DevTools',
         '',
-        TipType.Builder,
+        TipType.None,
         'Integrate Builder.io Publish (Visual CMS) into this project?',
         ['npm init builder.io@latest', runApp],
         'Add Builder',
@@ -61,16 +61,15 @@ function runApp(): Promise<void> {
 }
 
 export function builderDevelopAuth(): Tip[] {
-  const authed = getSetting(WorkspaceSetting.builderAuthenticated);
-  if (authed) return [];
+  const title = hasBuilder() ? 'Reauthenticate' : 'Authenticate';
 
   return [
     new Tip(
-      'Authenticate for Builder Develop',
+      title,
       '',
       TipType.None,
-      'Authenticate Builder.io Develop (AI Code Generation) for this project?',
-      ['npx builder.io auth', rememberAuth],
+      'Authenticate with Builder.io for this project?',
+      [auth, rememberAuth],
       'Authenticate',
       'Builder authenticated.',
       undefined,
@@ -85,9 +84,14 @@ export function builderDevelopAuth(): Tip[] {
           },
         },
       ])
-      .showProgressDialog()
       .canIgnore(),
   ];
+}
+
+async function auth(): Promise<void> {
+  const folder = exState.projectRef.projectFolder();
+  const cmd = 'npx builder.io auth';
+  await runWithProgress(cmd, 'Authenticating With Builder', folder);
 }
 
 async function rememberAuth(): Promise<void> {
@@ -95,9 +99,7 @@ async function rememberAuth(): Promise<void> {
 }
 
 export function builderDevelopInteractive(): Tip {
-  const authed = getSetting(WorkspaceSetting.builderAuthenticated);
-  if (!authed) return undefined;
-
+  if (!hasBuilder()) return undefined;
   return new Tip(
     'Chat',
     'Interactive',
@@ -116,8 +118,8 @@ export function builderDevelopInteractive(): Tip {
 
 // Builder Rules File
 export function builderSettingsRules(project: Project): Tip {
-  const authed = getSetting(WorkspaceSetting.builderAuthenticated);
-  if (!authed) return undefined;
+  if (!hasBuilder()) return undefined;
+
   return new Tip(
     'Rules',
     '',
@@ -137,10 +139,19 @@ export function builderSettingsRules(project: Project): Tip {
   });
 }
 
+function hasBuilder(): boolean {
+  const authed = getSetting(WorkspaceSetting.builderAuthenticated);
+  if (authed || hasDevTools()) return true;
+  return false;
+}
+
+function hasDevTools() {
+  return exists('@builder.io/dev-tools');
+}
+
 // Open Builder
 export function builderOpen(): Tip {
-  const authed = getSetting(WorkspaceSetting.builderAuthenticated);
-  if (!authed) return undefined;
+  if (!hasBuilder()) return undefined;
   return new Tip('Open', '', TipType.None, '').setQueuedAction(async () => {
     openUri('https://builder.io/content');
     //viewInEditor('https://builder.io/content', true, false, true, true );

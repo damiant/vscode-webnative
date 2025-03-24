@@ -369,22 +369,21 @@ export async function getRecommendations(project: Project, context: ExtensionCon
     project.tips(await capacitorRecommendations(project, false));
     tEnd('capacitorRecommendations');
   }
-  project.tips(checkBuilderIntegration());
-
-  // Builder
-  project.setGroup(`Builder`, `These tasks are available for Builder.io`, TipType.Builder, true, undefined, true);
-  project.add(builderDevelopInteractive());
-  project.add(builderDevelopPrompt(project));
-
-  project.tips(builderDevelopAuth());
-  project.add(builderSettingsRules(project));
-  project.add(builderOpen());
 
   tStart('reviewPackages');
   if (!project.isCapacitor && !project.isCordova) {
     // The project is not using Cordova or Capacitor
     webProject(project);
   }
+
+  // Builder
+  project.setGroup(`Builder`, `These tasks are available for Builder.io`, TipType.Builder, true, undefined, true);
+  project.tips(checkBuilderIntegration());
+  project.tips(builderDevelopAuth());
+  project.add(builderDevelopInteractive());
+  project.add(builderDevelopPrompt(project));
+  project.add(builderSettingsRules(project));
+  project.add(builderOpen());
 
   // Package Upgrade Features
   reviewPackages(packages, project);

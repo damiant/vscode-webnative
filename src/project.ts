@@ -592,6 +592,7 @@ export class Project {
   }
 
   public tips(tips: Tip[]) {
+    if (!tips) return;
     for (const tip of tips) {
       this.tip(tip);
     }

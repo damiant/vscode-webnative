@@ -18,6 +18,7 @@ import { startStopLogServer } from './log-server';
 import { qrView } from './webview-debug';
 import { CancellationToken, ProgressLocation, Uri, commands, window, workspace } from 'vscode';
 import { uncolor } from './uncolor';
+import { kill } from 'process';
 
 export interface CancelObject {
   proc: ChildProcess;
@@ -625,6 +626,7 @@ export async function runWithProgress(
   output?: RunResults,
 ): Promise<boolean> {
   let result = false;
+  let done = false;
   await window.withProgress(
     {
       location: ProgressLocation.Notification,
@@ -633,7 +635,19 @@ export async function runWithProgress(
     },
     async (progress, token: CancellationToken) => {
       const cancelObject: CancelObject = { proc: undefined, cancelled: false };
-      result = await run(folder, command, cancelObject, [], [], progress, undefined, output, false);
+      run(folder, command, cancelObject, [], [], progress, undefined, output, false).then((success) => {
+        writeWN(`Command ${command} completed.`);
+        done = true;
+        result = success;
+      });
+      while (!cancelObject.cancelled && !done) {
+        await delay(500);
+
+        if (token.isCancellationRequested) {
+          cancelObject.cancelled = true;
+          kill(cancelObject.proc.pid);
+        }
+      }
     },
   );
   return result;
