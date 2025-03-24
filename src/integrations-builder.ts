@@ -20,9 +20,9 @@ export function checkBuilderIntegration(): Tip[] {
   )
     tips.push(
       new Tip(
-        'Integrate Builder Publish',
+        'Integrate DevTools',
         '',
-        TipType.Builder,
+        TipType.None,
         'Integrate Builder.io Publish (Visual CMS) into this project?',
         ['npm init builder.io@latest', runApp],
         'Add Builder',
@@ -66,10 +66,10 @@ export function builderDevelopAuth(): Tip[] {
 
   return [
     new Tip(
-      'Authenticate for Builder Develop',
+      'Authenticate with Builder',
       '',
       TipType.None,
-      'Authenticate Builder.io Develop (AI Code Generation) for this project?',
+      'Authenticate with Builder.io for this project?',
       ['npx builder.io auth', rememberAuth],
       'Authenticate',
       'Builder authenticated.',

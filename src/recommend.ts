@@ -376,14 +376,12 @@ export async function getRecommendations(project: Project, context: ExtensionCon
     webProject(project);
   }
 
-  project.tips(checkBuilderIntegration());
-
   // Builder
   project.setGroup(`Builder`, `These tasks are available for Builder.io`, TipType.Builder, true, undefined, true);
+  project.tips(checkBuilderIntegration());
+  project.tips(builderDevelopAuth());
   project.add(builderDevelopInteractive());
   project.add(builderDevelopPrompt(project));
-
-  project.tips(builderDevelopAuth());
   project.add(builderSettingsRules(project));
   project.add(builderOpen());
 
