@@ -140,7 +140,7 @@ export function builderSettingsRules(project: Project): Tip {
 // Open Builder
 export function builderOpen(): Tip {
   const authed = getSetting(WorkspaceSetting.builderAuthenticated);
-  if (!authed) return undefined;
+  if (!authed || !exists('@builder.io/dev-tools')) return undefined;
   return new Tip('Open', '', TipType.None, '').setQueuedAction(async () => {
     openUri('https://builder.io/content');
     //viewInEditor('https://builder.io/content', true, false, true, true );
