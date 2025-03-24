@@ -1,12 +1,12 @@
 import { Range, TextDocument, Uri, window, workspace, WorkspaceEdit } from 'vscode';
 import { Parser } from 'htmlparser2';
 import { existsSync, readFileSync } from 'fs';
-import { FalseLiteral, Project } from 'ts-morph';
+import { Project } from 'ts-morph';
 import { exState } from './wn-tree-provider';
 import { join } from 'path';
 import { writeError } from './logging';
 import { exists } from './analyzer';
-import { getSetting, setSetting, WorkspaceSection, WorkspaceSetting } from './workspace-state';
+import { WorkspaceSection } from './workspace-state';
 import { getStringFrom } from './utilities';
 
 export async function autoFixOtherImports(document: TextDocument): Promise<boolean> {

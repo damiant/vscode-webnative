@@ -74,19 +74,19 @@ const angularSchematics: AngularSchematic[] = [
 
 export async function advancedActions(project: Project) {
   const picks: Array<QuickPickItem> = [];
+  picks.push({ label: 'Project', kind: QuickPickItemKind.Separator });
   picks.push({ label: Features.newProject });
+  picks.push({ label: Features.showIgnoredRecommendations });
+  if (project.packageManager == PackageManager.npm || project.packageManager == PackageManager.bun) {
+    picks.push({ label: Features.reinstallNodeModules });
+  }
+  picks.push({ label: 'Migrations', kind: QuickPickItemKind.Separator });
   if (project.packageManager == PackageManager.npm) {
     picks.push({ label: Features.migrateToPNPM });
     picks.push({ label: Features.migrateToBun });
 
     if (isGreaterOrEqual('@angular/core', '14.0.0')) {
       picks.push({ label: Features.migrateToNX });
-    }
-
-    picks.push({ label: Features.reinstallNodeModules });
-  } else {
-    if (project.packageManager == PackageManager.bun) {
-      picks.push({ label: Features.reinstallNodeModules });
     }
   }
 
@@ -106,8 +106,6 @@ export async function advancedActions(project: Project) {
   if (!exists('husky') && project.isCapacitor && isGreaterOrEqual('typescript', '4.0.0')) {
     picks.push({ label: Features.lintAndFormat });
   }
-
-  picks.push({ label: Features.showIgnoredRecommendations });
 
   if (isGreaterOrEqual('@angular-devkit/build-angular', '14.0.0')) {
     if (!isGreaterOrEqual('@angular/core', '17.0.0')) {

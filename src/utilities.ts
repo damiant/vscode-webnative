@@ -8,7 +8,7 @@ import { exists } from './analyzer';
 import { ionicInit } from './ionic-init';
 import { request } from 'https';
 import { ExtensionSetting, getExtSetting, getSetting, WorkspaceSection, WorkspaceSetting } from './workspace-state';
-import { showOutput, write, writeError, writeWN, writeWarning } from './logging';
+import { showOutput, write, writeError, writeWN } from './logging';
 import { getWebConfiguration, WebConfigSetting } from './web-configuration';
 import { Publisher } from './discovery';
 import { join } from 'path';
@@ -142,6 +142,8 @@ export async function run(
   output?: RunResults,
   suppressInfo?: boolean,
   auxData?: string,
+  continousProgress?: boolean,
+  preventErrorFocus?: boolean,
 ): Promise<boolean> {
   if (command == InternalCommand.removeCordova) {
     return await removeCordovaFromPackageJSON(folder);
@@ -216,8 +218,6 @@ export async function run(
         break;
       default: {
         openUri(localUrl);
-        //qrView(externalUrl);
-        //viewAsQR(localUrl, externalUrl);
         break;
       }
     }
@@ -313,6 +313,9 @@ export async function run(
             }
           }
         }
+        if (continousProgress) {
+          progress.report({ message: uncolor(data.toString()) });
+        }
         if (findExternalUrl) {
           if (data.includes('http')) {
             const url = checkForUrls(data, [
@@ -381,9 +384,11 @@ export async function run(
         }
       }
 
-      exState.channelFocus = true; // Allows the errors to show
-      focusOutput();
-      exState.channelFocus = false; // Reset so that if user fixes the error they dont see the logs again
+      if (!preventErrorFocus) {
+        exState.channelFocus = true; // Allows the errors to show
+        focusOutput();
+        exState.channelFocus = false; // Reset so that if user fixes the error they dont see the logs again
+      }
     });
 
     if (cancelObject) {
@@ -731,6 +736,16 @@ export function asAppId(name: string): string {
     name = 'com.' + name; // Must have at least a . in the name
   }
   return name;
+}
+
+export function extractBetween(A: string, B: string, C: string): string | null {
+  const indexB = A.indexOf(B);
+  if (indexB === -1) return null; // B not found
+
+  const indexC = A.indexOf(C, indexB + B.length);
+  if (indexC === -1) return null; // C not found after B
+
+  return A.substring(indexB + B.length, indexC);
 }
 
 export interface PackageFile {

@@ -14,6 +14,7 @@ export enum WorkspaceSetting {
   debugBrowser = 'debugBrowser',
   emulator = 'emulator',
   cocoaPods = 'cocoaPods2',
+  builderAuthenticated = 'builderAuthenticated',
 }
 
 export enum ExtensionSetting {

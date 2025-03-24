@@ -18,7 +18,7 @@ import { existsSync, readdirSync } from 'fs';
 import { CapacitorPlatform } from './capacitor-platform';
 import { npmInstall } from './node-commands';
 import { frameworks, starterTemplates, targets, Template } from './starter-templates';
-import { runInTerminal } from './terminal';
+import { recommendWebNativeProject as recommendWebNativeExtension } from './vscode-recommendation';
 
 enum MessageType {
   getTemplates = 'getTemplates',
@@ -324,6 +324,7 @@ async function createProject(project: Project, webview: Webview, panel: IonicSta
       return;
     }
     const folderPathParsed = isWindows() ? folder : folder.split(`\\`).join(`/`);
+    recommendWebNativeExtension(folderPathParsed);
     // Updated Uri.parse to Uri.file
     const folderUri = Uri.file(folderPathParsed);
     commands.executeCommand(`vscode.openFolder`, folderUri);
