@@ -61,12 +61,11 @@ function runApp(): Promise<void> {
 }
 
 export function builderDevelopAuth(): Tip[] {
-  const authed = getSetting(WorkspaceSetting.builderAuthenticated);
-  if (authed) return [];
+  if (!hasBuilder()) return undefined;
 
   return [
     new Tip(
-      'Authenticate with Builder',
+      'Authenticate',
       '',
       TipType.None,
       'Authenticate with Builder.io for this project?',
@@ -95,8 +94,7 @@ async function rememberAuth(): Promise<void> {
 }
 
 export function builderDevelopInteractive(): Tip {
-  const authed = getSetting(WorkspaceSetting.builderAuthenticated);
-  if (!authed) return undefined;
+  if (!hasBuilder()) return undefined;
 
   return new Tip(
     'Chat',
@@ -116,8 +114,8 @@ export function builderDevelopInteractive(): Tip {
 
 // Builder Rules File
 export function builderSettingsRules(project: Project): Tip {
-  const authed = getSetting(WorkspaceSetting.builderAuthenticated);
-  if (!authed) return undefined;
+  if (!hasBuilder()) return undefined;
+
   return new Tip(
     'Rules',
     '',
@@ -137,10 +135,15 @@ export function builderSettingsRules(project: Project): Tip {
   });
 }
 
+function hasBuilder(): boolean {
+  const authed = getSetting(WorkspaceSetting.builderAuthenticated);
+  if (authed || exists('@builder.io/dev-tools')) return true;
+  return false;
+}
+
 // Open Builder
 export function builderOpen(): Tip {
-  const authed = getSetting(WorkspaceSetting.builderAuthenticated);
-  if (!authed || !exists('@builder.io/dev-tools')) return undefined;
+  if (!hasBuilder()) return undefined;
   return new Tip('Open', '', TipType.None, '').setQueuedAction(async () => {
     openUri('https://builder.io/content');
     //viewInEditor('https://builder.io/content', true, false, true, true );
