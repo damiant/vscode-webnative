@@ -369,6 +369,13 @@ export async function getRecommendations(project: Project, context: ExtensionCon
     project.tips(await capacitorRecommendations(project, false));
     tEnd('capacitorRecommendations');
   }
+
+  tStart('reviewPackages');
+  if (!project.isCapacitor && !project.isCordova) {
+    // The project is not using Cordova or Capacitor
+    webProject(project);
+  }
+
   project.tips(checkBuilderIntegration());
 
   // Builder
@@ -379,12 +386,6 @@ export async function getRecommendations(project: Project, context: ExtensionCon
   project.tips(builderDevelopAuth());
   project.add(builderSettingsRules(project));
   project.add(builderOpen());
-
-  tStart('reviewPackages');
-  if (!project.isCapacitor && !project.isCordova) {
-    // The project is not using Cordova or Capacitor
-    webProject(project);
-  }
 
   // Package Upgrade Features
   reviewPackages(packages, project);
