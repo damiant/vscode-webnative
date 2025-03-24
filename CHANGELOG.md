@@ -1,8 +1,9 @@
 ## Changelog
 
-### Version 0.0.9
+### Version 0.0.12
 
-- Builder progress messinges
+- Builder import from Figma improvements
+- Builder progress messages
 - Focus if command has errors
 - Fix --host for Angular projects
 - Improve packages explorer for web projects
