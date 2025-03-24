@@ -8,7 +8,7 @@ import { exists } from './analyzer';
 import { ionicInit } from './ionic-init';
 import { request } from 'https';
 import { ExtensionSetting, getExtSetting, getSetting, WorkspaceSection, WorkspaceSetting } from './workspace-state';
-import { showOutput, write, writeError, writeWN, writeWarning } from './logging';
+import { showOutput, write, writeError, writeWN } from './logging';
 import { getWebConfiguration, WebConfigSetting } from './web-configuration';
 import { Publisher } from './discovery';
 import { join } from 'path';
@@ -736,6 +736,16 @@ export function asAppId(name: string): string {
     name = 'com.' + name; // Must have at least a . in the name
   }
   return name;
+}
+
+export function extractBetween(A: string, B: string, C: string): string | null {
+  const indexB = A.indexOf(B);
+  if (indexB === -1) return null; // B not found
+
+  const indexC = A.indexOf(C, indexB + B.length);
+  if (indexC === -1) return null; // C not found after B
+
+  return A.substring(indexB + B.length, indexC);
 }
 
 export interface PackageFile {
