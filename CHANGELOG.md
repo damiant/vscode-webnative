@@ -1,7 +1,8 @@
 ## Changelog
 
-### Version 0.0.14
+### Version 0.0.16
 
+- Fix auth for Builder
 - Change order of tasks
 
 ### Version 0.0.12

@@ -61,8 +61,7 @@ function runApp(): Promise<void> {
 }
 
 export function builderDevelopAuth(): Tip[] {
-  if (!hasBuilder()) return undefined;
-
+  if (hasBuilder()) return undefined;
   return [
     new Tip(
       'Authenticate',
@@ -95,7 +94,6 @@ async function rememberAuth(): Promise<void> {
 
 export function builderDevelopInteractive(): Tip {
   if (!hasBuilder()) return undefined;
-
   return new Tip(
     'Chat',
     'Interactive',
@@ -137,8 +135,12 @@ export function builderSettingsRules(project: Project): Tip {
 
 function hasBuilder(): boolean {
   const authed = getSetting(WorkspaceSetting.builderAuthenticated);
-  if (authed || exists('@builder.io/dev-tools')) return true;
+  if (authed || hasDevTools()) return true;
   return false;
+}
+
+function hasDevTools() {
+  return exists('@builder.io/dev-tools');
 }
 
 // Open Builder
