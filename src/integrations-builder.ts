@@ -98,8 +98,8 @@ export function builderDevelopInteractive(project: Project): Tip {
   if (!authed) return undefined;
 
   return new Tip(
-    'Develop',
-    '',
+    'Chat',
+    'Interactive',
     TipType.Builder,
     'Run Builder.io Develop',
     undefined,
@@ -109,6 +109,7 @@ export function builderDevelopInteractive(project: Project): Tip {
     'Builder Develop',
   )
     .setQueuedAction(develop)
+    .setTooltip('Chat with Builder Develop interactively in the terminal to modify your project')
     .canRefreshAfter();
 }
 
@@ -118,7 +119,7 @@ export function builderSettingsRules(project: Project): Tip {
   if (!authed) return undefined;
   return new Tip(
     'Builder Rules',
-    undefined,
+    '',
     TipType.Builder,
     'Open the Builder Develop Rules file (custom instructions for the AI)',
   ).setQueuedAction(async () => {
@@ -135,57 +136,59 @@ export function builderSettingsRules(project: Project): Tip {
   });
 }
 
-// Builder Develop Prompt
+// Chat: Builder Develop Prompt
 export function builderDevelopPrompt(project: Project): Tip {
   const authed = getSetting(WorkspaceSetting.builderAuthenticated);
   if (!authed) return undefined;
-  return new Tip('Chat', undefined, TipType.Builder, 'Chat with Builder Develop').setQueuedAction(async () => {
-    let chatting = true;
-    while (chatting) {
-      const prompt = await window.showInputBox({
-        title: 'Chat with Builder Develop',
-        placeHolder: 'Enter prompt (eg "Create a component called Pricing Page")',
-        ignoreFocusOut: true,
-      });
-      if (!prompt) return undefined;
+  return new Tip('Chat', '', TipType.Builder, 'Chat with Builder Develop')
+    .setTooltip('Chat with Builder Develop to modify your project')
+    .setQueuedAction(async () => {
+      let chatting = true;
+      while (chatting) {
+        const prompt = await window.showInputBox({
+          title: 'Chat with Builder Develop',
+          placeHolder: 'Enter prompt (eg "Create a component called Pricing Page")',
+          ignoreFocusOut: true,
+        });
+        if (!prompt) return undefined;
 
-      await window.withProgress(
-        {
-          location: ProgressLocation.Notification,
-          title: `Builder`,
-          cancellable: true,
-        },
-        async (progress, token: CancellationToken) => {
-          const cancelObject: CancelObject = { proc: undefined, cancelled: false };
-          await run(
-            project.projectFolder(),
-            `npx builder.io@latest code --prompt "${prompt}"`,
-            cancelObject,
-            [],
-            [],
-            progress,
-            undefined,
-            undefined,
-            false,
-            undefined,
-            true,
-            true,
-          );
-        },
-      );
-      const view = 'View Response';
-      const chat = 'Chat More';
-      chatting = false;
-      const res = await window.showInformationMessage(`Builder Develop has Finished.`, chat, view, 'Exit');
-      if (res == view) {
-        exState.channelFocus = true;
-        showOutput();
+        await window.withProgress(
+          {
+            location: ProgressLocation.Notification,
+            title: `Builder`,
+            cancellable: true,
+          },
+          async (progress, token: CancellationToken) => {
+            const cancelObject: CancelObject = { proc: undefined, cancelled: false };
+            await run(
+              project.projectFolder(),
+              `npx builder.io@latest code --prompt "${prompt}"`,
+              cancelObject,
+              [],
+              [],
+              progress,
+              undefined,
+              undefined,
+              false,
+              undefined,
+              true,
+              true,
+            );
+          },
+        );
+        const view = 'View Response';
+        const chat = 'Chat More';
+        chatting = false;
+        const res = await window.showInformationMessage(`Builder Develop has Finished.`, chat, view, 'Exit');
+        if (res == view) {
+          exState.channelFocus = true;
+          showOutput();
+        }
+        if (res == chat) {
+          chatting = true;
+        }
       }
-      if (res == chat) {
-        chatting = true;
-      }
-    }
-  });
+    });
 }
 
 async function develop(queueFunction: QueueFunction) {

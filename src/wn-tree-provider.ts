@@ -66,7 +66,6 @@ interface ExState {
   openEditorStatusBar: StatusBarItem | undefined;
   localUrl: string | undefined; // URL for the local browser
   externalUrl: string | undefined; // URL for the external browser
-  replaceRecommendation: boolean; // Whether to switch to this extension
   dontOpenBrowser: boolean; // If true then avoid opening the browser
 }
 export const exState: ExState = {
@@ -106,7 +105,6 @@ export const exState: ExState = {
   project: undefined,
   debugged: false,
   dontOpenBrowser: false,
-  replaceRecommendation: true,
 };
 
 interface FolderInfo {
