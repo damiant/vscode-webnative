@@ -1,5 +1,9 @@
 ## Changelog
 
+### Version 0.0.13
+
+- Change order of tasks
+
 ### Version 0.0.12
 
 - Builder import from Figma improvements
