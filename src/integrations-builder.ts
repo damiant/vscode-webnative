@@ -8,7 +8,7 @@ import { getSetting, setSetting, WorkspaceSetting } from './workspace-state';
 import { runInTerminal } from './terminal';
 import { join } from 'path';
 import { existsSync, writeFileSync } from 'fs';
-import { CancelObject, openUri, run } from './utilities';
+import { CancelObject, openUri, run, runWithProgress } from './utilities';
 import { exState } from './wn-tree-provider';
 import { viewInEditor } from './webview-preview';
 
@@ -61,14 +61,15 @@ function runApp(): Promise<void> {
 }
 
 export function builderDevelopAuth(): Tip[] {
-  if (hasBuilder()) return undefined;
+  const title = hasBuilder() ? 'Reauthenticate' : 'Authenticate';
+
   return [
     new Tip(
-      'Authenticate',
+      title,
       '',
       TipType.None,
       'Authenticate with Builder.io for this project?',
-      ['npx builder.io auth', rememberAuth],
+      [auth, rememberAuth],
       'Authenticate',
       'Builder authenticated.',
       undefined,
@@ -83,9 +84,14 @@ export function builderDevelopAuth(): Tip[] {
           },
         },
       ])
-      .showProgressDialog()
       .canIgnore(),
   ];
+}
+
+async function auth(): Promise<void> {
+  const folder = exState.projectRef.projectFolder();
+  const cmd = 'npx builder.io auth';
+  await runWithProgress(cmd, 'Authenticating With Builder', folder);
 }
 
 async function rememberAuth(): Promise<void> {

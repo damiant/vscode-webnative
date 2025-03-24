@@ -1,5 +1,9 @@
 ## Changelog
 
+### Version 0.0.17
+
+- Auth for Builder is now in progress dialog
+
 ### Version 0.0.16
 
 - Fix auth for Builder
