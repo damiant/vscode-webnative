@@ -276,7 +276,7 @@ export const starterTemplates: Template[] = [
     name: 'Javascript',
     description: 'A starter Web project with Javascript',
     url: 'https://vite.dev/guide/#trying-vite-online',
-    commands: ['npm create vite@latest $(project-name) -- --template vanilla-js'],
+    commands: ['npm create vite@latest $(project-name) -- --template vanilla'],
   },
   {
     type: 'vite-qwik',
