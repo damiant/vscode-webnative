@@ -16,7 +16,7 @@ export function checkBuilderIntegration(): Tip[] {
   const tips: Tip[] = [];
   if (
     !exists('@builder.io/dev-tools') &&
-    (exists('next') || exists('@remix-run/react') || exists('@angular/core') || exists('qwik'))
+    (exists('next') || exists('react') || exists('@remix-run/react') || exists('@angular/core') || exists('qwik'))
   )
     tips.push(
       new Tip(

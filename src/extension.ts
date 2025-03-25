@@ -6,7 +6,7 @@ import { clearRefreshCache } from './process-packages';
 import { Recommendation } from './recommendation';
 import { installPackage, reviewProject } from './project';
 import { Tip } from './tip';
-import { openUri } from './utilities';
+import { channelShow, openUri } from './utilities';
 import { CommandName } from './command-name';
 import { packageUpgrade } from './rules-package-upgrade';
 import { ProjectsProvider } from './projects-provider';
@@ -166,7 +166,7 @@ export async function activate(context: ExtensionContext) {
   });
   commands.registerCommand(CommandName.ShowLogs, async () => {
     exState.channelFocus = true;
-    showOutput();
+    channelShow();
   });
   commands.registerCommand(CommandName.Sync, async () => {
     await findAndRun(ionicProvider, rootPath, CommandTitle.Sync);
