@@ -20,7 +20,7 @@ import { addScripts } from './scripts';
 import { Context } from './context-variables';
 import { exState } from './wn-tree-provider';
 import { getAndroidWebViewList } from './android-debug-list';
-import { getDebugBrowserName } from './webview-preview';
+import { getDebugBrowserName } from './preview';
 import { checkIonicNativePackages } from './rules-ionic-native';
 import { alt, getRunOutput, showProgress, tEnd, tStart } from './utilities';
 import { startStopLogServer } from './log-server';

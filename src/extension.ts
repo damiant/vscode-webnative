@@ -30,7 +30,7 @@ import { window, commands, ExtensionContext, workspace, debug, languages, Status
 import { existsSync } from 'fs';
 import { CommandTitle } from './command-title';
 import { setSetting, WorkspaceSection, WorkspaceSetting } from './workspace-state';
-import { viewInEditor } from './webview-preview';
+import { viewInEditor } from './preview';
 import { autoRunClipboard } from './features/auto-run-clipboard';
 import { findAndRun, fix, fixIssue, runAction, runAgain } from './features/fix-issue';
 import { trackProjectChange } from './features/track-project-changes';

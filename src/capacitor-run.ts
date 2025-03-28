@@ -108,10 +108,11 @@ async function capRun(
   }
 
   // Live reload clashes with --no-build
-  if (noBuild && !liveReload) {
-    if (capRunFlags.length >= 0) capRunFlags += ' ';
-    capRunFlags += '--no-build';
-  }
+  // no-build flag was removed with Capacitor 7
+  // if (noBuild && !liveReload) {
+  //   if (capRunFlags.length >= 0) capRunFlags += ' ';
+  //   capRunFlags += '--no-build';
+  // }
 
   if (noSync) {
     if (capRunFlags.length >= 0) capRunFlags += ' ';

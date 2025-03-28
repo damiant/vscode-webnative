@@ -9,5 +9,5 @@
     "sourceMap": true,
     "rootDir": "src"
   },
-  "exclude": ["node_modules", "log-client", ".vscode-test", "plugin-explorer", "starter"]
+  "exclude": ["node_modules", "log-client", ".vscode-test", "plugin-explorer", "starter", "preview"]
 }

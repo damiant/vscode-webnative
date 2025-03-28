@@ -3,7 +3,7 @@ import { Context, VSCommand } from './context-variables';
 import { CommandName } from './command-name';
 import { exState } from './wn-tree-provider';
 import { join } from 'path';
-import { debugBrowser, viewInEditor } from './webview-preview';
+import { debugBrowser, viewInEditor } from './preview';
 import { httpRequest, openUri } from './utilities';
 import { write, writeError, writeWarning } from './logging';
 import { inspectProject, ProjectSummary } from './project';

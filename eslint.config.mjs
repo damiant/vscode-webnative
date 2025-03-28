@@ -6,6 +6,7 @@ import { defineConfig, globalIgnores } from 'eslint/config';
 export default tseslint.config(
   globalIgnores([
     'starter/**/*',
+    'preview/**/*',
     'plugin-explorer/**/*',
     'out/**/*',
     'resources/**/*',
