@@ -57,6 +57,8 @@
   align-items: center;
   gap: 2px;
   min-height: 32px;
+  padding-top: 3px;
+  padding-bottom: 3px;
 }
 
 .body {

@@ -1,15 +1,14 @@
 import { join } from 'path';
 import {
-  Disposable,
   Webview,
   WebviewPanel,
   window,
   Uri,
   ViewColumn,
-  ExtensionContext,
   QuickPickItemKind,
   DebugConfiguration,
   debug,
+  commands,
 } from 'vscode';
 import { exState } from './wn-tree-provider';
 import { getSetting, setSetting, WorkspaceSetting } from './workspace-state';
@@ -73,6 +72,9 @@ export function viewInEditor(
   const extensionUri = exState.context.extensionUri;
   panel.webview.html = url ? getWebviewContent(panel.webview, extensionUri) : '';
   panel.iconPath = iconFor('globe');
+  if (!existingPanel) {
+    commands.executeCommand('workbench.action.closeSidebar');
+  }
   let device = getSetting(WorkspaceSetting.emulator);
 
   if (overrideAsWeb) {
@@ -99,6 +101,10 @@ export function viewInEditor(
         panel.webview.postMessage({ command: MessageType.device, device });
         return;
       }
+    }
+    if (message.command == 'browser') {
+      openUri(lastUrl);
+      return;
     }
     if (message.command == 'add') {
       console.log('add');
@@ -187,78 +193,6 @@ async function selectMockDevice(): Promise<device> {
 
   return devices.find((device) => selected.includes(device.name));
 }
-
-// export class PreviewPanel {
-//   public static currentPanel: PreviewPanel | undefined;
-//   private readonly panel: WebviewPanel;
-//   private disposables: Disposable[] = [];
-
-//   private path: string;
-
-//   private constructor(panel: WebviewPanel, extensionUri: Uri, path: string, context: ExtensionContext) {
-//     if (!path) {
-//       path = extensionUri.fsPath;
-//     }
-//     this.panel = panel;
-//     this.path = path;
-//     this.panel.onDidDispose(() => this.dispose(), null, this.disposables);
-//     this.panel.webview.html = this.getWebviewContent(this.panel.webview, extensionUri);
-//     this.setWebviewMessageListener(this.panel.webview, extensionUri, path, context);
-//   }
-
-//   public static init(extensionUri: Uri, path: string, context: ExtensionContext, force?: boolean) {
-//     if (PreviewPanel.currentPanel) {
-//       // If the webview panel already exists reveal it
-//       PreviewPanel.currentPanel.panel.reveal(ViewColumn.One);
-//     } else {
-//       // If a webview panel does not already exist create and show a new one
-//       const panel = window.createWebviewPanel(
-//         // Panel view type
-//         'preview',
-//         // Panel title
-//         'Preview',
-//         ViewColumn.One,
-//         {
-//           enableScripts: true,
-//           localResourceRoots: [Uri.joinPath(extensionUri, 'out'), Uri.joinPath(extensionUri, 'preview', 'build')],
-//         },
-//       );
-
-//       PreviewPanel.currentPanel = new PreviewPanel(panel, extensionUri, path, context);
-//     }
-//   }
-
-//   public dispose() {
-//     PreviewPanel.currentPanel = undefined;
-//     this.panel.dispose();
-//     while (this.disposables.length) {
-//       const disposable = this.disposables.pop();
-//       if (disposable) {
-//         disposable.dispose();
-//       }
-//     }
-//   }
-
-//   private setWebviewMessageListener(webview: Webview, extensionUri: Uri, path: string, context: ExtensionContext) {
-//     webview.onDidReceiveMessage(
-//       async (message: any) => {
-//         const command = message.command;
-//         switch (command) {
-//           case MessageType.setMobile: {
-//             webview.postMessage({ command });
-//             break;
-//           }
-//           case MessageType.setWeb: {
-//             webview.postMessage({ command });
-//             break;
-//           }
-//         }
-//       },
-//       undefined,
-//       this.disposables,
-//     );
-//   }
-// }
 
 function getWebviewContent(webview: Webview, extensionUri: Uri) {
   const stylesUri = getUri(webview, extensionUri, ['preview', 'build', 'styles.css']);

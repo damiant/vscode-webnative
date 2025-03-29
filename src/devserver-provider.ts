@@ -28,6 +28,7 @@ export class DevServerProvider implements WebviewViewProvider {
       const shortUrl = qrWebView(webviewView.webview, externalUrl, localUrl);
       //webviewView.description = shortUrl;
       webviewView.show(true);
+
       const value: string = workspace.getConfiguration(WorkspaceSection).get('openBrowserOnRun');
       if (value !== 'no' && !exState.dontOpenBrowser) {
         openUri(localUrl);
