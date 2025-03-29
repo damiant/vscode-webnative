@@ -1,4 +1,4 @@
-import { Component, CUSTOM_ELEMENTS_SCHEMA, inject, OnInit, signal } from '@angular/core';
+import { Component, CUSTOM_ELEMENTS_SCHEMA, HostListener, inject, OnInit, signal } from '@angular/core';
 
 import { MessageType, sendMessage } from './utilities/messages';
 import { Template } from './utilities/template';
@@ -22,6 +22,7 @@ export class AppComponent implements OnInit {
   assetsUri = '';
   mobileClass = signal('');
   webClass = signal('');
+  device: any;
   id = '';
 
   async ngOnInit() {
@@ -45,6 +46,11 @@ export class AppComponent implements OnInit {
     f.src = f.src;
   }
 
+  @HostListener('window:resize', ['$event'])
+  onResize(event: any) {
+    this.setHeight();
+  }
+
   set(command: string) {
     if (command == 'back') {
       this.location.back();
@@ -65,6 +71,7 @@ export class AppComponent implements OnInit {
 
     if (event.data.command !== 'device') return;
     const device = event.data.device;
+    this.device = device;
     this.baseUrl = event.data.baseUrl ?? this.baseUrl;
     this.assetsUri = event.data.assetsUri ?? this.assetsUri;
     this.id = event.data.id ?? this.id;
@@ -85,7 +92,6 @@ export class AppComponent implements OnInit {
     let webSrc = 'about:blank';
     let frameSrc = 'about:blank';
     let webDisplay = 'none';
-    let framePadding = 50; // Height in pixels of padding from toolbar and mobile frame
     if (device.type == 'ios') {
       newurl += '?ionic:mode=ios';
     }
@@ -102,7 +108,6 @@ export class AppComponent implements OnInit {
         width = 'unset';
         height = '100%';
         dHeight = '100%';
-        framePadding = 80;
         devFrameAspectRatio = '2/3.6';
       }
       frameSrc = newurl;
@@ -117,11 +122,22 @@ export class AppComponent implements OnInit {
     e('web').style.display = webDisplay;
     e('body').style.display = bodyDisplay;
 
-    e('body').style.height = `${window.innerHeight - framePadding}px`;
     e('body').style.marginTop = bodyMarginTop;
     e('devFrame').style.aspectRatio = devFrameAspectRatio;
     e('devFrame').style.display = devFrameDisplay;
     e('devFrame').style.width = width;
     e('devFrame').style.height = dHeight;
+    this.setHeight();
+  }
+
+  setHeight() {
+    function e(name: string): any {
+      return document.getElementById(name);
+    }
+    let framePadding = 50;
+    if (this.device?.type == 'mobile') {
+      framePadding = 80;
+    }
+    e('body').style.height = `${window.innerHeight - framePadding}px`;
   }
 }

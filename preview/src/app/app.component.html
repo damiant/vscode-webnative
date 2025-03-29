@@ -1,4 +1,4 @@
-<div class="top-bar">
+<div class="top-bar" (window:resize)="onResize($event)">
   <vscode-button appearance="icon" aria-label="Back" (click)="set('back')">
     <img class="icon" [src]="assetsUri + '/back.svg'" />
   </vscode-button>
@@ -18,6 +18,9 @@
   </vscode-button>
   <vscode-button appearance="icon" aria-label="Refresh" (click)="reload()">
     <img class="icon" [src]="assetsUri + '/refresh.svg'" />
+  </vscode-button>
+  <vscode-button appearance="icon" aria-label="Open in Browser" (click)="set('browser')">
+    <img class="icon" [src]="assetsUri + '/web.svg'" />
   </vscode-button>
   <vscode-button appearance="icon" aria-label="New Window" (click)="set('add')">
     <img class="icon" [src]="assetsUri + '/add.svg'" />
