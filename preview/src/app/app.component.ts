@@ -77,7 +77,6 @@ export class AppComponent implements OnInit {
     let dHeight = device.height + 50 + 'px';
     let height = device.height + 'px';
     let devFrameDisplay = 'block';
-    let bodyHeight = '100vh';
     let bodyMarginTop = '0';
     let bodyDisplay = 'flex';
     let devFrameAspectRatio = 'unset';
@@ -86,6 +85,7 @@ export class AppComponent implements OnInit {
     let webSrc = 'about:blank';
     let frameSrc = 'about:blank';
     let webDisplay = 'none';
+    let framePadding = 50; // Height in pixels of padding from toolbar and mobile frame
     if (device.type == 'ios') {
       newurl += '?ionic:mode=ios';
     }
@@ -102,7 +102,7 @@ export class AppComponent implements OnInit {
         width = 'unset';
         height = '100%';
         dHeight = '100%';
-        bodyHeight = '90vh';
+        framePadding = 80;
         devFrameAspectRatio = '2/3.6';
       }
       frameSrc = newurl;
@@ -116,7 +116,8 @@ export class AppComponent implements OnInit {
     e('web').height = webHeight;
     e('web').style.display = webDisplay;
     e('body').style.display = bodyDisplay;
-    e('body').style.height = bodyHeight;
+
+    e('body').style.height = `${window.innerHeight - framePadding}px`;
     e('body').style.marginTop = bodyMarginTop;
     e('devFrame').style.aspectRatio = devFrameAspectRatio;
     e('devFrame').style.display = devFrameDisplay;
