@@ -39,6 +39,31 @@
   position: absolute;
 }
 
+.qr {
+  background-color: #222;
+  width: 148px;
+  height: 148px;
+  padding: 20px;
+  left: auto;
+  right: auto;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+.txt {
+  text-align: center;
+  padding-top: 16px;
+}
+
+.qr-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 90vh;
+}
+
 .mobile-frame {
   width: 375px;
   height: 610px;

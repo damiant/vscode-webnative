@@ -14,11 +14,13 @@ import { exState } from './wn-tree-provider';
 import { getSetting, setSetting, WorkspaceSetting } from './workspace-state';
 import { debugSkipFiles, openUri } from './utilities';
 import { cancelLastOperation } from './tasks';
+import { nexusURL } from './webview-debug';
 
 enum MessageType {
   setMobile = 'setMobile',
   setWeb = 'setWeb',
   device = 'device',
+  qr = 'qr',
   stopSpinner = 'stopSpinner',
 }
 
@@ -68,9 +70,13 @@ export function viewInEditor(
         enableScripts: true,
         retainContextWhenHidden: true,
       });
+
+  // Allows QR Codes to be displayed
+  const onDiskPath = Uri.file(join(exState.context.extensionPath, 'resources', 'qrious.min.js'));
+  const qrSrc = panel.webview.asWebviewUri(onDiskPath);
   lastUrl = url;
   const extensionUri = exState.context.extensionUri;
-  panel.webview.html = url ? getWebviewContent(panel.webview, extensionUri) : '';
+  panel.webview.html = url ? getWebviewContent(panel.webview, extensionUri, qrSrc.toString()) : '';
   panel.iconPath = iconFor('globe');
   if (!existingPanel) {
     commands.executeCommand('workbench.action.closeSidebar');
@@ -104,6 +110,11 @@ export function viewInEditor(
     }
     if (message.command == 'browser') {
       openUri(lastUrl);
+      return;
+    }
+    if (message.command == 'qr') {
+      const item = nexusURL(lastUrl);
+      panel.webview.postMessage({ command: MessageType.qr, item });
       return;
     }
     if (message.command == 'add') {
@@ -194,7 +205,7 @@ async function selectMockDevice(): Promise<device> {
   return devices.find((device) => selected.includes(device.name));
 }
 
-function getWebviewContent(webview: Webview, extensionUri: Uri) {
+function getWebviewContent(webview: Webview, extensionUri: Uri, qrSrc: string) {
   const stylesUri = getUri(webview, extensionUri, ['preview', 'build', 'styles.css']);
   const runtimeUri = getUri(webview, extensionUri, ['preview', 'build', 'runtime.js']);
   const polyfillsUri = getUri(webview, extensionUri, ['preview', 'build', 'polyfills.js']);
@@ -213,6 +224,7 @@ function getWebviewContent(webview: Webview, extensionUri: Uri) {
         <link rel="stylesheet" type="text/css" href="${stylesUri}">
         <titlePreview</title>
       </head>
+      <script src="${qrSrc}"></script>
       <body>
         <app-root></app-root>
         <script type="module" nonce="${nonce}" src="${runtimeUri}"></script>

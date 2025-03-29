@@ -1,4 +1,4 @@
-import { Component, CUSTOM_ELEMENTS_SCHEMA, HostListener, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, CUSTOM_ELEMENTS_SCHEMA, HostListener, inject, OnInit, signal } from '@angular/core';
 
 import { MessageType, sendMessage } from './utilities/messages';
 import { Template } from './utilities/template';
@@ -22,8 +22,10 @@ export class AppComponent implements OnInit {
   assetsUri = '';
   mobileClass = signal('');
   webClass = signal('');
+  qrClass = computed(() => (this.showQr() ? 'selected' : ''));
   device: any;
   id = '';
+  showQr = signal(false);
 
   async ngOnInit() {
     window.addEventListener('message', this.onMessage.bind(this));
@@ -56,13 +58,36 @@ export class AppComponent implements OnInit {
       this.location.back();
       return;
     }
+
     vscode.postMessage({ command, id: this.id });
+  }
+
+  setQR(externalUrl: string) {
+    if (this.showQr()) {
+      this.showQr.set(false);
+      return;
+    }
+    this.showQr.set(true);
+    setTimeout(() => {
+      const qr = new (window as any).QRious({
+        background: 'transparent',
+        foreground: '#888',
+        element: document.getElementById('qr'),
+        size: 150,
+        value: externalUrl,
+      });
+    }, 200);
   }
 
   async onMessage(event: any) {
     console.log('editor message', event.data);
     if (event.data.command == 'stopSpinner') {
       this.spinner = false;
+      return;
+    }
+
+    if (event.data.command == 'qr') {
+      this.setQR(event.data.item.url);
       return;
     }
     function e(name: string): any {

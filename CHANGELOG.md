@@ -1,5 +1,9 @@
 ## Changelog
 
+### Version 0.0.20
+
+- QR Code button for mobile scanning
+
 ### Version 0.0.19
 
 - Setting to open editor on side or tab
