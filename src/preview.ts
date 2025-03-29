@@ -54,6 +54,7 @@ const devices: Array<device> = [
 ];
 
 let lastUrl = '';
+const id = `w${Math.random()}`;
 
 export function viewInEditor(
   url: string,
@@ -62,7 +63,6 @@ export function viewInEditor(
   stopSpinner?: boolean,
   overrideAsWeb?: boolean, // Force Web
 ): WebviewPanel {
-  const id = `w${Math.random()}`;
   const panel = existingPanel
     ? exState.webView
     : window.createWebviewPanel('viewApp', 'Preview', active ? ViewColumn.Active : ViewColumn.Beside, {
@@ -78,17 +78,34 @@ export function viewInEditor(
   if (overrideAsWeb) {
     device = devices[0];
   }
+  const assetsUri = getUri(panel.webview, extensionUri, ['preview', 'build', 'assets']).toString();
 
   if (device) {
     panel.title = device.name;
-    panel.webview.postMessage({ command: MessageType.device, device, baseUrl: url, id });
+    panel.webview.postMessage({ command: MessageType.device, device, baseUrl: url, id, assetsUri });
   }
   if (existingPanel || stopSpinner) {
     panel.webview.postMessage({ command: MessageType.stopSpinner });
   }
 
+  if ((panel as any).initialized) return panel;
+  (panel as any).initialized = true;
   panel.webview.onDidReceiveMessage(async (message) => {
     console.log(message);
+    for (const device of devices) {
+      if (message.command == device.name) {
+        setSetting(WorkspaceSetting.emulator, device);
+        panel.title = device.name;
+        panel.webview.postMessage({ command: MessageType.device, device });
+        return;
+      }
+    }
+    if (message.command == 'add') {
+      console.log('add');
+      viewInEditor(lastUrl, true, false, true);
+      return;
+    }
+
     const device = await selectMockDevice();
     if (!device) {
       return;
@@ -114,6 +131,7 @@ function getDebugBrowserSetting() {
   }
   return browserType;
 }
+
 export async function debugBrowser(url: string, stopWebServerAfter: boolean) {
   try {
     const launchConfig: DebugConfiguration = {

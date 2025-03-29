@@ -1,4 +1,4 @@
-import { Component, CUSTOM_ELEMENTS_SCHEMA, inject, OnInit } from '@angular/core';
+import { Component, CUSTOM_ELEMENTS_SCHEMA, inject, OnInit, signal } from '@angular/core';
 
 import { MessageType, sendMessage } from './utilities/messages';
 import { Template } from './utilities/template';
@@ -19,6 +19,9 @@ export class AppComponent implements OnInit {
   spinner = true;
   location = inject(Location);
   baseUrl = '';
+  assetsUri = '';
+  mobileClass = signal('');
+  webClass = signal('');
   id = '';
 
   async ngOnInit() {
@@ -42,6 +45,14 @@ export class AppComponent implements OnInit {
     f.src = f.src;
   }
 
+  set(command: string) {
+    if (command == 'back') {
+      this.location.back();
+      return;
+    }
+    vscode.postMessage({ command, id: this.id });
+  }
+
   async onMessage(event: any) {
     console.log('editor message', event.data);
     if (event.data.command == 'stopSpinner') {
@@ -51,10 +62,15 @@ export class AppComponent implements OnInit {
     function e(name: string): any {
       return document.getElementById(name);
     }
+
     if (event.data.command !== 'device') return;
     const device = event.data.device;
     this.baseUrl = event.data.baseUrl ?? this.baseUrl;
+    this.assetsUri = event.data.assetsUri ?? this.assetsUri;
     this.id = event.data.id ?? this.id;
+
+    this.mobileClass.set(device.type == 'mobile' ? 'selected' : '');
+    this.webClass.set(device.type == 'web' ? 'selected' : '');
 
     let newurl = this.baseUrl;
     let width = device.width + 'px';
