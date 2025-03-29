@@ -2,7 +2,6 @@ import { Recommendation } from './recommendation';
 import { Tip, TipType } from './tip';
 import { load, exists } from './analyzer';
 import { isRunning } from './tasks';
-import { getGlobalIonicConfig, getIonicConfig, sendTelemetryEvents } from './telemetry';
 import { exState } from './wn-tree-provider';
 import { Context, VSCommand } from './context-variables';
 import { getRecommendations } from './recommend';
@@ -20,6 +19,7 @@ import { existsSync } from 'fs';
 import { write } from './logging';
 import { Features } from './features';
 import { fixIssue } from './features/fix-issue';
+import { getIonicConfig } from './ionic-config';
 
 export class Project {
   name: string;
@@ -678,18 +678,11 @@ export async function inspectProject(
   exState.view.title = project.name;
   project.type = project.isCapacitor ? 'Capacitor' : project.isCordova ? 'Cordova' : 'Other';
 
-  const gConfig = getGlobalIonicConfig();
-
   if (!Features.requireLogin) {
     exState.skipAuth = true;
   }
 
-  if (!gConfig['user.id'] && !exState.skipAuth) {
-    commands.executeCommand(VSCommand.setContext, Context.isAnonymous, true);
-    return undefined;
-  } else {
-    commands.executeCommand(VSCommand.setContext, Context.isAnonymous, false);
-  }
+  commands.executeCommand(VSCommand.setContext, Context.isAnonymous, false);
 
   await checkForMonoRepo(project, selectedProject, context);
 
@@ -704,8 +697,6 @@ export async function inspectProject(
   }
 
   guessFramework(project);
-
-  sendTelemetryEvents(folder, project, packages, context);
 
   checkNodeVersion();
   project.getIgnored(context);
