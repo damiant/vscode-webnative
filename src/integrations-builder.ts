@@ -61,18 +61,19 @@ function runApp(): Promise<void> {
 }
 
 export function builderDevelopAuth(): Tip[] {
-  const title = hasBuilder() ? 'Reauthenticate' : 'Authenticate';
+  const builder = hasBuilder();
+  const title = builder ? 'Reauthenticate' : 'Integrate Builder';
 
   return [
     new Tip(
       title,
       '',
-      TipType.None,
+      builder ? TipType.None : TipType.Builder,
       'Authenticate with Builder.io for this project?',
       [auth, rememberAuth],
       'Authenticate',
       'Builder authenticated.',
-      undefined,
+      'https://www.builder.io/',
       'Authenticating with Builder.io for this Project...',
     )
       .setRunPoints([
@@ -139,7 +140,7 @@ export function builderSettingsRules(project: Project): Tip {
   });
 }
 
-function hasBuilder(): boolean {
+export function hasBuilder(): boolean {
   const authed = getSetting(WorkspaceSetting.builderAuthenticated);
   if (authed || hasDevTools()) return true;
   return false;
