@@ -2,7 +2,7 @@
   "name": "webnative",
   "displayName": "WebNative",
   "description": "Create and maintain web and native projects",
-  "version": "0.0.18",
+  "version": "0.0.20",
   "icon": "media/webnative.png",
   "publisher": "WebNative",
   "keywords": [
@@ -615,11 +615,20 @@
           "scope": "workspace",
           "enum": [
             "yes",
-            "no",
-            ""
+            "no"
           ],
-          "default": "",
+          "default": "yes",
           "description": "Whether to open a browser whenever you click run."
+        },
+        "webnative.openPreviewLocation": {
+          "type": "string",
+          "scope": "workspace",
+          "default": "side",
+          "enum": [
+            "tab",
+            "side"
+          ],
+          "description": "Whether to open the preview as a tab or to the side"
         },
         "webnative.manualNewProjects": {
           "type": "boolean",

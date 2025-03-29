@@ -1,5 +1,17 @@
 ## Changelog
 
+### Version 0.0.20
+
+- QR Code button for mobile scanning
+
+### Version 0.0.19
+
+- Setting to open editor on side or tab
+- Add padding for the editor
+- Close panel on run web
+- Fix resizing of the editor
+- Open in Browser button on editor
+
 ### Version 0.0.17
 
 - Auth for Builder is now in progress dialog

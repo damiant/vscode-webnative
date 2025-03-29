@@ -1,4 +1,4 @@
-<div class="top-bar">
+<div class="top-bar" (window:resize)="onResize($event)">
   <vscode-button appearance="icon" aria-label="Back" (click)="set('back')">
     <img class="icon" [src]="assetsUri + '/back.svg'" />
   </vscode-button>
@@ -19,19 +19,37 @@
   <vscode-button appearance="icon" aria-label="Refresh" (click)="reload()">
     <img class="icon" [src]="assetsUri + '/refresh.svg'" />
   </vscode-button>
+  <vscode-button appearance="icon" aria-label="Open in Browser" (click)="set('browser')">
+    <img class="icon" [src]="assetsUri + '/web.svg'" />
+  </vscode-button>
+  <vscode-button [ngClass]="qrClass()" appearance="icon" aria-label="QR Code" (click)="set('qr')">
+    <img class="icon" [src]="assetsUri + '/qr-code.svg'" />
+  </vscode-button>
+
   <vscode-button appearance="icon" aria-label="New Window" (click)="set('add')">
     <img class="icon" [src]="assetsUri + '/add.svg'" />
   </vscode-button>
 </div>
+
+@if (showQr()) {
+  <div class="qr-container">
+    <div class="qr">
+      <canvas alt="Scan to view in a mobile browser" id="qr"></canvas>
+      <p class="txt">Scan the QR Code to display on mobile</p>
+    </div>
+  </div>
+}
 <div id="body" class="body">
   @if (spinner) {
     <span style="position: absolute; left: auto; right: auto" class="loader"></span>
   }
 
-  <iframe id="web" src="" width="100%" height="100%" frameBorder="0"></iframe>
-  <div id="devFrame" class="mobile-frame">
+  <iframe [hidden]="showQr()" id="web" src="" width="100%" height="100%" frameBorder="0"></iframe>
+
+  <div [hidden]="showQr()" id="devFrame" class="mobile-frame">
     <div id="frameContainer" style="width: 100%; height: calc(100% - 50px)">
       <div class="mobile-side-button" (click)="change()"></div>
+
       <iframe style="overflow: hidden" id="frame" src="" width="100%" height="100%" frameBorder="0"></iframe>
     </div>
     <div class="mobile-bar">

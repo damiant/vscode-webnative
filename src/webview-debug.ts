@@ -16,25 +16,37 @@ export function qrView(externalUrl: string, localUrl: string) {
   commands.executeCommand(CommandName.ViewDevServer, externalUrl, localUrl);
 }
 
+export interface NamedURL {
+  title: string;
+  url: string;
+}
+export function nexusURL(url: string): NamedURL {
+  const shortUrl = url ? url?.replace('https://', '').replace('http://', '') : undefined;
+  return {
+    title: shortUrl,
+    url: exState.projectRef.isCapacitor ? `https://nexusbrowser.com/` + encodeURIComponent(shortUrl) : url,
+  };
+}
 export function qrWebView(webview: Webview, externalUrl: string, localUrl: string): string | undefined {
   const onDiskPath = Uri.file(join(exState.context.extensionPath, 'resources', 'qrious.min.js'));
-  webview.options = { enableScripts: true };
   const qrSrc = webview.asWebviewUri(onDiskPath);
+  webview.options = { enableScripts: true };
+
   if (getSetting(WorkspaceSetting.pluginDrift) !== 'shown') {
     troubleshootPlugins();
   }
 
   const id = `${Math.random()}`;
-  const shortUrl = externalUrl ? externalUrl?.replace('https://', '').replace('http://', '') : undefined;
+  let title = '';
+
   if (!externalUrl) {
     webview.html = localUrl
       ? getWebviewQR(`<a href="${localUrl}">${localUrl}</a>`, localUrl, '', id)
       : getWebviewInitial();
   } else {
-    const qrUrl = exState.projectRef.isCapacitor
-      ? `https://nexusbrowser.com/` + encodeURIComponent(shortUrl)
-      : externalUrl;
-    webview.html = getWebviewQR(shortUrl, qrUrl, `${qrSrc}`, id);
+    const item = nexusURL(externalUrl);
+    title = item.title;
+    webview.html = getWebviewQR(item.title, item.url, `${qrSrc}`, id);
   }
   webview.onDidReceiveMessage(async (data) => {
     if (data.from !== id) return;
@@ -69,7 +81,7 @@ export function qrWebView(webview: Webview, externalUrl: string, localUrl: strin
         window.showInformationMessage(data.message);
     }
   });
-  return shortUrl;
+  return title;
 }
 
 export async function troubleshootPlugins() {
