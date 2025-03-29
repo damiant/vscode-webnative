@@ -10,6 +10,8 @@ plugin-explorer/*.js
 plugin-explorer/*.md
 starter/**
 !starter/build/**
+preview/**
+!preview/build/**
 plugin-explorer/*.json
 plugin-explorer/*.js
 plugin-explorer/*.md

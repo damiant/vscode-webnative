@@ -1,5 +1,5 @@
 import { RunPoint, TipFeature } from './tip';
-import { debugBrowser, viewInEditor } from './webview-preview';
+import { debugBrowser, viewInEditor } from './preview';
 import { handleError } from './error-handler';
 import { exState, ExTreeProvider } from './wn-tree-provider';
 import { getMonoRepoFolder, getPackageJSONFilename } from './monorepo';

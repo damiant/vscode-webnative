@@ -10,13 +10,13 @@ import { join } from 'path';
 import { existsSync, writeFileSync } from 'fs';
 import { CancelObject, openUri, run, runWithProgress } from './utilities';
 import { exState } from './wn-tree-provider';
-import { viewInEditor } from './webview-preview';
+import { viewInEditor } from './preview';
 
 export function checkBuilderIntegration(): Tip[] {
   const tips: Tip[] = [];
   if (
     !exists('@builder.io/dev-tools') &&
-    (exists('next') || exists('@remix-run/react') || exists('@angular/core') || exists('qwik'))
+    (exists('next') || exists('react') || exists('@remix-run/react') || exists('@angular/core') || exists('qwik'))
   )
     tips.push(
       new Tip(
@@ -61,18 +61,19 @@ function runApp(): Promise<void> {
 }
 
 export function builderDevelopAuth(): Tip[] {
-  const title = hasBuilder() ? 'Reauthenticate' : 'Authenticate';
+  const builder = hasBuilder();
+  const title = builder ? 'Reauthenticate' : 'Integrate Builder';
 
   return [
     new Tip(
       title,
       '',
-      TipType.None,
+      builder ? TipType.None : TipType.Builder,
       'Authenticate with Builder.io for this project?',
       [auth, rememberAuth],
       'Authenticate',
       'Builder authenticated.',
-      undefined,
+      'https://www.builder.io/',
       'Authenticating with Builder.io for this Project...',
     )
       .setRunPoints([
@@ -139,7 +140,7 @@ export function builderSettingsRules(project: Project): Tip {
   });
 }
 
-function hasBuilder(): boolean {
+export function hasBuilder(): boolean {
   const authed = getSetting(WorkspaceSetting.builderAuthenticated);
   if (authed || hasDevTools()) return true;
   return false;

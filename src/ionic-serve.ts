@@ -22,7 +22,7 @@ import { window, workspace } from 'vscode';
 import { write, writeError } from './logging';
 import { createServer } from 'http';
 import { join } from 'path';
-import { viewInEditor } from './webview-preview';
+import { viewInEditor } from './preview';
 import { exists } from './analyzer';
 
 /**

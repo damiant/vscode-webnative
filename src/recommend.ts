@@ -20,7 +20,7 @@ import { addScripts } from './scripts';
 import { Context } from './context-variables';
 import { exState } from './wn-tree-provider';
 import { getAndroidWebViewList } from './android-debug-list';
-import { getDebugBrowserName } from './webview-preview';
+import { getDebugBrowserName } from './preview';
 import { checkIonicNativePackages } from './rules-ionic-native';
 import { alt, getRunOutput, showProgress, tEnd, tStart } from './utilities';
 import { startStopLogServer } from './log-server';
@@ -47,6 +47,7 @@ import {
   builderDevelopAuth,
   builderDevelopPrompt,
   builderOpen,
+  hasBuilder,
 } from './integrations-builder';
 import { webProjectPackages } from './web-configuration';
 
@@ -377,13 +378,19 @@ export async function getRecommendations(project: Project, context: ExtensionCon
   }
 
   // Builder
-  project.setGroup(`Builder`, `These tasks are available for Builder.io`, TipType.Builder, true, undefined, true);
-  project.tips(checkBuilderIntegration());
-  project.tips(builderDevelopAuth());
-  project.add(builderDevelopInteractive());
-  project.add(builderDevelopPrompt(project));
-  project.add(builderSettingsRules(project));
-  project.add(builderOpen());
+  const bTask = builderDevelopAuth();
+  if (hasBuilder()) {
+    project.setGroup(`Builder`, `These tasks are available for Builder.io`, TipType.Builder, true, undefined, true);
+
+    project.tips(bTask);
+    project.tips(checkBuilderIntegration());
+    project.add(builderDevelopInteractive());
+    project.add(builderDevelopPrompt(project));
+    project.add(builderSettingsRules(project));
+    project.add(builderOpen());
+  } else {
+    project.tips(bTask);
+  }
 
   // Package Upgrade Features
   reviewPackages(packages, project);

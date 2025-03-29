@@ -192,7 +192,7 @@ export async function fix(
     const msg = tip.message ? `: ${tip.message}` : '';
     const info = tip.description ? tip.description : `${tip.title}${msg}`;
     const ignoreTitle = tip.ignorable ? 'Ignore' : undefined;
-    const selection = await window.showInformationMessage(info, urlBtn, tip.secondTitle, tip.commandTitle, ignoreTitle);
+    const selection = await window.showInformationMessage(info, tip.secondTitle, tip.commandTitle, urlBtn, ignoreTitle);
     if (selection && selection == tip.commandTitle) {
       fixIssue(tip.command, rootPath, ionicProvider, tip, tip.commandSuccess);
     }
