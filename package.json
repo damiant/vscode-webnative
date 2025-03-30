@@ -45,6 +45,7 @@
     "watch": "tsc -watch -p ./",
     "lint": "npm run eslint && npm run prettier -- --check",
     "fmt": "npm run eslint -- --fix && npm run prettier -- --write",
+    "test": "npx vitest tests",
     "prettier": "prettier \"**/*.ts\"",
     "eslint": "eslint . --ext .ts"
   },
@@ -663,10 +664,12 @@
     "@typescript-eslint/eslint-plugin": "8.26.1",
     "@typescript-eslint/parser": "8.26.1",
     "@webnativellc/eslint-config": "0.4.0",
+    "bun-types": "^1.2.7",
     "esbuild": "0.25.1",
     "eslint": "9.22.0",
     "husky": "^7.0.0",
-    "typescript": "5.8.2"
+    "typescript": "5.8.2",
+    "vitest": "^3.0.9"
   },
   "dependencies": {
     "fast-xml-parser": "^3.21.1",

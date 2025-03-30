@@ -145,14 +145,14 @@ async function getCapacitorProjectState(prj: Project, context: ExtensionContext)
     }
   }
 
-  const androidProject = getAndroidProject(prj);
-  const iosProject = getIosProject(prj);
+  const androidProject = await getAndroidProject(prj);
+  const iosProject = await getIosProject(prj);
   let hasNativeProject = false;
   if (iosProject.exists()) {
     const appTarget = iosProject.getAppTarget();
     if (appTarget) {
       state.iosBundleId = iosProject.getBundleId(appTarget.name);
-      state.iosDisplayName = await iosProject.getDisplayName(appTarget.name);
+      state.iosDisplayName = await iosProject.getDisplayName();
       for (const buildConfig of iosProject.getBuildConfigurations(appTarget.name)) {
         try {
           state.iosVersion = iosProject.getVersion(appTarget.name, buildConfig.name);
@@ -224,21 +224,21 @@ async function setBundleId(
     return; // User cancelled
   }
   queueFunction();
-  const iosProject = getIosProject(prj);
+  const iosProject = await getIosProject(prj);
 
   if (iosProject.exists() && platform != NativePlatform.AndroidOnly) {
     const appTarget = iosProject.getAppTarget();
     if (appTarget) {
       for (const buildConfig of iosProject.getBuildConfigurations(appTarget.name)) {
         write(`Set iOS Bundle Id for target ${appTarget.name} buildConfig.${buildConfig.name} to ${newBundleId}`);
-        iosProject.setBundleId(appTarget.name, buildConfig.name, newBundleId);
+        await iosProject.setBundleId(appTarget.name, buildConfig.name, newBundleId);
       }
     } else {
       writeError(`Unable to update iosProject bundleId`);
     }
   }
 
-  const androidProject = getAndroidProject(prj);
+  const androidProject = await getAndroidProject(prj);
   if (androidProject.exists() && platform != NativePlatform.iOSOnly) {
     write(`Set Android Package Name to ${newBundleId}`);
     try {
@@ -259,7 +259,7 @@ async function setBundleId(
 }
 
 async function updateStringsXML(folder: string, prj: Project, newBundleId: string) {
-  const androidProject = getAndroidProject(prj);
+  const androidProject = await getAndroidProject(prj);
   let data = androidProject.getResource('values', 'strings.xml');
   if (!data) {
     write(`Unable to set Android display name`);
@@ -309,8 +309,8 @@ async function setVersion(queueFunction: QueueFunction, version: string, prj: Pr
   }
 
   queueFunction();
-  const iosProject = getIosProject(prj);
-  const androidProject = getAndroidProject(prj);
+  const iosProject = await getIosProject(prj);
+  const androidProject = await getAndroidProject(prj);
 
   if (iosProject.exists() && platform != NativePlatform.AndroidOnly) {
     const appTarget = iosProject.getAppTarget();
@@ -352,8 +352,8 @@ async function setBuild(queueFunction: QueueFunction, build: string, prj: Projec
   }
 
   queueFunction();
-  const iosProject = getIosProject(prj);
-  const androidProject = getAndroidProject(prj);
+  const iosProject = await getIosProject(prj);
+  const androidProject = await getAndroidProject(prj);
 
   if (iosProject.exists() && platform != NativePlatform.AndroidOnly) {
     const appTarget = iosProject.getAppTarget();
@@ -394,8 +394,8 @@ async function setDisplayName(
   }
 
   queueFunction();
-  const iosProject = getIosProject(prj);
-  const androidProject = getAndroidProject(prj);
+  const iosProject = await getIosProject(prj);
+  const androidProject = await getAndroidProject(prj);
 
   console.log(`Display name changed to ${displayName}`);
   if (iosProject.exists() != null && platform != NativePlatform.AndroidOnly) {
@@ -426,9 +426,13 @@ async function setDisplayName(
   clearCapProjectCache();
 }
 
-function getAndroidProject(prj: Project): AndroidProject {
-  return new AndroidProject(join(prj.projectFolder(), 'android'));
+async function getAndroidProject(prj: Project): Promise<AndroidProject> {
+  const project = new AndroidProject(join(prj.projectFolder(), 'android'));
+  await project.parse();
+  return project;
 }
-function getIosProject(prj: Project): IosProject {
-  return new IosProject(join(prj.projectFolder(), 'ios', 'App'));
+async function getIosProject(prj: Project): Promise<IosProject> {
+  const project = new IosProject(join(prj.projectFolder(), 'ios', 'App'));
+  await project.parse();
+  return project;
 }

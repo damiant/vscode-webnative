@@ -7,7 +7,8 @@
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "sourceMap": true,
-    "rootDir": "src"
+    "rootDir": "src",
+    "types": ["bun-types"]
   },
-  "exclude": ["node_modules", "log-client", ".vscode-test", "plugin-explorer", "starter", "preview"]
+  "exclude": ["node_modules", "log-client", ".vscode-test", "plugin-explorer", "starter", "preview", "tests"]
 }

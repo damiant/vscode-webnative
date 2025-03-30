@@ -1,3 +1,5 @@
+import { existsSync } from 'fs';
+
 export class AndroidProject {
   private _projectPath: string;
   constructor(projectPath: string) {
@@ -5,9 +7,10 @@ export class AndroidProject {
   }
 
   exists(): boolean {
-    // TODO
-    return true;
+    return existsSync(this._projectPath);
   }
+
+  async parse(): Promise<void> {}
 
   getPackageName(): string {
     throw new Error('Not implemented');
