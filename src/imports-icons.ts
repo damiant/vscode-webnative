@@ -7,7 +7,7 @@ import { join } from 'path';
 import { writeError } from './logging';
 import { exists } from './analyzer';
 import { WorkspaceSection } from './workspace-state';
-import { getStringFrom } from './utilities';
+import { getStringFrom } from './utils-strings';
 
 export async function autoFixOtherImports(document: TextDocument): Promise<boolean> {
   const value: string = workspace.getConfiguration(WorkspaceSection).get('autoImportIcons');

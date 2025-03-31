@@ -1,7 +1,7 @@
 import { CapacitorProjectState } from './cap-project';
 import { Project } from './project';
 import { QueueFunction, Tip, TipType } from './tip';
-import { channelShow, getStringFrom, setStringIn } from './utilities';
+import { channelShow } from './utilities';
 import { CapProjectCache } from './context-variables';
 import { join } from 'path';
 import { getCapacitorConfigureFile, updateCapacitorConfig } from './capacitor-config-file';
@@ -10,6 +10,7 @@ import { existsSync, writeFileSync } from 'fs';
 import { ExtensionContext, window } from 'vscode';
 import { AndroidProject } from './native-project-android';
 import { IosProject } from './native-project-ios';
+import { getStringFrom, setStringIn } from './utils-strings';
 
 enum NativePlatform {
   iOSOnly,
@@ -266,7 +267,7 @@ async function updateStringsXML(folder: string, prj: Project, newBundleId: strin
   }
   data = setStringIn(data as string, `<string name="package_name">`, `</string>`, newBundleId);
   data = setStringIn(data as string, `<string name="custom_url_scheme">`, `</string>`, newBundleId);
-  const filename = join(folder, 'android/app/src/main/res/values/strings.xml');
+  const filename = join(folder, 'android', 'app', 'src', 'main', 'res', 'values', 'strings.xml');
   if (existsSync(filename)) {
     writeFileSync(filename, data);
   }

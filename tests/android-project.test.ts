@@ -15,3 +15,27 @@ test('Android project parses', async () => {
   const project = new AndroidProject(exampleProject());
   expect(await project.parse()).toBeUndefined();
 });
+
+test('Android project has a display name', async () => {
+  const project = new AndroidProject(exampleProject());
+  await project.parse();
+  expect(project.getDisplayName()).toBe('Scratch');
+});
+
+test('Android project has a package name', async () => {
+  const project = new AndroidProject(exampleProject());
+  await project.parse();
+  expect(project.getPackageName()).toBe('scratch.ts');
+});
+
+test('Android project has a version name', async () => {
+  const project = new AndroidProject(exampleProject());
+  await project.parse();
+  expect(project.getVersionName()).toBe('1.0');
+});
+
+test('Android project has a version code', async () => {
+  const project = new AndroidProject(exampleProject());
+  await project.parse();
+  expect(project.getVersionCode()).toBe(1);
+});

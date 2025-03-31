@@ -3,12 +3,13 @@ import { coerce } from 'semver';
 import { writeFileSync, readdirSync, statSync, existsSync } from 'fs';
 import { join } from 'path';
 import { PackageInfo } from './package-info';
-import { getStringFrom, plural } from './utilities';
+import { plural } from './utilities';
 import { Recommendation } from './recommendation';
 import { ExtensionContext, window } from 'vscode';
 import { QueueFunction } from './tip';
 import { getNpmInfo } from './npm-info';
 import { write, writeError } from './logging';
+import { getStringFrom } from './utils-strings';
 
 export async function ionicExport(
   queueFunction: QueueFunction,

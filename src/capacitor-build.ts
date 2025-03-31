@@ -2,7 +2,7 @@ import { Project } from './project';
 import { MonoRepoType } from './monorepo';
 import { CapacitorPlatform } from './capacitor-platform';
 import { InternalCommand } from './command-name';
-import { runWithProgress, getStringFrom, RunResults, openUri } from './utilities';
+import { runWithProgress, RunResults, openUri } from './utilities';
 import { writeError, writeWN } from './logging';
 import { exists, isGreaterOrEqual } from './analyzer';
 import { readFileSync, writeFileSync } from 'fs';
@@ -12,6 +12,7 @@ import { exec } from 'child_process';
 import { getCapacitorConfigureFilename, writeCapacitorConfig } from './capacitor-config-file';
 import { window } from 'vscode';
 import { QueueFunction } from './tip';
+import { getStringFrom } from './utils-strings';
 
 /**
  * Capacitor build command
