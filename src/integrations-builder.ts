@@ -161,8 +161,7 @@ export function builderOpen(): Tip {
 
 // Chat: Builder Develop Prompt
 export function builderDevelopPrompt(project: Project): Tip {
-  const authed = getSetting(WorkspaceSetting.builderAuthenticated);
-  if (!authed) return undefined;
+  if (!hasBuilder()) return undefined;
   return new Tip('Chat', '', TipType.None, 'Chat with Builder Develop')
     .setTooltip('Chat with Builder Develop to modify your project')
     .setQueuedAction(async () => {
