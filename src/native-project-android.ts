@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, readdirSync, readFileSync, renameSync, writeFileSync } from 'fs';
+import { existsSync, mkdirSync, readdirSync, readFileSync, renameSync, rmdirSync, writeFileSync } from 'fs';
 import { parse } from 'fast-xml-parser';
 import { join } from 'path';
 import { getStringFrom } from './utils-strings';
@@ -93,12 +93,12 @@ export class AndroidProject {
   }
   async setPackageName(packageName: string): Promise<void> {
     const dir = join(this._projectPath, 'app', 'src', 'main', 'java');
-    const mainActivity = join(dir, 'MainActivity.java');
     const stringsXML = this.stringsXmlPath();
     const currentPackageName = this.getPackageName();
     const gradlePath = join(this._projectPath, 'app', 'build.gradle');
     const currentFolders = currentPackageName.split('.');
     const currentPath = join(dir, ...currentFolders);
+    const mainActivity = join(currentPath, 'MainActivity.java');
 
     if (packageName === currentPackageName) {
       return;
@@ -151,6 +151,19 @@ export class AndroidProject {
       const source = join(currentPath, file);
       const destination = join(newPath, file);
       renameSync(source, destination);
+    }
+
+    // Delete old path
+    let count = currentFolders.length;
+    let pth = currentPath;
+    while (count > 0) {
+      try {
+        rmdirSync(pth);
+        pth = pth.substring(0, pth.lastIndexOf('/'));
+        count--;
+      } catch {
+        break;
+      }
     }
   }
 
