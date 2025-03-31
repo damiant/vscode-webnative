@@ -149,7 +149,7 @@ async function getCapacitorProjectState(prj: Project, context: ExtensionContext)
   const androidProject = await getAndroidProject(prj);
   const iosProject = await getIosProject(prj);
   let hasNativeProject = false;
-  if (iosProject.exists()) {
+  if (iosProject && iosProject.exists()) {
     const appTarget = iosProject.getAppTarget();
     if (appTarget) {
       state.iosBundleId = iosProject.getBundleId(appTarget.name);
@@ -168,7 +168,7 @@ async function getCapacitorProjectState(prj: Project, context: ExtensionContext)
     hasNativeProject = true;
   }
 
-  if (androidProject.exists()) {
+  if (androidProject && androidProject.exists()) {
     try {
       const [androidBundleId, androidVersion, androidBuild, androidDisplayName] = await Promise.all([
         androidProject.getPackageName(),
@@ -408,6 +408,14 @@ async function getAndroidProject(prj: Project): Promise<AndroidProject> {
 }
 async function getIosProject(prj: Project): Promise<IosProject> {
   const project = new IosProject(join(prj.projectFolder(), 'ios', 'App'));
-  await project.parse();
-  return project;
+  try {
+    const ok = await project.parse();
+    if (!ok) {
+      return undefined;
+    }
+    return project;
+  } catch (error) {
+    writeError(`Unable to parse ios project: ${error}`);
+    return undefined;
+  }
 }

@@ -17,10 +17,14 @@ export class IosProject {
     return existsSync(this._projectPath);
   }
 
-  async parse(): Promise<void> {
+  async parse(): Promise<boolean> {
+    if (!this.exists()) {
+      return false;
+    }
     this._project = xcode.project(this._projectPath);
     try {
       await this.parseAsync(this._project);
+      return true;
     } catch (error) {
       console.error(error);
       throw new Error(`Unable to parse project ${this._projectPath}`);
