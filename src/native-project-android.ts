@@ -1,7 +1,7 @@
 import { existsSync, mkdirSync, readdirSync, readFileSync, renameSync, rmdirSync, writeFileSync } from 'fs';
 import { parse } from 'fast-xml-parser';
 import { join } from 'path';
-import { getStringFrom } from './utils-strings';
+import { getStringFrom, setStringIn } from './utils-strings';
 
 export class AndroidProject {
   private _projectPath: string;
@@ -22,6 +22,16 @@ export class AndroidProject {
   // Function to get the current app name
   getDisplayName(): string {
     return this.getValueFromStringsXml('app_name');
+  }
+
+  setDisplayName(newName: string): void {
+    let data = readFileSync(this.stringsXmlPath(), 'utf-8');
+    if (!data) {
+      throw new Error(`Unable to set Android display name`);
+    }
+    data = setStringIn(data as string, `<string name="app_name">`, `</string>`, newName);
+    data = setStringIn(data as string, `<string name="title_activity_main">`, `</string>`, newName);
+    writeFileSync(this.stringsXmlPath(), data);
   }
 
   getValueFromStringsXml(key: string): string | null {
@@ -88,9 +98,17 @@ export class AndroidProject {
       return null;
     }
   }
-  getResource(folder: string, file: string): string {
-    throw new Error('Not implemented');
+
+  updateStringsXML(newBundleId: string) {
+    let data = readFileSync(this.stringsXmlPath(), 'utf-8');
+    if (!data) {
+      throw new Error('Error reading strings.xml');
+    }
+    data = setStringIn(data as string, `<string name="package_name">`, `</string>`, newBundleId);
+    data = setStringIn(data as string, `<string name="custom_url_scheme">`, `</string>`, newBundleId);
+    writeFileSync(this.stringsXmlPath(), data);
   }
+
   async setPackageName(packageName: string): Promise<void> {
     const dir = join(this._projectPath, 'app', 'src', 'main', 'java');
     const stringsXML = this.stringsXmlPath();

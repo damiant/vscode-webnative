@@ -63,3 +63,11 @@ test('Android project set version code', async () => {
   expect(project.getVersionCode()).toBe(2);
   await project.setVersionCode(1);
 });
+
+test('Android project set display name', async () => {
+  const project = new AndroidProject(exampleProject());
+  await project.parse();
+  project.setDisplayName('Scratch 2');
+  expect(project.getDisplayName()).toBe('Scratch 2');
+  project.setDisplayName('Scratch');
+});

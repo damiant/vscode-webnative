@@ -170,16 +170,16 @@ async function getCapacitorProjectState(prj: Project, context: ExtensionContext)
 
   if (androidProject.exists()) {
     try {
-      const [androidBundleId, androidVersion, androidBuild, data] = await Promise.all([
+      const [androidBundleId, androidVersion, androidBuild, androidDisplayName] = await Promise.all([
         androidProject.getPackageName(),
         androidProject.getVersionName(),
         androidProject.getVersionCode(),
-        androidProject.getResource('values', 'strings.xml'),
+        androidProject.getDisplayName(),
       ]);
       state.androidBundleId = androidBundleId;
       state.androidVersion = androidVersion;
       state.androidBuild = androidBuild;
-      state.androidDisplayName = getStringFrom(data as string, `<string name="app_name">`, `</string`);
+      state.androidDisplayName = androidDisplayName;
     } catch (error) {
       console.error('getCapacitorProjectState', error);
       return undefined;
@@ -253,24 +253,10 @@ async function setBundleId(
     }
   }
 
-  await updateStringsXML(folder, prj, newBundleId);
+  androidProject.updateStringsXML(newBundleId);
   updateCapacitorConfig(prj, newBundleId);
   showOutput();
   clearCapProjectCache();
-}
-
-async function updateStringsXML(folder: string, prj: Project, newBundleId: string) {
-  const androidProject = await getAndroidProject(prj);
-  let data = androidProject.getResource('values', 'strings.xml');
-  if (!data) {
-    write(`Unable to set Android display name`);
-  }
-  data = setStringIn(data as string, `<string name="package_name">`, `</string>`, newBundleId);
-  data = setStringIn(data as string, `<string name="custom_url_scheme">`, `</string>`, newBundleId);
-  const filename = join(folder, 'android', 'app', 'src', 'main', 'res', 'values', 'strings.xml');
-  if (existsSync(filename)) {
-    writeFileSync(filename, data);
-  }
 }
 
 function setValueIn(data: string, key: string, value: string): string {
@@ -407,20 +393,8 @@ async function setDisplayName(
     }
   }
   if (androidProject.exists() && platform != NativePlatform.iOSOnly) {
-    let data = androidProject.getResource('values', 'strings.xml');
-    if (!data) {
-      write(`Unable to set Android display name`);
-    }
-    data = setStringIn(data as string, `<string name="app_name">`, `</string>`, displayName);
-    data = setStringIn(data as string, `<string name="title_activity_main">`, `</string>`, displayName);
-    const filename = join(folder, 'android/app/src/main/res/values/strings.xml');
-    if (existsSync(filename)) {
-      writeFileSync(filename, data);
-      write(`Set Android app_name to ${displayName}`);
-      write(`Set Android title_activity_main to ${displayName}`);
-    } else {
-      window.showErrorMessage('Unable to write to ' + filename);
-    }
+    androidProject.setDisplayName(displayName);
+    write(`Set Android Displayname to ${displayName}`);
   }
   channelShow();
   updateCapacitorConfig(prj, undefined, displayName);
