@@ -24,6 +24,11 @@ export function webProject(project: Project) {
     } else if (existsSync(join(project.projectFolder(), 'dist')) || exists('vue')) {
       outFolder = 'dist'; /// use dist folder (usually vue)
     }
+    if (exists('@ionic/angular') || exists('ionicons')) {
+      // Likely www
+    } else {
+      outFolder = 'dist';
+    }
   }
 
   const pre = project.repoType != MonoRepoType.none ? InternalCommand.cwd : '';
