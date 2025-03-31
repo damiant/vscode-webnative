@@ -47,3 +47,19 @@ test('Android project change package name', async () => {
   expect(project.getPackageName()).toBe('com.example.scratch');
   await project.setPackageName('scratch.ts');
 });
+
+test('Android project set version name', async () => {
+  const project = new AndroidProject(exampleProject());
+  await project.parse();
+  await project.setVersionName('1.1');
+  expect(project.getVersionName()).toBe('1.1');
+  await project.setVersionName('1.0');
+});
+
+test('Android project set version code', async () => {
+  const project = new AndroidProject(exampleProject());
+  await project.parse();
+  await project.setVersionCode(2);
+  expect(project.getVersionCode()).toBe(2);
+  await project.setVersionCode(1);
+});

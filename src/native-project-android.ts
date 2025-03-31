@@ -168,10 +168,29 @@ export class AndroidProject {
   }
 
   async setVersionName(versionName: string): Promise<void> {
-    throw new Error('Not implemented');
+    const currentVersionName = this.getVersionName();
+    this.gradleReplace('versionName', `"${versionName}"`, `"${currentVersionName}"`);
+  }
+
+  private gradleReplace(key: string, value: string, oldvalue: string): void {
+    const gradlePath = join(this._projectPath, 'app', 'build.gradle');
+    if (!existsSync(gradlePath)) {
+      console.error('Error: build.gradle not found.');
+      return null;
+    }
+
+    try {
+      const gradleData = readFileSync(gradlePath, 'utf-8');
+
+      const newData = gradleData.replace(`${key} ${oldvalue}`, `${key} ${value}`);
+      writeFileSync(gradlePath, newData);
+    } catch (error) {
+      throw new Error(`Error setting ${key} to ${value}: ${error.message}`);
+    }
   }
 
   async setVersionCode(versionCode: number): Promise<void> {
-    throw new Error('Not implemented');
+    const currentVersionCode = this.getVersionCode();
+    this.gradleReplace('versionCode', versionCode.toString(), currentVersionCode.toString());
   }
 }
