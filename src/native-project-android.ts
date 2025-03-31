@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from 'fs';
+import { existsSync, mkdirSync, readdirSync, readFileSync, renameSync, writeFileSync } from 'fs';
 import { parse } from 'fast-xml-parser';
 import { join } from 'path';
 import { getStringFrom } from './utils-strings';
@@ -92,7 +92,66 @@ export class AndroidProject {
     throw new Error('Not implemented');
   }
   async setPackageName(packageName: string): Promise<void> {
-    throw new Error('Not implemented');
+    const dir = join(this._projectPath, 'app', 'src', 'main', 'java');
+    const mainActivity = join(dir, 'MainActivity.java');
+    const stringsXML = this.stringsXmlPath();
+    const currentPackageName = this.getPackageName();
+    const gradlePath = join(this._projectPath, 'app', 'build.gradle');
+    const currentFolders = currentPackageName.split('.');
+    const currentPath = join(dir, ...currentFolders);
+
+    if (packageName === currentPackageName) {
+      return;
+    }
+    if (!existsSync(currentPath)) {
+      throw new Error(`Path ${currentPath} does not exist.`);
+      return;
+    }
+    if (!existsSync(mainActivity)) {
+      console.error('Error: MainActivity.java not found.');
+      return;
+    }
+    if (!existsSync(stringsXML)) {
+      console.error('Error: strings.xml not found.');
+      return;
+    }
+    if (!existsSync(gradlePath)) {
+      console.error('Error: build.gradle not found.');
+      return;
+    }
+
+    // Replace package name in MainActivity.java
+    const data = readFileSync(mainActivity, 'utf-8');
+    const newData = data.replace(new RegExp(currentPackageName, 'g'), packageName);
+    writeFileSync(mainActivity, newData);
+
+    // Replace package name in strings.xml
+    const data2 = readFileSync(stringsXML, 'utf-8');
+    const newData2 = data2.replace(new RegExp(currentPackageName, 'g'), packageName);
+    writeFileSync(stringsXML, newData2);
+
+    // Replace package name in Build.gradle
+    const data3 = readFileSync(gradlePath, 'utf-8');
+    const newData3 = data3.replace(new RegExp(currentPackageName, 'g'), packageName);
+    writeFileSync(gradlePath, newData3);
+
+    // Create new folders for the new package name
+    const folders = packageName.split('.');
+    let newPath = dir;
+    for (const folder of folders) {
+      newPath = join(newPath, folder);
+      if (!existsSync(newPath)) {
+        mkdirSync(newPath);
+      }
+    }
+
+    // Move all files from the currentPath to the newPath
+    const files = readdirSync(currentPath);
+    for (const file of files) {
+      const source = join(currentPath, file);
+      const destination = join(newPath, file);
+      renameSync(source, destination);
+    }
   }
 
   async setVersionName(versionName: string): Promise<void> {
