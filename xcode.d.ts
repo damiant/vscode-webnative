@@ -238,7 +238,7 @@ declare module 'xcode' {
 
     updateProductName(name: any): void;
 
-    writeSync(options: any): any;
+    writeSync(options?: any): any;
 
     xcVersionGroupSection(): any;
   }

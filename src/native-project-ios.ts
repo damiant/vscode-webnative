@@ -159,31 +159,71 @@ export class IosProject {
   }
 
   async setBundleId(target: string, buildConfig: string, bundleId: string): Promise<void> {
-    // const project = this._project;
-    // Object.keys(project.hash.project.objects.XCBuildConfiguration).forEach((key) => {
-    // 	if (key == buildConfig) {
-    // 		project.hash.project.objects.XCBuildConfiguration[key].buildSettings.PRODUCT_BUNDLE_IDENTIFIER = bundleId;
+    const targets = this._project.hash.project.objects.PBXNativeTarget;
+    let set = false;
+    Object.keys(targets).forEach((key) => {
+      if (targets[key].name === target) {
+        const buildConfigs = this._project.hash.project.objects.XCBuildConfiguration;
+        Object.keys(buildConfigs).forEach((configKey) => {
+          const config = buildConfigs[configKey];
 
-    // 		const config = project.hash.project.objects.XCBuildConfiguration[key];
-    // 		if (config.buildSettings && config.buildSettings.PRODUCT_BUNDLE_IDENTIFIER) {
-    // 			config.buildSettings.PRODUCT_BUNDLE_IDENTIFIER = bundleId;
-    // 		}
-    // 	}
-    // });
-    // writeFileSync(this._projectPath, project.writeSync());
-    throw new Error('Not implemented');
+          if (config.buildSettings && config.buildSettings.PRODUCT_BUNDLE_IDENTIFIER) {
+            config.buildSettings.PRODUCT_BUNDLE_IDENTIFIER = bundleId;
+            writeFileSync(this._projectPath, this._project.writeSync());
+            set = true;
+          }
+        });
+      }
+    });
+    if (!set) {
+      throw new Error(`setBundleId ${target} failed`);
+    }
   }
 
   setVersion(target: string, buildConfig: string, version: string): void {
-    throw new Error('Not implemented');
+    const identifier = this.getVariable(this.getInfoPlist().CFBundleShortVersionString);
+    let versionSet = false;
+    const buildConfigs = this._project.hash.project.objects.XCBuildConfiguration;
+    Object.keys(buildConfigs).forEach((configKey) => {
+      const config = buildConfigs[configKey];
+      if (config.name === buildConfig) {
+        if (config.buildSettings && config.buildSettings[identifier]) {
+          config.buildSettings[identifier] = version;
+          writeFileSync(this._projectPath, this._project.writeSync());
+          versionSet = true;
+          return;
+        }
+      }
+    });
+    if (!versionSet) {
+      throw Error(`Couldnt find version for ${identifier} in ${buildConfig}`);
+    }
   }
 
   async setBuild(target: string, buildConfig: string, build: number): Promise<void> {
-    throw new Error('Not implemented');
+    const identifier = this.getVariable(this.getInfoPlist().CFBundleVersion);
+    let set = false;
+    const buildConfigs = this._project.hash.project.objects.XCBuildConfiguration;
+    Object.keys(buildConfigs).forEach((configKey) => {
+      const config = buildConfigs[configKey];
+      if (config.name === buildConfig) {
+        if (config.buildSettings && config.buildSettings[identifier]) {
+          config.buildSettings[identifier] = build;
+          writeFileSync(this._projectPath, this._project.writeSync());
+          set = true;
+          return;
+        }
+      }
+    });
+    if (!set) {
+      throw Error(`Couldnt find build for ${identifier} in ${buildConfig}`);
+    }
   }
 
   async setDisplayName(target: string, buildConfig: string, displayName: string): Promise<void> {
-    throw new Error('Not implemented');
+    const data: any = plist.readFileSync(this._infoPlistPath);
+    data.CFBundleDisplayName = displayName;
+    plist.writeFileSync(this._infoPlistPath, data);
   }
 }
 

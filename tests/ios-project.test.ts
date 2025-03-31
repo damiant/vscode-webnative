@@ -42,6 +42,7 @@ test('Get bundle id', async () => {
     expect(project.getBundleId(target.name)).toBe('scratch.ts');
   }
 });
+
 test('Get display name', async () => {
   const project = new IosProject(exampleIoSProject());
   await project.parse();
@@ -73,6 +74,53 @@ test('Get build', async () => {
   await project.parse();
   const target = project.getAppTarget();
   expect(await project.getBuild(target.name, 'Release')).toBe(1);
+});
+
+test('Set version', async () => {
+  const project = new IosProject(exampleIoSProject());
+  await project.parse();
+  const target = project.getAppTarget();
+  const originalVersion = project.getVersion(target.name, 'Release');
+  project.setVersion(target.name, 'Release', '1.3');
+  project.setVersion(target.name, 'Debug', '1.3');
+  const project2 = new IosProject(exampleIoSProject());
+  await project2.parse();
+  expect(project2.getVersion(target.name, 'Debug')).toBe('1.3');
+  expect(project2.getVersion(target.name, 'Release')).toBe('1.3');
+  project.setVersion(target.name, 'Release', originalVersion);
+  project.setVersion(target.name, 'Debug', originalVersion);
+});
+
+test('Set build', async () => {
+  const project = new IosProject(exampleIoSProject());
+  await project.parse();
+  const target = project.getAppTarget();
+  await project.setBuild(target.name, 'Release', 123);
+  expect(await project.getBuild(target.name, 'Release')).toEqual(123);
+  await project.setBuild(target.name, 'Release', 1);
+});
+
+test('Set Display Name', async () => {
+  const project = new IosProject(exampleIoSProject());
+  await project.parse();
+  const target = project.getAppTarget();
+  await project.setDisplayName('ignored', 'ignored', 'Scratch2');
+  const project2 = new IosProject(exampleIoSProject());
+  await project2.parse();
+  expect(await project2.getDisplayName()).toBe('Scratch2');
+  await project.setDisplayName('ignored', 'ignored', 'Scratch');
+});
+
+test('Set Bundle Id', async () => {
+  const project = new IosProject(exampleIoSProject());
+  await project.parse();
+  const target = project.getAppTarget();
+  await project.setBundleId(target.name, 'ignored', 'com.example.scratch');
+  const project2 = new IosProject(exampleIoSProject());
+  await project2.parse();
+  expect(project2.getBundleId(target.name)).toBe('com.example.scratch');
+  await project.setBundleId(target.name, 'ignored', 'scratch.ts');
+  expect(project.getBundleId(target.name)).toEqual('scratch.ts');
 });
 // test("IOS project has a bundle id", async () => {
 // 	const project = new IosProject("ios/App/App.xcodeproj");

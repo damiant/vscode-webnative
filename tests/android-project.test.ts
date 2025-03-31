@@ -10,3 +10,8 @@ test('Android project exists', () => {
   const project = new AndroidProject(exampleProject());
   expect(project.exists()).toBe(true);
 });
+
+test('Android project parses', async () => {
+  const project = new AndroidProject(exampleProject());
+  expect(await project.parse()).toBeUndefined();
+});
