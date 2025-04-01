@@ -2,7 +2,7 @@
 
 ### Version 0.0.21
 
-- Fix for Angular projects that do not use Ionic
+- Support Angular generate schematics for regular Angular projects
 
 ### Version 0.0.20
 
