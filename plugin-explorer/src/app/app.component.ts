@@ -100,7 +100,7 @@ export class AppComponent implements OnInit {
 
     if (checked('installed')) {
       filters.push(PluginFilter.installed);
-      this.listTitle = 'Installed Plugins';
+      this.listTitle = 'Installed Packages';
     }
     if (checked('official')) {
       filters.push(PluginFilter.official);
