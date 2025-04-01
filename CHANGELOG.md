@@ -2,7 +2,7 @@
 
 ### Version 0.0.21
 
--
+- Fix for Angular projects that do not use Ionic
 
 ### Version 0.0.20
 

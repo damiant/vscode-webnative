@@ -4,13 +4,31 @@ import { getRunOutput, openUri, replaceAll } from './utilities';
 import { write, writeError, writeWN } from './logging';
 import { join } from 'path';
 import { existsSync } from 'fs';
-import { isGreaterOrEqual } from './analyzer';
+import { exists, isGreaterOrEqual } from './analyzer';
 import { window } from 'vscode';
-import { QueueFunction } from './tip';
+import { QueueFunction, Tip, TipType } from './tip';
 import { exState } from './wn-tree-provider';
 import { npx } from './node-commands';
 import { checkAngularJson } from './rules-angular-json';
 import { getStringFrom } from './utils-strings';
+
+export async function addAngularGenerateAction(project: Project) {
+  if (!project.isCapacitor) return;
+  if (exists('@angular/core')) return;
+  if (!exists('@ionic/angular-toolkit')) return;
+
+  project.setSubGroup('New', TipType.Add, 'Create new Angular Components, Pages and more');
+
+  ['Page', 'Component', 'Service', 'Module', 'Class', 'Directive'].forEach((item) => {
+    project.add(
+      new Tip(item, '', TipType.Angular)
+        .setQueuedAction(angularGenerate, project, item.toLowerCase())
+        .setTooltip(`Create a new Angular ${item.toLowerCase()}`)
+        .canRefreshAfter(),
+    );
+  });
+  project.clearSubgroup();
+}
 
 export async function angularGenerate(
   queueFunction: QueueFunction,

@@ -33,7 +33,7 @@ import { updateMinorDependencies } from './update-minor';
 import { audit } from './audit';
 import { analyzeSize } from './analyze-size';
 import { ionicExport } from './ionic-export';
-import { angularGenerate } from './angular-generate';
+import { addAngularGenerateAction, angularGenerate } from './angular-generate';
 import { LoggingSettings } from './log-settings';
 import { writeWN } from './logging';
 import { cancelLastOperation } from './tasks';
@@ -199,21 +199,8 @@ export async function getRecommendations(project: Project, context: ExtensionCon
         .setData(project)
         .setContext(Context.selectAction);
     }
-    if (project.isCapacitor) {
-      if (exists('@angular/core')) {
-        project.setSubGroup('New', TipType.Add, 'Create new Angular Components, Pages and more');
 
-        ['Page', 'Component', 'Service', 'Module', 'Class', 'Directive'].forEach((item) => {
-          project.add(
-            new Tip(item, '', TipType.Angular)
-              .setQueuedAction(angularGenerate, project, item.toLowerCase())
-              .setTooltip(`Create a new Angular ${item.toLowerCase()}`)
-              .canRefreshAfter(),
-          );
-        });
-        project.clearSubgroup();
-      }
-    }
+    addAngularGenerateAction(project);
 
     project.add(buildAction(project));
 
