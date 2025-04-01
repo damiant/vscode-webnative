@@ -154,7 +154,7 @@ export async function suggestInstallAll(project: Project) {
       options.push('bun');
     }
     if (options.length > 1) {
-      message = `Install using which package manager?`;
+      message = `Which package manager should be used to install dependencies?`;
       noMessage = 'None of these';
     }
   } else {
