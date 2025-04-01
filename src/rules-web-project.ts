@@ -44,9 +44,10 @@ export function webProject(project: Project) {
 }
 
 async function integrateCapacitor(project: Project) {
+  const task = `Integrate Capacitor`;
   const result = await window.showInformationMessage(
     `Integrate Capacitor with this project to make it native mobile?`,
-    'Add',
+    task,
     'Info',
     'Exit',
   );
@@ -54,7 +55,7 @@ async function integrateCapacitor(project: Project) {
     openUri('https://capacitorjs.com');
     return;
   }
-  if (result !== 'Add') {
+  if (result !== task) {
     return;
   }
 
@@ -68,7 +69,7 @@ async function integrateCapacitor(project: Project) {
   if (!existsSync(join(project.projectFolder(), 'www'))) {
     if (existsSync(join(project.projectFolder(), 'build')) || exists('react')) {
       outFolder = 'build'; // use build folder (usually react)
-    } else if (exists('@angular/core') && isGreaterOrEqual('@angular/core', '18.0.0')) {
+    } else if (exists('@angular/core')) {
       outFolder = guessOutputFolder(project);
     } else if (existsSync(join(project.projectFolder(), 'dist')) || exists('vue')) {
       outFolder = 'dist'; /// use dist folder (usually vue)
@@ -96,7 +97,9 @@ function guessOutputFolder(project: Project): string {
     for (const projectName of Object.keys(angular.projects)) {
       const outputPath = angular.projects[projectName].architect.build.options.outputPath;
       if (outputPath) {
-        return outputPath;
+        // It might be browser folder
+        const browser = join(project.projectFolder(), outputPath, 'browser');
+        return existsSync(browser) ? browser : outputPath;
       }
     }
   } catch {
