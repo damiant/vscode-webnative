@@ -5,7 +5,7 @@ import { exists, isLess, isVersionGreaterOrEqual } from './analyzer';
 import { clearOutput, showOutput, write, writeError, writeWN, writeWarning } from './logging';
 import { installForceArgument, npmInstall, npmUninstall, npmUpdate, saveDevArgument } from './node-commands';
 import { inspectProject, Project } from './project';
-import { doDoes, getRunOutput, getStringFrom, plural, pluralize, run, setAllStringIn, showProgress } from './utilities';
+import { doDoes, getRunOutput, plural, pluralize, run, showProgress } from './utilities';
 import { capacitorSync } from './capacitor-sync';
 import { ActionResult } from './command-name';
 import { exState } from './wn-tree-provider';
@@ -17,6 +17,7 @@ import { checkPeerDependencies, PeerReport } from './peer-dependencies';
 import { removeNodeModules } from './advanced-actions';
 import { window } from 'vscode';
 import { QueueFunction } from './tip';
+import { getStringFrom, setAllStringIn } from './utils-strings';
 
 export interface CapacitorMigrationOptions {
   coreVersion: string;

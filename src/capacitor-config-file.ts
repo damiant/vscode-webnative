@@ -1,7 +1,7 @@
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { Project } from './project';
-import { getStringFrom, setStringIn } from './utilities';
+import { getStringFrom, setStringIn } from './utils-strings';
 
 // Purpose: Capacitor Config File Management
 

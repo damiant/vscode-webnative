@@ -14,11 +14,12 @@ import {
 import { processPackages } from './process-packages';
 import { Command, Tip, TipType } from './tip';
 import { Project } from './project';
-import { getRunOutput, setStringIn } from './utilities';
+import { getRunOutput } from './utilities';
 import { npmInstall, npmUninstall, PackageManager } from './node-commands';
 import { exState } from './wn-tree-provider';
 import { ExtensionContext, window } from 'vscode';
 import { existsSync, lstatSync, readFileSync, statSync, writeFileSync } from 'fs';
+import { setStringIn } from './utils-strings';
 
 let packageFile;
 let allDependencies = {};

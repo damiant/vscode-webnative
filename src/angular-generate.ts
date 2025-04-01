@@ -1,6 +1,6 @@
 import { Project } from './project';
 
-import { getRunOutput, getStringFrom, openUri, replaceAll } from './utilities';
+import { getRunOutput, openUri, replaceAll } from './utilities';
 import { write, writeError, writeWN } from './logging';
 import { join } from 'path';
 import { existsSync } from 'fs';
@@ -10,6 +10,7 @@ import { QueueFunction } from './tip';
 import { exState } from './wn-tree-provider';
 import { npx } from './node-commands';
 import { checkAngularJson } from './rules-angular-json';
+import { getStringFrom } from './utils-strings';
 
 export async function angularGenerate(
   queueFunction: QueueFunction,

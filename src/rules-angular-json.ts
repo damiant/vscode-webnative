@@ -7,7 +7,7 @@ import { getCapacitorConfigWebDir, getCapacitorConfigureFilename, writeCapacitor
 import { join, sep } from 'path';
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { window } from 'vscode';
-import { openUri, replaceAll, replaceAllStringIn, replaceStringIn } from './utilities';
+import { openUri, replaceAll } from './utilities';
 import { MonoRepoType } from './monorepo';
 
 /**

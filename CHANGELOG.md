@@ -3,6 +3,7 @@
 ### Version 0.0.20
 
 - QR Code button for mobile scanning
+- Reduce size of extension by replacing Trapeze for native project configuration
 
 ### Version 0.0.19
 

@@ -2,6 +2,7 @@ roadmap.md
 site/videos/**
 site/**
 **/*.vsix
+tests/** */
 plugin-explorer/.angular
 plugin-explorer/node_modules
 plugin-explorer/src

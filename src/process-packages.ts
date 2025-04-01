@@ -1,7 +1,7 @@
 import { coerce } from 'semver';
 import { Command, Tip, TipType } from './tip';
 import { Project } from './project';
-import { getRunOutput, getStringFrom, setAllStringIn, stripJSON, tEnd, tStart } from './utilities';
+import { getRunOutput, stripJSON, tEnd, tStart } from './utilities';
 import { NpmDependency, NpmOutdatedDependency, NpmPackage, PackageType, PackageVersion } from './npm-model';
 import { listCommand, outdatedCommand } from './node-commands';
 import {
@@ -19,6 +19,7 @@ import { ExtensionContext, window } from 'vscode';
 import { existsSync, lstatSync, readFileSync, readdirSync, writeFileSync } from 'fs';
 import { execSync } from 'child_process';
 import { getVersionsFromPackageLock } from './package-lock';
+import { getStringFrom, setAllStringIn } from './utils-strings';
 
 export interface PluginInformation {
   androidPermissions: Array<string>;

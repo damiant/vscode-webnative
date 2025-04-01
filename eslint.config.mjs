@@ -9,6 +9,7 @@ export default tseslint.config(
     'preview/**/*',
     'plugin-explorer/**/*',
     'out/**/*',
+    'tests/**/*',
     'resources/**/*',
     'certificates/**/*',
     'node_modules/**/*',

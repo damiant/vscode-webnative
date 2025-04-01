@@ -1,14 +1,16 @@
-import { MobileProject, MobileProjectConfig } from '@trapezedev/project';
 import { CapacitorProjectState } from './cap-project';
 import { Project } from './project';
 import { QueueFunction, Tip, TipType } from './tip';
-import { channelShow, getStringFrom, setStringIn } from './utilities';
+import { channelShow } from './utilities';
 import { CapProjectCache } from './context-variables';
 import { join } from 'path';
 import { getCapacitorConfigureFile, updateCapacitorConfig } from './capacitor-config-file';
 import { showOutput, write, writeError } from './logging';
 import { existsSync, writeFileSync } from 'fs';
 import { ExtensionContext, window } from 'vscode';
+import { AndroidProject } from './native-project-android';
+import { IosProject } from './native-project-ios';
+import { getStringFrom, setStringIn } from './utils-strings';
 
 enum NativePlatform {
   iOSOnly,
@@ -144,50 +146,48 @@ async function getCapacitorProjectState(prj: Project, context: ExtensionContext)
     }
   }
 
-  let project: MobileProject;
-  try {
-    project = await getCapacitorProject(prj);
-  } catch {
-    return undefined;
-  }
-
-  if (project.ios) {
-    const appTarget = project.ios?.getAppTarget();
+  const androidProject = await getAndroidProject(prj);
+  const iosProject = await getIosProject(prj);
+  let hasNativeProject = false;
+  if (iosProject && iosProject.exists()) {
+    const appTarget = iosProject.getAppTarget();
     if (appTarget) {
-      state.iosBundleId = project.ios.getBundleId(appTarget.name);
-      state.iosDisplayName = await project.ios.getDisplayName(appTarget.name);
-      for (const buildConfig of project.ios.getBuildConfigurations(appTarget.name)) {
+      state.iosBundleId = iosProject.getBundleId(appTarget.name);
+      state.iosDisplayName = await iosProject.getDisplayName();
+      for (const buildConfig of iosProject.getBuildConfigurations(appTarget.name)) {
         try {
-          state.iosVersion = project.ios?.getVersion(appTarget.name, buildConfig.name);
-          state.iosBuild = await project.ios.getBuild(appTarget.name, buildConfig.name);
+          state.iosVersion = iosProject.getVersion(appTarget.name, buildConfig.name);
+          state.iosBuild = await iosProject.getBuild(appTarget.name, buildConfig.name);
         } catch (error) {
           writeError(`Unable to getBuild of ios project ${appTarget.name} ${buildConfig.name}`);
         }
       }
     } else {
-      writeError(`Unable to getAppTarget of ios project ${project.ios.getError().message}`);
+      writeError(`Unable to getAppTarget of ios project`);
     }
+    hasNativeProject = true;
   }
 
-  if (project.android) {
+  if (androidProject && androidProject.exists()) {
     try {
-      const [androidBundleId, androidVersion, androidBuild, data] = await Promise.all([
-        project.android?.getPackageName(),
-        project.android?.getVersionName(),
-        project.android?.getVersionCode(),
-        project.android?.getResource('values', 'strings.xml'),
+      const [androidBundleId, androidVersion, androidBuild, androidDisplayName] = await Promise.all([
+        androidProject.getPackageName(),
+        androidProject.getVersionName(),
+        androidProject.getVersionCode(),
+        androidProject.getDisplayName(),
       ]);
       state.androidBundleId = androidBundleId;
       state.androidVersion = androidVersion;
       state.androidBuild = androidBuild;
-      state.androidDisplayName = getStringFrom(data as string, `<string name="app_name">`, `</string`);
+      state.androidDisplayName = androidDisplayName;
     } catch (error) {
       console.error('getCapacitorProjectState', error);
       return undefined;
     }
+    hasNativeProject = true;
   }
 
-  if (!project.ios && !project.android) {
+  if (!hasNativeProject) {
     return undefined;
   }
 
@@ -225,52 +225,38 @@ async function setBundleId(
     return; // User cancelled
   }
   queueFunction();
-  const project = await getCapacitorProject(prj);
+  const iosProject = await getIosProject(prj);
 
-  if (project?.ios && platform != NativePlatform.AndroidOnly) {
-    const appTarget = project.ios?.getAppTarget();
+  if (iosProject.exists() && platform != NativePlatform.AndroidOnly) {
+    const appTarget = iosProject.getAppTarget();
     if (appTarget) {
-      for (const buildConfig of project.ios.getBuildConfigurations(appTarget.name)) {
+      for (const buildConfig of iosProject.getBuildConfigurations(appTarget.name)) {
         write(`Set iOS Bundle Id for target ${appTarget.name} buildConfig.${buildConfig.name} to ${newBundleId}`);
-        project.ios.setBundleId(appTarget.name, buildConfig.name, newBundleId);
+        await iosProject.setBundleId(appTarget.name, buildConfig.name, newBundleId);
       }
     } else {
-      writeError(`Unable to update iosProject bundleId: ${project.ios.getError().message}`);
+      writeError(`Unable to update iosProject bundleId`);
     }
   }
 
-  if (project.android && platform != NativePlatform.iOSOnly) {
+  const androidProject = await getAndroidProject(prj);
+  if (androidProject.exists() && platform != NativePlatform.iOSOnly) {
     write(`Set Android Package Name to ${newBundleId}`);
     try {
       // This doesnt really work in Trapeze: https://github.com/ionic-team/trapeze/issues/191
       // So we alter strings.xml afterwards
-      await project.android?.setPackageName(newBundleId);
+      await androidProject.setPackageName(newBundleId);
     } catch (error) {
       writeError(`Unable to setPackageName for android: ${error}`);
       console.error(error);
       return;
     }
   }
-  await project.commit();
 
-  await updateStringsXML(folder, prj, newBundleId);
+  androidProject.updateStringsXML(newBundleId);
   updateCapacitorConfig(prj, newBundleId);
   showOutput();
   clearCapProjectCache();
-}
-
-async function updateStringsXML(folder: string, prj: Project, newBundleId: string) {
-  const project = await getCapacitorProject(prj);
-  let data = await project.android?.getResource('values', 'strings.xml');
-  if (!data) {
-    write(`Unable to set Android display name`);
-  }
-  data = setStringIn(data as string, `<string name="package_name">`, `</string>`, newBundleId);
-  data = setStringIn(data as string, `<string name="custom_url_scheme">`, `</string>`, newBundleId);
-  const filename = join(folder, 'android/app/src/main/res/values/strings.xml');
-  if (existsSync(filename)) {
-    writeFileSync(filename, data);
-  }
 }
 
 function setValueIn(data: string, key: string, value: string): string {
@@ -310,20 +296,20 @@ async function setVersion(queueFunction: QueueFunction, version: string, prj: Pr
   }
 
   queueFunction();
-  const project = await getCapacitorProject(prj);
+  const iosProject = await getIosProject(prj);
+  const androidProject = await getAndroidProject(prj);
 
-  if (project?.ios && platform != NativePlatform.AndroidOnly) {
-    const appTarget = project.ios?.getAppTarget();
-    for (const buildConfig of project.ios.getBuildConfigurations(appTarget.name)) {
+  if (iosProject.exists() && platform != NativePlatform.AndroidOnly) {
+    const appTarget = iosProject.getAppTarget();
+    for (const buildConfig of iosProject.getBuildConfigurations(appTarget.name)) {
       write(`Set iOS Version for target ${appTarget.name} buildConfig.${buildConfig.name} to ${newVersion}`);
-      await project.ios.setVersion(appTarget.name, buildConfig.name, newVersion);
+      await iosProject.setVersion(appTarget.name, buildConfig.name, newVersion);
     }
   }
-  if (project.android && platform != NativePlatform.iOSOnly) {
+  if (androidProject.exists() && platform != NativePlatform.iOSOnly) {
     write(`Set Android Version to ${newVersion}`);
-    await project.android?.setVersionName(newVersion);
+    await androidProject.setVersionName(newVersion);
   }
-  await project.commit();
   channelShow();
   clearCapProjectCache();
 }
@@ -353,20 +339,20 @@ async function setBuild(queueFunction: QueueFunction, build: string, prj: Projec
   }
 
   queueFunction();
-  const project = await getCapacitorProject(prj);
+  const iosProject = await getIosProject(prj);
+  const androidProject = await getAndroidProject(prj);
 
-  if (project?.ios && platform != NativePlatform.AndroidOnly) {
-    const appTarget = project.ios?.getAppTarget();
-    for (const buildConfig of project.ios.getBuildConfigurations(appTarget.name)) {
+  if (iosProject.exists() && platform != NativePlatform.AndroidOnly) {
+    const appTarget = iosProject.getAppTarget();
+    for (const buildConfig of iosProject.getBuildConfigurations(appTarget.name)) {
       write(`Set iOS Version for target ${appTarget.name} buildConfig.${buildConfig.name} to ${newBuild}`);
-      await project.ios.setBuild(appTarget.name, buildConfig.name, parseInt(newBuild));
+      await iosProject.setBuild(appTarget.name, buildConfig.name, parseInt(newBuild));
     }
   }
-  if (project.android && platform != NativePlatform.iOSOnly) {
+  if (androidProject.exists() && platform != NativePlatform.iOSOnly) {
     write(`Set Android Version to ${newBuild}`);
-    await project.android?.setVersionCode(parseInt(newBuild));
+    await androidProject.setVersionCode(parseInt(newBuild));
   }
-  await project.commit();
   clearCapProjectCache();
   channelShow();
 }
@@ -395,48 +381,41 @@ async function setDisplayName(
   }
 
   queueFunction();
-  const project = await getCapacitorProject(prj);
+  const iosProject = await getIosProject(prj);
+  const androidProject = await getAndroidProject(prj);
 
   console.log(`Display name changed to ${displayName}`);
-  if (project.ios != null && platform != NativePlatform.AndroidOnly) {
-    const appTarget = project.ios?.getAppTarget();
-    for (const buildConfig of project.ios.getBuildConfigurations(appTarget.name)) {
+  if (iosProject.exists() != null && platform != NativePlatform.AndroidOnly) {
+    const appTarget = iosProject.getAppTarget();
+    for (const buildConfig of iosProject.getBuildConfigurations(appTarget.name)) {
       write(`Set iOS Displayname for target ${appTarget.name} buildConfig.${buildConfig.name} to ${displayName}`);
-      await project.ios.setDisplayName(appTarget.name, buildConfig.name, displayName);
+      await iosProject.setDisplayName(appTarget.name, buildConfig.name, displayName);
     }
   }
-  if (project.android != null && platform != NativePlatform.iOSOnly) {
-    let data = await project.android?.getResource('values', 'strings.xml');
-    if (!data) {
-      write(`Unable to set Android display name`);
-    }
-    data = setStringIn(data as string, `<string name="app_name">`, `</string>`, displayName);
-    data = setStringIn(data as string, `<string name="title_activity_main">`, `</string>`, displayName);
-    const filename = join(folder, 'android/app/src/main/res/values/strings.xml');
-    if (existsSync(filename)) {
-      writeFileSync(filename, data);
-      write(`Set Android app_name to ${displayName}`);
-      write(`Set Android title_activity_main to ${displayName}`);
-    } else {
-      window.showErrorMessage('Unable to write to ' + filename);
-    }
+  if (androidProject.exists() && platform != NativePlatform.iOSOnly) {
+    androidProject.setDisplayName(displayName);
+    write(`Set Android Displayname to ${displayName}`);
   }
   channelShow();
-  project.commit();
   updateCapacitorConfig(prj, undefined, displayName);
   clearCapProjectCache();
 }
 
-async function getCapacitorProject(prj: Project): Promise<MobileProject> {
-  const capConfig: MobileProjectConfig = {
-    ios: {
-      path: join(prj.projectFolder(), 'ios', 'App'),
-    },
-    android: {
-      path: join(prj.projectFolder(), 'android'),
-    },
-  };
-  const project = new MobileProject('', capConfig);
-  await project.load();
+async function getAndroidProject(prj: Project): Promise<AndroidProject> {
+  const project = new AndroidProject(join(prj.projectFolder(), 'android'));
+  await project.parse();
   return project;
+}
+async function getIosProject(prj: Project): Promise<IosProject> {
+  const project = new IosProject(join(prj.projectFolder(), 'ios', 'App'));
+  try {
+    const ok = await project.parse();
+    if (!ok) {
+      return undefined;
+    }
+    return project;
+  } catch (error) {
+    writeError(`Unable to parse ios project: ${error}`);
+    return undefined;
+  }
 }
