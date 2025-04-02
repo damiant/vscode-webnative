@@ -25,7 +25,11 @@
   <vscode-button [ngClass]="qrClass()" appearance="icon" aria-label="QR Code" (click)="set('qr')">
     <img class="icon" [src]="assetsUri + '/qr-code.svg'" />
   </vscode-button>
-
+  @if (hasChat()) {
+    <vscode-button appearance="icon" aria-label="Chat" (click)="chat()">
+      <img class="icon" [src]="assetsUri + '/chat.svg'" />
+    </vscode-button>
+  }
   <vscode-button appearance="icon" aria-label="New Window" (click)="set('add')">
     <img class="icon" [src]="assetsUri + '/add.svg'" />
   </vscode-button>
