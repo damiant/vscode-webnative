@@ -86,11 +86,14 @@ export function viewInEditor(
   if (overrideAsWeb) {
     device = devices[0];
   }
+  if (!device) {
+    device = devices[0];
+  }
   const assetsUri = getUri(panel.webview, extensionUri, ['preview', 'build', 'assets']).toString();
 
   if (device) {
     panel.title = device.name;
-    panel.webview.postMessage({ command: MessageType.device, device, baseUrl: url, id, assetsUri });
+    panel.webview.postMessage({ command: MessageType.device, device, baseUrl: url, id, assetsUri: assetsUri });
   }
   if (existingPanel || stopSpinner) {
     panel.webview.postMessage({ command: MessageType.stopSpinner });
