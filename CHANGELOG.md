@@ -1,5 +1,10 @@
 ## Changelog
 
+### Version 0.0.21
+
+- Support Angular generate schematics for regular Angular projects
+- Fix to show editor preview properly for the first time
+
 ### Version 0.0.20
 
 - QR Code button for mobile scanning

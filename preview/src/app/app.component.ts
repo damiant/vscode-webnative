@@ -20,6 +20,7 @@ export class AppComponent implements OnInit {
   location = inject(Location);
   baseUrl = '';
   assetsUri = '';
+  hasChat = signal(false);
   mobileClass = signal('');
   webClass = signal('');
   qrClass = computed(() => (this.showQr() ? 'selected' : ''));
@@ -41,6 +42,10 @@ export class AppComponent implements OnInit {
 
   back() {
     this.location.back();
+  }
+
+  chat() {
+    vscode.postMessage({ command: 'chat' });
   }
 
   reload() {
@@ -99,6 +104,9 @@ export class AppComponent implements OnInit {
     this.device = device;
     this.baseUrl = event.data.baseUrl ?? this.baseUrl;
     this.assetsUri = event.data.assetsUri ?? this.assetsUri;
+    if (event.data.hasChat) {
+      this.hasChat.set(true);
+    }
     this.id = event.data.id ?? this.id;
 
     this.mobileClass.set(device.type == 'mobile' ? 'selected' : '');

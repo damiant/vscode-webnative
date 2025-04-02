@@ -2,7 +2,7 @@
   "name": "webnative",
   "displayName": "WebNative",
   "description": "Create and maintain web and native projects",
-  "version": "0.0.20",
+  "version": "0.0.21",
   "icon": "media/webnative.png",
   "publisher": "WebNative",
   "keywords": [
@@ -93,7 +93,7 @@
       },
       {
         "view": "wn-tree",
-        "contents": "Want to create a new Mobile or Web App?\n[Start New Project](command:webnative.newProject)\n",
+        "contents": "Create a new Web or Mobile App?\n[Start New Project](command:webnative.newProject)\n",
         "when": "noProjectFound == true"
       },
       {
