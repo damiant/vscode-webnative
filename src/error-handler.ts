@@ -113,6 +113,9 @@ function extractErrors(errorText: string, logs: Array<string>, folder: string): 
       if (!error && errorText.includes('Error:')) {
         error = extractLintStyleError(errorText);
       }
+      if (!error && errorText.startsWith('✘ [ERROR]')) {
+        error = extractESBuildStyleError(errorText);
+      }
       if (error) {
         errors.push(error);
         return errors;
@@ -231,6 +234,22 @@ function extractErrors(errorText: string, logs: Array<string>, folder: string): 
   return errors;
 }
 
+// ESBuild style Typescript error (eg Angular)
+// ✘ [ERROR] TS2420: Class 'ContainerComponent' incorrectly implements interface 'OnInit'.\n  Property 'ngOnInit' is missing in type 'ContainerComponent' but required in type 'OnInit'. [plugin angular-compiler]\n\n    src/app/components/container/container.component.ts:15:13:\n      15 │ export class ContainerComponent implements OnInit {\n         ╵              ~~~~~~~~~~~~~~~~~~\n\n  'ngOnInit' is declared here.\n\n    node_modules/@angular/core/index.d.ts:6119:4:\n      6119 │     ngOnInit(): void;\n           ╵     ~~~~~~~~~~~~~~~~~\n\n\n"
+function extractESBuildStyleError(errorText: string): ErrorLine {
+  try {
+    const lines = errorText.split('\n');
+    let error = lines[0].replace('✘ [ERROR] ', '').trim();
+    if (lines[1].length > 1) error += ' ' + lines[1].trim();
+    const args = lines[3].split(':');
+    const linenumber = parseInt(args[1]) - 1;
+    const position = parseInt(args[2]) - 1;
+    const filename = args[0].trim();
+    return { line: linenumber, position: position, uri: filename, error };
+  } catch {
+    return; // Parse error
+  }
+}
 // NextJS error has the style: Failed to compile.
 // "./src/components/BynderImage.tsx"
 // "Error:   x Expression expected"
