@@ -10,7 +10,7 @@ import { channelShow, openUri } from './utilities';
 import { CommandName } from './command-name';
 import { packageUpgrade } from './rules-package-upgrade';
 import { ProjectsProvider } from './projects-provider';
-import { buildConfiguration } from './build-configuration';
+import { buildConfiguration, runConfiguration } from './build-configuration';
 import { setWebConfig, WebConfigSetting } from './web-configuration';
 import { getLocalFolder } from './monorepo';
 import { androidDebugUnforward } from './android-debug-bridge';
@@ -227,7 +227,16 @@ export async function activate(context: ExtensionContext) {
     if (config != 'default') {
       r.tip.addActionArg(`--configuration=${config}`);
     }
-    exState.configuration = config;
+    exState.buildConfiguration = config;
+    runAction(r.tip, ionicProvider, rootPath);
+  });
+  commands.registerCommand(CommandName.RunConfig, async (r: Recommendation) => {
+    const config = await runConfiguration(context.extensionPath, context, r.tip.actionArg(0));
+    if (!config) return;
+    if (config != 'default') {
+      r.tip.addActionArg(`--configuration=${config}`);
+    }
+    exState.runConfiguration = config;
     runAction(r.tip, ionicProvider, rootPath);
   });
 

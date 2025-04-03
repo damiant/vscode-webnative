@@ -5,12 +5,12 @@ import { InternalCommand } from './command-name';
 import { npmRun, npx, preflightNPMCheck } from './node-commands';
 import { exists } from './analyzer';
 import { CapacitorPlatform } from './capacitor-platform';
-import { getConfigurationArgs } from './build-configuration';
 import { workspace } from 'vscode';
 import { error } from 'console';
 import { existsSync, readFileSync } from 'fs';
 import { join } from 'path';
 import { WorkspaceSection } from './workspace-state';
+import { getBuildConfigurationArgs } from './build-configuration';
 
 interface BuildOptions {
   platform?: CapacitorPlatform;
@@ -32,7 +32,7 @@ export async function build(project: Project, options: BuildOptions): Promise<st
   if (exState.project) {
     args += ` --project=${exState.project}`;
   }
-  const additionalArgs = getConfigurationArgs(false);
+  const additionalArgs = getBuildConfigurationArgs(false);
   if (additionalArgs) {
     if (additionalArgs.includes('--configuration=') && args.includes('--configuration')) {
       // We've already got the configuration argument so ignore it

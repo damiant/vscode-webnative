@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from 'fs';
 import { networkInterfaces } from 'os';
 
-import { getConfigurationArgs } from './build-configuration';
+import { getRunConfigurationArgs } from './build-configuration';
 import { InternalCommand } from './command-name';
 import { exState } from './wn-tree-provider';
 import { certPath } from './live-reload';
@@ -102,7 +102,7 @@ async function runServe(
     serveFlags += ` --project=${exState.project}`;
   }
 
-  serveFlags += getConfigurationArgs(isDebugging);
+  serveFlags += getRunConfigurationArgs(isDebugging);
 
   if (httpsForWeb) {
     serveFlags += ' --ssl';
