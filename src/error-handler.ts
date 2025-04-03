@@ -104,8 +104,15 @@ function extractErrors(errorText: string, logs: Array<string>, folder: string): 
     let tsline = undefined; // Vue style typescript error
     let javaLine = undefined; // Java style errors
     let jasmineLine = undefined; // Jasmine test errors
-    if (errorText && errorText.startsWith('Failed to compile.')) {
-      const error = extractNextJSErrorFrom(errorText);
+    if (errorText) {
+      let error: ErrorLine | undefined = undefined;
+      if (errorText.startsWith('Failed to compile.')) {
+        error = extractNextJSErrorFrom(errorText);
+      }
+      //
+      if (!error && errorText.includes('Error:')) {
+        error = extractLintStyleError(errorText);
+      }
       if (error) {
         errors.push(error);
         return errors;
@@ -236,6 +243,23 @@ function extractNextJSErrorFrom(errorText: string): ErrorLine {
     const line = parseInt(args[1]);
     const position = parseInt(args[2]);
     return { line, position, uri: args[0], error };
+  } catch {
+    return; // Couldn't parse
+  }
+}
+
+// Errors from linting look like this:
+// "./src/components/BynderImage.tsx"
+// "3:19  Error: 'builder' is defined but never used.  @typescript-eslint/no-unused-vars"
+function extractLintStyleError(errorText: string): ErrorLine {
+  try {
+    const lines = errorText.split('\n');
+    const filename = lines[1];
+    const args = lines[2].replace('Error: ', ':').trim().split(':');
+    const linenumber = parseInt(args[0]) - 1;
+    const position = parseInt(args[1]) - 1;
+    const error = args[2].trim();
+    return { line: linenumber, position: position, uri: filename, error };
   } catch {
     return; // Couldn't parse
   }
