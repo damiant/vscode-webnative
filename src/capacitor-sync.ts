@@ -1,10 +1,10 @@
 import { Project } from './project';
 import { MonoRepoType } from './monorepo';
-import { exists, isGreaterOrEqual } from './analyzer';
+import { isGreaterOrEqual } from './analyzer';
 import { InternalCommand } from './command-name';
-import { npx, PackageManager, preflightNPMCheck } from './node-commands';
-import { getConfigurationArgs } from './build-configuration';
+import { npx, preflightNPMCheck } from './node-commands';
 import { useIonicCLI } from './capacitor-run';
+import { getBuildConfigurationArgs } from './build-configuration';
 
 /**
  * Creates the capacitor sync command
@@ -35,16 +35,16 @@ function capCLISync(project: Project): string {
   if (isGreaterOrEqual('@capacitor/cli', '4.1.0')) {
     return `${npx(project)} cap sync --inline`;
   }
-  return `${npx(project)} cap sync${getConfigurationArgs()}`;
+  return `${npx(project)} cap sync${getBuildConfigurationArgs()}`;
 }
 
 function ionicCLISync(project: Project): string {
-  return `${npx(project)} ionic cap sync --inline${getConfigurationArgs()}`;
+  return `${npx(project)} ionic cap sync --inline${getBuildConfigurationArgs()}`;
 }
 
 function nxSync(project: Project): string {
   if (project.monoRepo.isNXStandalone) {
     return capCLISync(project);
   }
-  return `${npx(project)} nx sync ${project.monoRepo.name}${getConfigurationArgs()}`;
+  return `${npx(project)} nx sync ${project.monoRepo.name}${getBuildConfigurationArgs()}`;
 }

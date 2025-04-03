@@ -1,20 +1,25 @@
 ## Changelog
 
-### Version 0.0.22
+### Version 2.0.23
+
+- Run tasks can now choose the configuration to use (eg mode=development)
+- Build and run configurations for Vite based projects now find additional modes (eg staging, testing)
+
+### Version 2.0.22
 
 - Fix with Builder feature
 
-### Version 0.0.21
+### Version 2.0.21
 
 - Support Angular generate schematics for regular Angular projects
 - Fix to show editor preview properly for the first time
 
-### Version 0.0.20
+### Version 2.0.20
 
 - QR Code button for mobile scanning
 - Reduce size of extension by replacing Trapeze for native project configuration
 
-### Version 0.0.19
+### Version 2.0.19
 
 - Setting to open editor on side or tab
 - Add padding for the editor
@@ -22,16 +27,16 @@
 - Fix resizing of the editor
 - Open in Browser button on editor
 
-### Version 0.0.17
+### Version 2.0.17
 
 - Auth for Builder is now in progress dialog
 
-### Version 0.0.16
+### Version 2.0.16
 
 - Fix auth for Builder
 - Change order of tasks
 
-### Version 0.0.12
+### Version 2.0.12
 
 - Builder import from Figma improvements
 - Builder progress messages

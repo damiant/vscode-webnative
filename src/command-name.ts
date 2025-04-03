@@ -15,6 +15,7 @@ export enum CommandName {
   ProjectsRefresh = 'webnative.projectRefresh',
   ProjectSelect = 'webnative.projectSelect',
   BuildConfig = 'webnative.buildConfig',
+  RunConfig = 'webnative.runConfig',
   StatusRun = 'webnative.statusRun',
 
   LiveReload = 'webnative.liveReload',

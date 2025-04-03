@@ -25,8 +25,8 @@ export function checkAngularJson(project: Project) {
       const angular = parseAngularJSON(filename);
       for (const projectName of Object.keys(angular.projects)) {
         defaultConfiguration = angular.projects[projectName].architect?.build?.defaultConfiguration;
-        if (!exState.configuration && defaultConfiguration) {
-          exState.configuration = defaultConfiguration;
+        if (!exState.buildConfiguration && defaultConfiguration) {
+          exState.buildConfiguration = defaultConfiguration;
         }
         if (!exState.project) {
           exState.project = projectName;

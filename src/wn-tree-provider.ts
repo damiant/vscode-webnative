@@ -47,7 +47,8 @@ interface ExState {
   nodeModulesFolder: string; // The folder where node_modules is located
   hasPackageJson: boolean; // Whether folder has package.json
   hasNodeModulesNotified: boolean; // Whether we've notified the user of no node_modules
-  configuration: string; // Build configuration
+  buildConfiguration: string; // Build configuration
+  runConfiguration: string; // Run configuration
   project: string; // Angular project name
   nvm: string; // If .nvmrc is used will contain its contents
   rootFolder: string; // The folder to inspect
@@ -100,7 +101,8 @@ export const exState: ExState = {
   webView: undefined,
   lastRun: undefined,
   projectRef: undefined,
-  configuration: undefined,
+  buildConfiguration: undefined,
+  runConfiguration: undefined,
   servePort: 8100,
   project: undefined,
   debugged: false,

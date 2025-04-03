@@ -2,7 +2,7 @@
   "name": "webnative",
   "displayName": "WebNative",
   "description": "Create and maintain web and native projects",
-  "version": "0.0.22",
+  "version": "2.0.23",
   "icon": "media/webnative.png",
   "publisher": "WebNative",
   "keywords": [
@@ -268,6 +268,14 @@
         }
       },
       {
+        "command": "webnative.runConfig",
+        "title": "Run Configuration",
+        "icon": {
+          "light": "resources/light/more.svg",
+          "dark": "resources/dark/more.svg"
+        }
+      },
+      {
         "command": "webnative.function",
         "title": "Execute"
       },
@@ -317,7 +325,7 @@
       },
       {
         "command": "webnative.webNexus",
-        "title": "Show Preview Window",
+        "title": "Preview Window",
         "icon": {
           "light": "resources/light/webnative.svg",
           "dark": "resources/dark/webnative.svg"
@@ -325,7 +333,7 @@
       },
       {
         "command": "webnative.webNexusSelected",
-        "title": "Show Preview Window",
+        "title": "Preview Window",
         "icon": {
           "light": "resources/light/webnative-select.svg",
           "dark": "resources/dark/webnative-select.svg"
@@ -365,7 +373,7 @@
       },
       {
         "command": "webnative.selectDevice",
-        "title": "Select device to run",
+        "title": "Device to run",
         "icon": "$(device-mobile)"
       },
       {
@@ -473,6 +481,11 @@
       ],
       "view/item/context": [
         {
+          "command": "webnative.runConfig",
+          "when": "view == wn-tree && viewItem == webConfig",
+          "group": "inline"
+        },
+        {
           "command": "webnative.add",
           "when": "view == wn-tree && viewItem == packages",
           "group": "inline"
@@ -520,6 +533,11 @@
         {
           "command": "webnative.liveReloadSelected",
           "when": "view == wn-tree && viewItem == selectDevice && liveReload",
+          "group": "inline"
+        },
+        {
+          "command": "webnative.runConfig",
+          "when": "view == wn-tree && viewItem == selectDevice",
           "group": "inline"
         },
         {

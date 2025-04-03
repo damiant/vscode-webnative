@@ -24,7 +24,7 @@ import { getDebugBrowserName } from './preview';
 import { checkIonicNativePackages } from './rules-ionic-native';
 import { alt, getRunOutput, showProgress, tEnd, tStart } from './utilities';
 import { startStopLogServer } from './log-server';
-import { getConfigurationName } from './build-configuration';
+import { getBuildConfigurationName } from './build-configuration';
 import { liveReloadSSL } from './live-reload';
 import { npmInstall, npmUninstall, PackageManager } from './node-commands';
 import { capacitorBuild } from './capacitor-build';
@@ -430,7 +430,7 @@ export function debugOnWeb(project: Project, title: string): Tip {
 }
 
 export function buildAction(project: Project) {
-  return new Tip('Build', getConfigurationName(), TipType.Build, 'Build', undefined, 'Building', undefined)
+  return new Tip('Build', getBuildConfigurationName(), TipType.Build, 'Build', undefined, 'Building', undefined)
     .setDynamicCommand(build, project, {})
     .setContextValue(Context.buildConfig)
     .canStop()
