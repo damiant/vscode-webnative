@@ -8,6 +8,10 @@ import { getLastOperation } from './tasks';
 import { Disposable, Position, Selection, TextDocument, Uri, commands, window, workspace } from 'vscode';
 import { existsSync, lstatSync } from 'fs';
 import { join } from 'path';
+import { chat, hasBuilder } from './integrations-builder';
+import { hideOutput } from './logging';
+import { uncolor } from './uncolor';
+import { getStringFrom } from './utils-strings';
 
 interface ErrorLine {
   uri: string;
@@ -101,6 +105,23 @@ function extractErrors(errorText: string, logs: Array<string>, folder: string): 
     let tsline = undefined; // Vue style typescript error
     let javaLine = undefined; // Java style errors
     let jasmineLine = undefined; // Jasmine test errors
+    if (errorText) {
+      let error: ErrorLine | undefined = undefined;
+      if (errorText.startsWith('Failed to compile.')) {
+        error = extractNextJSErrorFrom(errorText);
+      }
+      //
+      if (!error && errorText.includes('Error:')) {
+        error = extractLintStyleError(errorText);
+      }
+      if (!error && errorText.startsWith('✘ [ERROR]')) {
+        error = extractESBuildStyleError(errorText);
+      }
+      if (error) {
+        errors.push(error);
+        return errors;
+      }
+    }
     for (let log of logs) {
       if (log.startsWith('[capacitor]')) {
         log = log.replace('[capacitor]', '').trim();
@@ -129,8 +150,12 @@ function extractErrors(errorText: string, logs: Array<string>, folder: string): 
         }
       }
 
-      // Vue style typescript error
+      // Vite style build error
+      if (log.includes(': error ')) {
+        errors.push(extractViteErrorFrom2(log));
+      }
       if (log.includes('error  in ')) {
+        // Vue style typescript error
         tsline = log;
       } else {
         if (tsline) {
@@ -214,6 +239,56 @@ function extractErrors(errorText: string, logs: Array<string>, folder: string): 
   return errors;
 }
 
+// ESBuild style Typescript error (eg Angular)
+// ✘ [ERROR] TS2420: Class 'ContainerComponent' incorrectly implements interface 'OnInit'.\n  Property 'ngOnInit' is missing in type 'ContainerComponent' but required in type 'OnInit'. [plugin angular-compiler]\n\n    src/app/components/container/container.component.ts:15:13:\n      15 │ export class ContainerComponent implements OnInit {\n         ╵              ~~~~~~~~~~~~~~~~~~\n\n  'ngOnInit' is declared here.\n\n    node_modules/@angular/core/index.d.ts:6119:4:\n      6119 │     ngOnInit(): void;\n           ╵     ~~~~~~~~~~~~~~~~~\n\n\n"
+function extractESBuildStyleError(errorText: string): ErrorLine {
+  try {
+    const lines = errorText.split('\n');
+    let error = lines[0].replace('✘ [ERROR] ', '').trim();
+    if (lines[1].length > 1) error += ' ' + lines[1].trim();
+    const args = lines[3].split(':');
+    const linenumber = parseInt(args[1]) - 1;
+    const position = parseInt(args[2]) - 1;
+    const filename = args[0].trim();
+    return { line: linenumber, position: position, uri: filename, error };
+  } catch {
+    return; // Parse error
+  }
+}
+// NextJS error has the style: Failed to compile.
+// "./src/components/BynderImage.tsx"
+// "Error:   x Expression expected"
+// "    ,-[/Users/damiantarnawsky/Code/damian-builder1/src/components/BynderImage.tsx:17:1]"
+function extractNextJSErrorFrom(errorText: string): ErrorLine {
+  try {
+    const lines = uncolor(errorText).split('\n');
+    const error = lines[3].replace('Error:', '').trim();
+    const args = lines[4].replace('    ,-[', '').replace(']', '').split(':');
+    const line = parseInt(args[1]);
+    const position = parseInt(args[2]);
+    return { line, position, uri: args[0], error };
+  } catch {
+    return; // Couldn't parse
+  }
+}
+
+// Errors from linting look like this:
+// "./src/components/BynderImage.tsx"
+// "3:19  Error: 'builder' is defined but never used.  @typescript-eslint/no-unused-vars"
+function extractLintStyleError(errorText: string): ErrorLine {
+  try {
+    const lines = errorText.split('\n');
+    const filename = lines[1];
+    const args = lines[2].replace('Error: ', ':').trim().split(':');
+    const linenumber = parseInt(args[0]) - 1;
+    const position = parseInt(args[1]) - 1;
+    const error = args[2].trim();
+    return { line: linenumber, position: position, uri: filename, error };
+  } catch {
+    return; // Couldn't parse
+  }
+}
+
 // Parse an error like:
 // libs/core/src/services/downloadPdf.service.ts:4:32 - error TS2307: Cannot find module '@ionic-native/document-viewer/ngx' or its corresponding type declarations.
 function extractTSErrorFrom(line: string): ErrorLine {
@@ -246,6 +321,22 @@ function extractErrorFrom(line: string): ErrorLine {
     return { line: linenumber, position: position, uri: codeline, error: errormsg };
   } catch {
     // Couldnt parse the line. Continue
+  }
+}
+
+// Extract error from line like:
+// src/counter.test.ts(1,34): error TS6133: 'beforeEach' is declared but its value is never read.\n
+function extractViteErrorFrom2(txt: string): ErrorLine {
+  try {
+    const args = txt.split(':');
+    const uri = args[0].split('(')[0];
+    const error = args[1] + ' ' + args[2].trim();
+    const pos = getStringFrom(txt, '(', ')').split(',');
+    const line = parseInt(pos[0]) - 1;
+    const position = parseInt(pos[1]) - 1;
+    return { uri, error, line, position };
+  } catch {
+    return;
   }
 }
 
@@ -324,8 +415,10 @@ async function handleErrorLine(number: number, errors: Array<ErrorLine>, folder:
   if (!errors[number]) return;
   const nextButton = number + 1 == errors.length ? undefined : 'Next';
   const prevButton = number == 0 ? undefined : 'Previous';
+  const fixTitle = 'Fix with Builder';
+  const fixButton = hasBuilder() ? fixTitle : undefined;
   const title = errors.length > 1 ? `Error ${number + 1} of ${errors.length}: ` : '';
-  window.showErrorMessage(`${title}${errors[number].error}`, prevButton, nextButton, 'Ok').then((result) => {
+  window.showErrorMessage(`${title}${errors[number].error}`, fixButton, prevButton, nextButton, 'Ok').then((result) => {
     if (result == 'Next') {
       handleErrorLine(number + 1, errors, folder);
       return;
@@ -333,6 +426,11 @@ async function handleErrorLine(number: number, errors: Array<ErrorLine>, folder:
     if (result == 'Previous') {
       handleErrorLine(number - 1, errors, folder);
       return;
+    }
+    if (result == fixTitle) {
+      const prompt = `Fix the error on line ${errors[number].line} at position ${errors[number].position} of ${errors[number].uri}: ${errors[number].error}`;
+      hideOutput();
+      chat(exState.projectRef.projectFolder(), undefined, undefined, prompt);
     }
   });
   let uri = errors[number].uri;
