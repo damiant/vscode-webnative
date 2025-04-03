@@ -11,6 +11,7 @@ import { join } from 'path';
 import { chat, hasBuilder } from './integrations-builder';
 import { hideOutput } from './logging';
 import { uncolor } from './uncolor';
+import { getStringFrom } from './utils-strings';
 
 interface ErrorLine {
   uri: string;
@@ -149,8 +150,12 @@ function extractErrors(errorText: string, logs: Array<string>, folder: string): 
         }
       }
 
-      // Vue style typescript error
+      // Vite style build error
+      if (log.includes(': error ')) {
+        errors.push(extractViteErrorFrom2(log));
+      }
       if (log.includes('error  in ')) {
+        // Vue style typescript error
         tsline = log;
       } else {
         if (tsline) {
@@ -316,6 +321,22 @@ function extractErrorFrom(line: string): ErrorLine {
     return { line: linenumber, position: position, uri: codeline, error: errormsg };
   } catch {
     // Couldnt parse the line. Continue
+  }
+}
+
+// Extract error from line like:
+// src/counter.test.ts(1,34): error TS6133: 'beforeEach' is declared but its value is never read.\n
+function extractViteErrorFrom2(txt: string): ErrorLine {
+  try {
+    const args = txt.split(':');
+    const uri = args[0].split('(')[0];
+    const error = args[1] + ' ' + args[2].trim();
+    const pos = getStringFrom(txt, '(', ')').split(',');
+    const line = parseInt(pos[0]) - 1;
+    const position = parseInt(pos[1]) - 1;
+    return { uri, error, line, position };
+  } catch {
+    return;
   }
 }
 
