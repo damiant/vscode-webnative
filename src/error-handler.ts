@@ -10,6 +10,7 @@ import { existsSync, lstatSync } from 'fs';
 import { join } from 'path';
 import { chat, hasBuilder } from './integrations-builder';
 import { hideOutput } from './logging';
+import { uncolor } from './uncolor';
 
 interface ErrorLine {
   uri: string;
@@ -103,6 +104,13 @@ function extractErrors(errorText: string, logs: Array<string>, folder: string): 
     let tsline = undefined; // Vue style typescript error
     let javaLine = undefined; // Java style errors
     let jasmineLine = undefined; // Jasmine test errors
+    if (errorText && errorText.startsWith('Failed to compile.')) {
+      const error = extractNextJSErrorFrom(errorText);
+      if (error) {
+        errors.push(error);
+        return errors;
+      }
+    }
     for (let log of logs) {
       if (log.startsWith('[capacitor]')) {
         log = log.replace('[capacitor]', '').trim();
@@ -214,6 +222,23 @@ function extractErrors(errorText: string, logs: Array<string>, folder: string): 
     }
   }
   return errors;
+}
+
+// NextJS error has the style: Failed to compile.
+// "./src/components/BynderImage.tsx"
+// "Error:   x Expression expected"
+// "    ,-[/Users/damiantarnawsky/Code/damian-builder1/src/components/BynderImage.tsx:17:1]"
+function extractNextJSErrorFrom(errorText: string): ErrorLine {
+  try {
+    const lines = uncolor(errorText).split('\n');
+    const error = lines[3].replace('Error:', '').trim();
+    const args = lines[4].replace('    ,-[', '').replace(']', '').split(':');
+    const line = parseInt(args[1]);
+    const position = parseInt(args[2]);
+    return { line, position, uri: args[0], error };
+  } catch {
+    return; // Couldn't parse
+  }
 }
 
 // Parse an error like:
