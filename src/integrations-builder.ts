@@ -3,7 +3,7 @@ import { exists } from './analyzer';
 import { CommandName } from './command-name';
 import { Project } from './project';
 import { QueueFunction, Tip, TipType } from './tip';
-import { showOutput } from './logging';
+import { showOutput, write } from './logging';
 import { getSetting, setSetting, WorkspaceSetting } from './workspace-state';
 import { runInTerminal } from './terminal';
 import { join } from 'path';
@@ -169,19 +169,23 @@ export function builderDevelopPrompt(project: Project): Tip {
     });
 }
 
-export async function chat(folder: string, url?: string, append?: string): Promise<void> {
+export async function chat(folder: string, url?: string, append?: string, prompt?: string): Promise<void> {
   let chatting = true;
   while (chatting) {
     const title = url
       ? `How would you like to integrate this Figma design?`
       : `How would you like to modify your project?`;
-    const prompt = await window.showInputBox({
-      title,
-      placeHolder: 'Enter prompt (eg "Create a component called Pricing Page")',
-      ignoreFocusOut: true,
-    });
-    if (!prompt) return undefined;
+    if (!prompt) {
+      prompt = await window.showInputBox({
+        title,
+        placeHolder: 'Enter prompt (eg "Create a component called Pricing Page")',
+        ignoreFocusOut: true,
+      });
+      if (!prompt) return undefined;
+    }
 
+    const cmd = `npx builder.io@latest code --prompt "${prompt}" ${url ? `--url "${url}"${append ?? ''}` : ''}`;
+    write(`> ${cmd}`);
     await window.withProgress(
       {
         location: ProgressLocation.Notification,
@@ -190,20 +194,7 @@ export async function chat(folder: string, url?: string, append?: string): Promi
       },
       async (progress, token: CancellationToken) => {
         const cancelObject: CancelObject = { proc: undefined, cancelled: false };
-        await run(
-          folder,
-          `npx builder.io@latest code --prompt "${prompt}" ${url ? `--url "${url}"${append ?? ''}` : ''}`,
-          cancelObject,
-          [],
-          [],
-          progress,
-          undefined,
-          undefined,
-          false,
-          undefined,
-          true,
-          true,
-        );
+        await run(folder, cmd, cancelObject, [], [], progress, undefined, undefined, false, undefined, true, true);
       },
     );
     const view = 'View Response';

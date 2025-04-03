@@ -8,6 +8,7 @@ import { getLastOperation } from './tasks';
 import { Disposable, Position, Selection, TextDocument, Uri, commands, window, workspace } from 'vscode';
 import { existsSync, lstatSync } from 'fs';
 import { join } from 'path';
+import { chat, hasBuilder } from './integrations-builder';
 
 interface ErrorLine {
   uri: string;
@@ -324,8 +325,9 @@ async function handleErrorLine(number: number, errors: Array<ErrorLine>, folder:
   if (!errors[number]) return;
   const nextButton = number + 1 == errors.length ? undefined : 'Next';
   const prevButton = number == 0 ? undefined : 'Previous';
+  const fixButton = hasBuilder() ? 'Fix' : undefined;
   const title = errors.length > 1 ? `Error ${number + 1} of ${errors.length}: ` : '';
-  window.showErrorMessage(`${title}${errors[number].error}`, prevButton, nextButton, 'Ok').then((result) => {
+  window.showErrorMessage(`${title}${errors[number].error}`, fixButton, prevButton, nextButton, 'Ok').then((result) => {
     if (result == 'Next') {
       handleErrorLine(number + 1, errors, folder);
       return;
@@ -333,6 +335,10 @@ async function handleErrorLine(number: number, errors: Array<ErrorLine>, folder:
     if (result == 'Previous') {
       handleErrorLine(number - 1, errors, folder);
       return;
+    }
+    if (result == 'Fix') {
+      const prompt = `Fix this error: ${errors[number].error}`;
+      chat(exState.projectRef.projectFolder(), undefined, undefined, prompt);
     }
   });
   let uri = errors[number].uri;
