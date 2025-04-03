@@ -8,7 +8,7 @@ import { exists } from './analyzer';
 import { ionicInit } from './ionic-init';
 import { request } from 'https';
 import { ExtensionSetting, getExtSetting, getSetting, WorkspaceSection, WorkspaceSetting } from './workspace-state';
-import { showOutput, write, writeError, writeWN } from './logging';
+import { showOutput, write, writeAppend, writeError, writeWN } from './logging';
 import { getWebConfiguration, WebConfigSetting } from './web-configuration';
 import { Publisher } from './discovery';
 import { join } from 'path';
@@ -35,10 +35,12 @@ const filteredLines = [
   '  :host-context([dir=rtl])',
   '  .ion-float-start:dir(rtl)',
   '▲ [WARNING] 20 rules skipped',
-  '◑  Install Dependencies',
-  '◒  Install Dependencies',
-  '◐  Install Dependencies',
-  '◓  Install Dependencies',
+  '◑',
+  '◒',
+  '◐',
+  '◓',
+  '│',
+  '◇  💡',
   '[info][capacitorcookies] Getting cookies at:',
   '[INFO] Waiting for connectivity with npm...', // Occurs during debugging
 ];
@@ -107,6 +109,7 @@ export function passesFilter(msg: string, logFilters: string[], isRemote: boolea
       return false;
     }
   }
+  if (msg == '') return false;
   if (!logFilters) return true;
 
   for (const logFilter of logFilters) {
@@ -290,7 +293,7 @@ export async function run(
         if (output) {
           output.output += data;
         }
-        const logLines = data.split('\n');
+        const logLines = data.split('\r\n');
         logs = logs.concat(logLines);
         if (findLocalUrl) {
           if (data.includes('http')) {
@@ -370,7 +373,11 @@ export async function run(
           } else if (logLine && !suppressInfo) {
             const uncolored = uncolor(logLine);
             if (passesFilter(uncolored, logFilters, false)) {
-              write(uncolored);
+              if (uncolored.includes('\r')) {
+                write(uncolored);
+              } else {
+                writeAppend(uncolored);
+              }
             }
           }
         }

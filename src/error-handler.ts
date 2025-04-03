@@ -9,6 +9,7 @@ import { Disposable, Position, Selection, TextDocument, Uri, commands, window, w
 import { existsSync, lstatSync } from 'fs';
 import { join } from 'path';
 import { chat, hasBuilder } from './integrations-builder';
+import { hideOutput } from './logging';
 
 interface ErrorLine {
   uri: string;
@@ -325,7 +326,8 @@ async function handleErrorLine(number: number, errors: Array<ErrorLine>, folder:
   if (!errors[number]) return;
   const nextButton = number + 1 == errors.length ? undefined : 'Next';
   const prevButton = number == 0 ? undefined : 'Previous';
-  const fixButton = hasBuilder() ? 'Fix' : undefined;
+  const fixTitle = 'Fix with Builder';
+  const fixButton = hasBuilder() ? fixTitle : undefined;
   const title = errors.length > 1 ? `Error ${number + 1} of ${errors.length}: ` : '';
   window.showErrorMessage(`${title}${errors[number].error}`, fixButton, prevButton, nextButton, 'Ok').then((result) => {
     if (result == 'Next') {
@@ -336,8 +338,9 @@ async function handleErrorLine(number: number, errors: Array<ErrorLine>, folder:
       handleErrorLine(number - 1, errors, folder);
       return;
     }
-    if (result == 'Fix') {
-      const prompt = `Fix this error: ${errors[number].error}`;
+    if (result == fixTitle) {
+      const prompt = `Fix the error on line ${errors[number].line} at position ${errors[number].position} of ${errors[number].uri}: ${errors[number].error}`;
+      hideOutput();
       chat(exState.projectRef.projectFolder(), undefined, undefined, prompt);
     }
   });

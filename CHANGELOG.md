@@ -1,5 +1,9 @@
 ## Changelog
 
+### Version 0.0.22
+
+- Fix with Builder feature
+
 ### Version 0.0.21
 
 - Support Angular generate schematics for regular Angular projects

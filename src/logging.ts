@@ -22,6 +22,11 @@ export function showOutput() {
   channel.show();
 }
 
+export function hideOutput() {
+  const channel = getOutputChannel();
+  channel.hide();
+}
+
 export function write(message: string) {
   getOutputChannel().appendLine(message);
 }
