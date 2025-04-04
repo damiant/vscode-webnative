@@ -5,8 +5,8 @@ import { getMonoRepoFolder, MonoRepoType } from './monorepo';
 import { Project } from './project';
 import { getRunOutput, showProgress } from './utilities';
 import { existsSync } from 'fs';
-import { GlobalSetting, getGlobalSetting, setGlobalSetting } from './workspace-state';
-import { exists, isGreaterOrEqual, isVersionGreaterOrEqual } from './analyzer';
+import { ExtensionSetting, GlobalSetting, getExtSetting, getGlobalSetting, setGlobalSetting } from './workspace-state';
+import { exists, isVersionGreaterOrEqual } from './analyzer';
 import { hasPackageLock } from './package-lock';
 
 export enum PackageManager {
@@ -121,6 +121,23 @@ export function preflightNPMCheck(project: Project): string {
   return preop;
 }
 
+export async function getPackageManagers(): Promise<string[]> {
+  const result = [];
+  if (isVersionGreaterOrEqual(await getVersion('npm -v'), '0.0.0')) {
+    result.push('npm');
+  }
+  if (isVersionGreaterOrEqual(await getVersion('pnpm -v'), '0.0.0')) {
+    result.push('pnpm');
+  }
+  if (isVersionGreaterOrEqual(await getVersion('yarn -v'), '0.0.0')) {
+    result.push('yarn');
+  }
+  if (isVersionGreaterOrEqual(await getVersion('bun -v'), '0.0.0')) {
+    result.push('bun');
+  }
+  return result;
+}
+
 async function getVersion(cmd: string): Promise<string> {
   return await getRunOutput(cmd, '', undefined, true, true);
 }
@@ -134,38 +151,34 @@ export async function suggestInstallAll(project: Project) {
   if (project.isModernYarn()) {
     return;
   }
-  if (getGlobalSetting(GlobalSetting.suggestNPMInstall) == 'no') return;
+  let res = getExtSetting(ExtensionSetting.packageManager);
 
-  const isNpm = hasPackageLock(project);
-  let message = `Would you like to install node modules for this project?`;
-  const options = [];
-  let noMessage = 'no';
-  if (!isNpm) {
-    if (isVersionGreaterOrEqual(await getVersion('npm -v'), '0.0.0')) {
-      options.push('npm');
+  if (!res || res == '') {
+    if (getGlobalSetting(GlobalSetting.suggestNPMInstall) == 'no') return;
+
+    const isNpm = hasPackageLock(project);
+    let message = `Would you like to install node modules for this project?`;
+    const options = [];
+    let noMessage = 'no';
+    if (!isNpm) {
+      const list = await getPackageManagers();
+      for (const pm of list) {
+        options.push(pm);
+      }
+      if (options.length > 1) {
+        message = `Which package manager should be used to install dependencies?`;
+        noMessage = 'None of these';
+      }
+    } else {
+      options.push('Yes');
     }
-    if (isVersionGreaterOrEqual(await getVersion('pnpm -v'), '0.0.0')) {
-      options.push('pnpm');
+    const res = await window.showInformationMessage(message, ...options, noMessage, 'Never');
+    if (res == 'Never') {
+      setGlobalSetting(GlobalSetting.suggestNPMInstall, 'no');
+      return;
     }
-    if (isVersionGreaterOrEqual(await getVersion('yarn -v'), '0.0.0')) {
-      options.push('yarn');
-    }
-    if (isVersionGreaterOrEqual(await getVersion('bun -v'), '0.0.0')) {
-      options.push('bun');
-    }
-    if (options.length > 1) {
-      message = `Which package manager should be used to install dependencies?`;
-      noMessage = 'None of these';
-    }
-  } else {
-    options.push('Yes');
+    if (!res || res == noMessage) return;
   }
-  const res = await window.showInformationMessage(message, ...options, noMessage, 'Never');
-  if (res == 'Never') {
-    setGlobalSetting(GlobalSetting.suggestNPMInstall, 'no');
-    return;
-  }
-  if (!res || res == noMessage) return;
   if (res == 'npm') {
     exState.repoType = MonoRepoType.npm;
     exState.packageManager = PackageManager.npm;
@@ -181,7 +194,7 @@ export async function suggestInstallAll(project: Project) {
   if (res == 'bun') {
     exState.packageManager = PackageManager.bun;
   }
-  showProgress(`Installing....`, async () => {
+  showProgress(`Installing dependencies with ${res}....`, async () => {
     await project.runAtRoot(npmInstallAll());
     exState.view.reveal(undefined, { focus: true, expand: true });
     commands.executeCommand(CommandName.Refresh);

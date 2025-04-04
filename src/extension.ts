@@ -25,7 +25,7 @@ import { webDebugSetting } from './web-debug';
 import { showOutput } from './logging';
 import { ImportQuickFixProvider } from './quick-fix';
 import { buildAction, debugOnWeb } from './recommend';
-import { IonicStartPanel } from './starter';
+import { StarterPanel } from './starter';
 import { window, commands, ExtensionContext, workspace, debug, languages, StatusBarAlignment } from 'vscode';
 import { existsSync } from 'fs';
 import { CommandTitle } from './command-title';
@@ -241,7 +241,7 @@ export async function activate(context: ExtensionContext) {
   });
 
   commands.registerCommand(CommandName.NewProject, async () => {
-    IonicStartPanel.init(exState.context.extensionUri, this.workspaceRoot, exState.context, true);
+    StarterPanel.init(exState.context.extensionUri, this.workspaceRoot, exState.context, true);
   });
 
   commands.registerCommand(CommandName.PluginExplorer, async () => {

@@ -649,6 +649,19 @@
           ],
           "description": "Whether to open the preview as a tab or to the side"
         },
+        "webnative.packageManager": {
+          "type": "string",
+          "scope": "application",
+          "default": "",
+          "enum": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun",
+            ""
+          ],
+          "description": "Package Manager to use by default"
+        },
         "webnative.manualNewProjects": {
           "type": "boolean",
           "scope": "application",
