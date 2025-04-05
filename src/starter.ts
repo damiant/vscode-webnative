@@ -9,23 +9,16 @@ import {
   commands,
   workspace,
 } from 'vscode';
-import { isWindows, openUri, replaceAll, run, showMessage, toTitleCase } from './utilities';
+import { isWindows, openUri, replaceAll, run, toTitleCase } from './utilities';
 import { showOutput, writeError, writeWN } from './logging';
 import { homedir } from 'os';
-import {
-  ExtensionSetting,
-  GlobalSetting,
-  getExtSetting,
-  getGlobalSetting,
-  setExtSetting,
-  setGlobalSetting,
-} from './workspace-state';
+import { ExtensionSetting, GlobalSetting, getExtSetting, getGlobalSetting, setGlobalSetting } from './workspace-state';
 import { join } from 'path';
 import { existsSync, readdirSync } from 'fs';
 import { CapacitorPlatform } from './capacitor-platform';
 import { getPackageManagers, npmInstall } from './node-commands';
 import { frameworks, starterTemplates, targets, Template } from './starter-templates';
-import { recommendWebNativeProject as recommendWebNativeExtension } from './vscode-recommendation';
+import { recommendWebNativeExtension } from './vscode-recommendation';
 
 enum MessageType {
   getTemplates = 'getTemplates',

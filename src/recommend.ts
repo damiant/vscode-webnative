@@ -50,6 +50,7 @@ import {
   hasBuilder,
 } from './integrations-builder';
 import { webProjectPackages } from './web-configuration';
+import { checkRecommendedExtensions } from './vscode-recommendation';
 
 function hasWebPackages() {
   for (const pkg of webProjectPackages) {
@@ -73,6 +74,10 @@ export async function getRecommendations(project: Project, context: ExtensionCon
         .setContext(Context.selectAction);
     } else {
       project.setGroup('Run', `Press ${alt('R')} to run the last chosen platform or Web.`, TipType.WebNative, true);
+    }
+
+    if (project.isCapacitor) {
+      checkRecommendedExtensions(project.projectFolder());
     }
 
     const hasCapIos = project.hasCapacitorProject(CapacitorPlatform.ios);
