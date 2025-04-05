@@ -1,7 +1,7 @@
 import { deprecatedPackages, exists, isGreaterOrEqual } from './analyzer';
 import { reviewCapacitorConfig } from './capacitor-configure';
-import { build } from './build';
-import { serve } from './ionic-serve';
+import { build, BuildOptions } from './build';
+import { serve } from './run-web';
 import { Project } from './project';
 import { addSplashAndIconFeatures } from './splash-icon';
 import { QueueFunction, RunPoint, RunStatus, Tip, TipFeature, TipType } from './tip';
@@ -188,7 +188,7 @@ export async function getRecommendations(project: Project, context: ExtensionCon
       r.whenExpanded = async () => {
         return [
           project.asRecommendation(debugOnWeb(project, 'Web')),
-          ...(await getAndroidWebViewList(hasCapAndroid, project.getDistFolder())),
+          ...(await getAndroidWebViewList(hasCapAndroid, project.getDistFolder(), project.projectFolder())),
         ];
       };
     }
@@ -430,8 +430,11 @@ export function debugOnWeb(project: Project, title: string): Tip {
 }
 
 export function buildAction(project: Project) {
+  const buildConfig = getBuildConfigurationName();
+  const sourceMaps = buildConfig !== 'production';
+  const options: BuildOptions = { sourceMaps };
   return new Tip('Build', getBuildConfigurationName(), TipType.Build, 'Build', undefined, 'Building', undefined)
-    .setDynamicCommand(build, project, {})
+    .setDynamicCommand(build, project, options)
     .setContextValue(Context.buildConfig)
     .canStop()
     .canAnimate()

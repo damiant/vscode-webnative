@@ -18,7 +18,7 @@ import { CapacitorPlatform } from '../capacitor-platform';
 import { kill } from '../process-list';
 import { ignore } from '../ignore';
 import { Context } from '../context-variables';
-import { selectExternalIPAddress } from '../ionic-serve';
+import { selectExternalIPAddress } from '../run-web';
 import { selectDevice } from '../capacitor-device';
 import { Recommendation } from '../recommendation';
 import { CommandTitle } from '../command-title';
