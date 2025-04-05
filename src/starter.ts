@@ -12,11 +12,18 @@ import {
 import { isWindows, openUri, replaceAll, run, showMessage, toTitleCase } from './utilities';
 import { showOutput, writeError, writeWN } from './logging';
 import { homedir } from 'os';
-import { ExtensionSetting, GlobalSetting, getExtSetting, getGlobalSetting, setGlobalSetting } from './workspace-state';
+import {
+  ExtensionSetting,
+  GlobalSetting,
+  getExtSetting,
+  getGlobalSetting,
+  setExtSetting,
+  setGlobalSetting,
+} from './workspace-state';
 import { join } from 'path';
 import { existsSync, readdirSync } from 'fs';
 import { CapacitorPlatform } from './capacitor-platform';
-import { npmInstall } from './node-commands';
+import { getPackageManagers, npmInstall } from './node-commands';
 import { frameworks, starterTemplates, targets, Template } from './starter-templates';
 import { recommendWebNativeProject as recommendWebNativeExtension } from './vscode-recommendation';
 
@@ -29,8 +36,8 @@ enum MessageType {
   openUrl = 'openUrl',
 }
 
-export class IonicStartPanel {
-  public static currentPanel: IonicStartPanel | undefined;
+export class StarterPanel {
+  public static currentPanel: StarterPanel | undefined;
   private readonly panel: WebviewPanel;
   private disposables: Disposable[] = [];
 
@@ -50,9 +57,9 @@ export class IonicStartPanel {
   public static init(extensionUri: Uri, path: string, context: ExtensionContext, force?: boolean) {
     const manualNewProjects = getExtSetting(ExtensionSetting.manualNewProjects);
     if (manualNewProjects && !force) return;
-    if (IonicStartPanel.currentPanel) {
+    if (StarterPanel.currentPanel) {
       // If the webview panel already exists reveal it
-      IonicStartPanel.currentPanel.panel.reveal(ViewColumn.One);
+      StarterPanel.currentPanel.panel.reveal(ViewColumn.One);
     } else {
       // If a webview panel does not already exist create and show a new one
       const panel = window.createWebviewPanel(
@@ -67,12 +74,12 @@ export class IonicStartPanel {
         },
       );
 
-      IonicStartPanel.currentPanel = new IonicStartPanel(panel, extensionUri, path, context);
+      StarterPanel.currentPanel = new StarterPanel(panel, extensionUri, path, context);
     }
   }
 
   public dispose() {
-    IonicStartPanel.currentPanel = undefined;
+    StarterPanel.currentPanel = undefined;
     this.panel.dispose();
     while (this.disposables.length) {
       const disposable = this.disposables.pop();
@@ -119,7 +126,15 @@ export class IonicStartPanel {
           case MessageType.getTemplates: {
             const templates: Template[] = starterTemplates;
             const assetsUri = getUri(webview, extensionUri, ['starter', 'build', 'assets']).toString();
-            webview.postMessage({ command, templates, assetsUri, frameworks, targets });
+            const packageManagers = await getPackageManagers();
+            webview.postMessage({
+              command,
+              templates,
+              assetsUri,
+              frameworks,
+              targets,
+              packageManagers: packageManagers,
+            });
             break;
           }
           case MessageType.openUrl: {
@@ -215,6 +230,7 @@ interface Project {
   name: string;
   type: string;
   template: string;
+  packageManager: string;
   targets: string[];
 }
 
@@ -298,12 +314,13 @@ function getIonicTemplateCommands(project: Project, options: ProjectOptions): st
   return cmds;
 }
 
-async function createProject(project: Project, webview: Webview, panel: IonicStartPanel) {
+async function createProject(project: Project, webview: Webview, panel: StarterPanel) {
   const name = getProjectName(project.name);
   const packageId = getPackageId(name);
   const noGit = !isWindows();
   const folder = join(getProjectsFolder(), name);
   const templates: Template[] = starterTemplates;
+
   const template = templates.find((t) => t.name == project.template && t.type == project.type);
   if (!template) {
     window.showErrorMessage(`Cannot find template ${project.template} of type ${project.type}`, 'OK');

@@ -13,7 +13,7 @@ import { gradleToJson } from './gradle-to-json';
 import { ExtensionSetting, getExtSetting, getSetting, WorkspaceSection, WorkspaceSetting } from './workspace-state';
 import { window, workspace } from 'vscode';
 import { join } from 'path';
-import { serve } from './ionic-serve';
+import { serve } from './run-web';
 
 /**
  * Creates the command line to run for Capacitor

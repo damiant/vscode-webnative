@@ -1,5 +1,11 @@
 ## Changelog
 
+### Version 2.0.24
+
+- Angular project now lets you choose the package manager you want to use
+- Package manager default selection is now a setting
+- Debugging for Vite based projects on Android is now working
+
 ### Version 2.0.23
 
 - Run tasks can now choose the configuration to use (eg mode=development)

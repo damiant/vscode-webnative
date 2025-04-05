@@ -107,7 +107,7 @@ export const starterTemplates: Template[] = [
     name: 'Starter',
     url: 'https://angular.dev/installation#instructions',
     description: 'The official empty starter project for Angular',
-    commands: ['npm install -g @angular/cli', 'ng new $(project-name)'],
+    commands: ['npx -p @angular/cli ng new $(project-name) --skip-install'],
     targets: '',
   },
   {

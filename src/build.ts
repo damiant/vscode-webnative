@@ -12,7 +12,7 @@ import { join } from 'path';
 import { WorkspaceSection } from './workspace-state';
 import { getBuildConfigurationArgs } from './build-configuration';
 
-interface BuildOptions {
+export interface BuildOptions {
   platform?: CapacitorPlatform;
   arguments?: string;
   sourceMaps?: boolean;
@@ -44,7 +44,7 @@ export async function build(project: Project, options: BuildOptions): Promise<st
     case MonoRepoType.none:
       return `${preop}${runBuild(prod, project, args, options.platform, options.sourceMaps)}`;
     case MonoRepoType.npm:
-      return `${InternalCommand.cwd}${preop}${runBuild(prod, project, args, options.platform)}`;
+      return `${InternalCommand.cwd}${preop}${runBuild(prod, project, args, options.platform, options.sourceMaps)}`;
     case MonoRepoType.nx:
       return `${preop}${nxBuild(prod, project, args)}`;
     case MonoRepoType.folder:
@@ -77,7 +77,7 @@ function runBuild(
     cmd += ' --prod';
   }
   if (sourceMaps && cmd.includes('vite')) {
-    cmd += ` --sourcemap true`;
+    cmd += ` --sourcemap inline`;
   }
 
   if (platform || exists('@capacitor/ios') || exists('@capacitor/android')) {

@@ -21,6 +21,7 @@ export enum ExtensionSetting {
   internalAddress = 'internalAddress',
   javaHome = 'javaHome',
   manualNewProjects = 'manualNewProjects',
+  packageManager = 'packageManager',
 }
 
 export enum GlobalSetting {
@@ -39,6 +40,10 @@ export async function setSetting(key: WorkspaceSetting, value: any): Promise<voi
 
 export function getExtSetting(key: ExtensionSetting): any {
   return workspace.getConfiguration(WorkspaceSection).get(key);
+}
+
+export function setExtSetting(key: ExtensionSetting, value: any): any {
+  return workspace.getConfiguration(WorkspaceSection).update(key, value);
 }
 
 export function getGlobalSetting(key: GlobalSetting): any {

@@ -2,7 +2,7 @@
   "name": "webnative",
   "displayName": "WebNative",
   "description": "Create and maintain web and native projects",
-  "version": "2.0.23",
+  "version": "2.0.24",
   "icon": "media/webnative.png",
   "publisher": "WebNative",
   "keywords": [
@@ -648,6 +648,19 @@
             "side"
           ],
           "description": "Whether to open the preview as a tab or to the side"
+        },
+        "webnative.packageManager": {
+          "type": "string",
+          "scope": "application",
+          "default": "",
+          "enum": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun",
+            ""
+          ],
+          "description": "Package Manager to use by default"
         },
         "webnative.manualNewProjects": {
           "type": "boolean",

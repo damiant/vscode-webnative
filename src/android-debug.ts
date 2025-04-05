@@ -6,7 +6,7 @@ import { exState } from './wn-tree-provider';
 // The debug provider type for VS Code
 export const AndroidDebugType = 'android-web';
 
-export function debugAndroid(packageName: string, wwwFolder: string) {
+export function debugAndroid(packageName: string, wwwFolder: string, projectFolder: string) {
   // Source maps are required for debugging. These are loaded from where the app is
   // loaded (eg http://localhost) so we're running a source map server to deliver them
   // An alternative includes inlining the source maps.
@@ -27,7 +27,10 @@ export function debugAndroid(packageName: string, wwwFolder: string) {
     name: 'Debug Android',
     request: 'attach',
     packageName: packageName,
-    webRoot: '${workspaceFolder}',
+    platform: 'android',
+    webRoot: wwwFolder, //'${workspaceFolder}',
+    sourceMaps: true,
+
     skipFiles: debugSkipFiles(),
   });
 

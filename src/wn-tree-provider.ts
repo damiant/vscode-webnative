@@ -21,7 +21,7 @@ import {
 } from 'vscode';
 import { accessSync } from 'fs';
 import { join } from 'path';
-import { IonicStartPanel } from './starter';
+import { StarterPanel } from './starter';
 
 interface ExState {
   view: TreeView<any>;
@@ -69,6 +69,7 @@ interface ExState {
   externalUrl: string | undefined; // URL for the external browser
   dontOpenBrowser: boolean; // If true then avoid opening the browser
 }
+
 export const exState: ExState = {
   view: undefined,
   context: undefined,
@@ -172,7 +173,7 @@ export class ExTreeProvider implements TreeDataProvider<Recommendation> {
         if (!summary) return [];
         return summary.project.groups;
       } else {
-        IonicStartPanel.init(exState.context.extensionUri, this.workspaceRoot, exState.context);
+        StarterPanel.init(exState.context.extensionUri, this.workspaceRoot, exState.context);
         return Promise.resolve([]);
       }
     }

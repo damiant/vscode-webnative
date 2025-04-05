@@ -10,6 +10,7 @@ import { QueueFunction, Tip, TipType } from './tip';
 export async function getAndroidWebViewList(
   hasCapacitorAndroid: boolean,
   wwwFolder: string,
+  projectFolder: string,
 ): Promise<Recommendation[]> {
   if (exState.refreshDebugDevices) {
     exState.refreshDebugDevices = false;
@@ -32,7 +33,9 @@ export async function getAndroidWebViewList(
         undefined,
       );
       r.setIcon('debug');
-      r.tip = new Tip(undefined, undefined, TipType.Run).setQueuedAction(debug, device, webview, wwwFolder).doNotWait();
+      r.tip = new Tip(undefined, undefined, TipType.Run)
+        .setQueuedAction(debug, device, webview, wwwFolder, projectFolder)
+        .doNotWait();
       r.command.arguments = [r];
       result.push(r);
     }
@@ -52,9 +55,15 @@ export async function getAndroidWebViewList(
   return result;
 }
 
-async function debug(queueFunction: QueueFunction, device: Device, webview: WebView, wwwfolder: string): Promise<void> {
+async function debug(
+  queueFunction: QueueFunction,
+  device: Device,
+  webview: WebView,
+  wwwfolder: string,
+  projectFolder: string,
+): Promise<void> {
   queueFunction();
-  debugAndroid(webview.packageName, wwwfolder);
+  debugAndroid(webview.packageName, wwwfolder, projectFolder);
   return;
 }
 
