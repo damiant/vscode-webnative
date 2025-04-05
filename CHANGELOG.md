@@ -1,5 +1,9 @@
 ## Changelog
 
+### Version 2.0.26
+
+- Remove tests from extension output
+
 ### Version 2.0.24
 
 - Angular project now lets you choose the package manager you want to use
