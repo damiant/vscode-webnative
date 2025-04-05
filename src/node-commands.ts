@@ -151,7 +151,7 @@ export async function suggestInstallAll(project: Project) {
   if (project.isModernYarn()) {
     return;
   }
-  let res = getExtSetting(ExtensionSetting.packageManager);
+  const res = getExtSetting(ExtensionSetting.packageManager);
 
   if (!res || res == '') {
     if (getGlobalSetting(GlobalSetting.suggestNPMInstall) == 'no') return;
