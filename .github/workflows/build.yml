@@ -47,4 +47,5 @@ jobs:
           path: ./webnative-*.vsix
           retention-days: 60
       - name: Publish to VS Marketplace
+        if: { { github.ref == 'ref/head/main' } }
         run: npx vsce publish --packagePath ./webnative-*.vsix -p ${{ secrets.VSCE_PAT }}
