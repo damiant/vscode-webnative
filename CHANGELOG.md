@@ -1,5 +1,9 @@
 ## Changelog
 
+### Version 2.0.27
+
+- Fix for running native projects opening web preview
+
 ### Version 2.0.26
 
 - Remove tests from extension output
