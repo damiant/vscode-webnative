@@ -8,7 +8,7 @@ import { Context, VSCommand } from './context-variables';
 import { getPnpmWorkspaces } from './monorepos-pnpm';
 import { PackageManager } from './node-commands';
 import { getLernaWorkspaces } from './monorepos-lerna';
-import { join } from 'path';
+import { basename, dirname, join } from 'path';
 import { write, writeWarning } from './logging';
 import { NpmDependency, NpmOutdatedDependency } from './npm-model';
 import { ExtensionContext, commands, window, workspace } from 'vscode';
@@ -192,6 +192,30 @@ export function isFolderBasedMonoRepo(rootFolder: string): Array<MonoFolder> {
 
 function vsCodeWorkSpaces(): Array<MonoFolder> {
   const result = [];
+  const wsp = workspace.workspaceFile.fsPath;
+  if (wsp && existsSync(wsp)) {
+    try {
+      const txt = readFileSync(wsp, 'utf-8');
+      const json = JSON.parse(txt);
+      if (json.folders) {
+        for (const folder of json.folders) {
+          const packageJson = join(dirname(wsp), folder.path, 'package.json');
+          if (existsSync(packageJson)) {
+            let id = folder.path.replace('.', '');
+            if (id == '') {
+              id = 'give your folder a name';
+            }
+            result.push({ name: folder.name ?? id, packageJson: packageJson, path: join(dirname(wsp), folder.path) });
+          }
+        }
+        return result;
+      }
+    } catch {
+      return [];
+    }
+  }
+
+  // The below code only works for MacOs and crashes on Windows
   for (const ws of workspace.workspaceFolders) {
     const packageJson = join(ws.uri.path, 'package.json');
     if (existsSync(packageJson)) {

@@ -71,7 +71,7 @@ async function runServe(
     defaultPort = undefined;
   }
 
-  if (webConfig.includes(WebConfigSetting.editor)) {
+  if (webConfig.includes(WebConfigSetting.editor) && !isNative) {
     const value: string = workspace.getConfiguration(WorkspaceSection).get('openPreviewLocation');
     exState.webView = viewInEditor('about:blank', value === 'tab');
   }

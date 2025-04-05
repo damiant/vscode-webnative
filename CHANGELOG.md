@@ -1,5 +1,13 @@
 ## Changelog
 
+### Version 2.0.28
+
+- Fix for VSCode workspaces on Windows
+
+### Version 2.0.27
+
+- Fix for running native projects opening web preview
+
 ### Version 2.0.26
 
 - Remove tests from extension output
