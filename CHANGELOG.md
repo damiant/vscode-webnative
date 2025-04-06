@@ -1,5 +1,9 @@
 ## Changelog
 
+### Version 2.0.30
+
+- Fix to show results of Security Audit
+
 ### Version 2.0.28
 
 - Fix for VSCode workspaces on Windows

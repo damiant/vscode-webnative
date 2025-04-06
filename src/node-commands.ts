@@ -141,6 +141,13 @@ export async function getPackageManagers(): Promise<string[]> {
 async function getVersion(cmd: string): Promise<string> {
   return await getRunOutput(cmd, '', undefined, true, true);
 }
+/**
+ * Suggests and handles installation of node modules for a project.
+ * Prompts the user to choose a package manager if not already specified,
+ * and then installs dependencies using the selected package manager.
+ *
+ * @param project The project for which to install node modules
+ */
 export async function suggestInstallAll(project: Project) {
   if (!exState || !exState.hasPackageJson) {
     return;
@@ -152,7 +159,7 @@ export async function suggestInstallAll(project: Project) {
     return;
   }
   const res = getExtSetting(ExtensionSetting.packageManager);
-
+  let choice = undefined;
   if (!res || res == '') {
     if (getGlobalSetting(GlobalSetting.suggestNPMInstall) == 'no') return;
 
@@ -173,28 +180,29 @@ export async function suggestInstallAll(project: Project) {
       options.push('Yes');
     }
     const res = await window.showInformationMessage(message, ...options, noMessage, 'Never');
-    if (res == 'Never') {
+    choice = `${res}`;
+    if (choice == 'Never') {
       setGlobalSetting(GlobalSetting.suggestNPMInstall, 'no');
       return;
     }
-    if (!res || res == noMessage) return;
+    if (!choice || choice == noMessage) return;
   }
-  if (res == 'npm') {
+  if (choice == 'npm') {
     exState.repoType = MonoRepoType.npm;
     exState.packageManager = PackageManager.npm;
   }
-  if (res == 'pnpm') {
+  if (choice == 'pnpm') {
     exState.repoType = MonoRepoType.pnpm;
     exState.packageManager = PackageManager.pnpm;
   }
-  if (res == 'yarn') {
+  if (choice == 'yarn') {
     exState.repoType = MonoRepoType.yarn;
     exState.packageManager = PackageManager.yarn;
   }
-  if (res == 'bun') {
+  if (choice == 'bun') {
     exState.packageManager = PackageManager.bun;
   }
-  showProgress(`Installing dependencies with ${res}....`, async () => {
+  showProgress(`Installing dependencies with ${choice}....`, async () => {
     await project.runAtRoot(npmInstallAll());
     exState.view.reveal(undefined, { focus: true, expand: true });
     commands.executeCommand(CommandName.Refresh);
