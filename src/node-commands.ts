@@ -202,7 +202,8 @@ export async function suggestInstallAll(project: Project) {
   if (choice == 'bun') {
     exState.packageManager = PackageManager.bun;
   }
-  showProgress(`Installing dependencies with ${choice}....`, async () => {
+  const message = choice == 'Yes' ? 'Installing dependencies...' : 'Installing dependencies with ' + choice + '...';
+  showProgress(message, async () => {
     await project.runAtRoot(npmInstallAll());
     exState.view.reveal(undefined, { focus: true, expand: true });
     commands.executeCommand(CommandName.Refresh);

@@ -12,6 +12,8 @@ import { join } from 'path';
 import { readAngularJson } from './rules-angular-json';
 import { runCommands } from './advanced-actions';
 import { window } from 'vscode';
+import { ignore } from './ignore';
+import { exState } from './wn-tree-provider';
 
 /**
  * Web projects are not using Capacitor or Cordova
@@ -33,7 +35,6 @@ export function webProject(project: Project) {
         'Add Capacitor',
         'Capacitor added to this project',
       )
-        .canIgnore()
         .showProgressDialog()
         .setQueuedAction(async (queueFunction: QueueFunction) => {
           queueFunction();
@@ -48,11 +49,15 @@ async function integrateCapacitor(project: Project) {
   const result = await window.showInformationMessage(
     `Integrate Capacitor with this project to make it native mobile?`,
     task,
-    'Info',
-    'Exit',
+    'About',
+    'Ignore',
   );
-  if (result === 'Info') {
+  if (result === 'About') {
     openUri('https://capacitorjs.com');
+    return;
+  }
+  if (result === 'Ignore') {
+    ignore(new Tip(task, ''), exState.context);
     return;
   }
   if (result !== task) {

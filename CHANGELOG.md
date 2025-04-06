@@ -1,5 +1,9 @@
 ## Changelog
 
+### Version 2.0.31
+
+- Fix to show preview on first run
+
 ### Version 2.0.30
 
 - Fix to show results of Security Audit
