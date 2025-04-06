@@ -13,7 +13,9 @@ import { coerce } from 'semver';
 
 export function qrView(externalUrl: string, localUrl: string) {
   commands.executeCommand(VSCommand.setContext, Context.isDevServing, true);
-  commands.executeCommand(CommandName.ViewDevServer, externalUrl, localUrl);
+  setTimeout(() => {
+    commands.executeCommand(CommandName.ViewDevServer, externalUrl, localUrl);
+  }, 250);
 }
 
 export interface NamedURL {

@@ -29,10 +29,10 @@ export class DevServerProvider implements WebviewViewProvider {
       //webviewView.description = shortUrl;
       webviewView.show(true);
 
-      const value: string = workspace.getConfiguration(WorkspaceSection).get('openBrowserOnRun');
-      if (value !== 'no' && !exState.dontOpenBrowser) {
-        openUri(localUrl);
-      }
+      // const value: string = workspace.getConfiguration(WorkspaceSection).get('√');
+      // if (value !== 'no' && !exState.dontOpenBrowser) {
+      //   openUri(localUrl);
+      // }
     });
 
     commands.registerCommand(CommandName.HideDevServer, () => {
