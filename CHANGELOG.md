@@ -1,5 +1,9 @@
 ## Changelog
 
+### Version 2.0.32
+
+- Fix to use package manager specified in settings
+
 ### Version 2.0.31
 
 - Fix to show preview on first run
