@@ -159,7 +159,7 @@ export async function suggestInstallAll(project: Project) {
     return;
   }
   const res = getExtSetting(ExtensionSetting.packageManager);
-  let choice = undefined;
+  let choice = res;
   if (!res || res == '') {
     if (getGlobalSetting(GlobalSetting.suggestNPMInstall) == 'no') return;
 
