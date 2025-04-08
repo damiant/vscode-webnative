@@ -21,11 +21,22 @@ export function autoRunClipboard() {
           // Its a Figma design
           const url = extractBetween(txt, '--url "', '"');
           chat(exState.projectRef.projectFolder(), url, ' --spaceId');
-        } else {
-          const selection = await window.showInformationMessage(`Run "${txt}" in the terminal?`, 'Execute', 'Exit');
-          if (selection == 'Execute') {
+          return;
+        }
+
+        // For componment mapping the command will be like:
+        // npx builder.io@latest figma generate --token <x> --spaceId <y>
+        if (txt.includes('npx builder.io@latest figma generate')) {
+          const selection = await window.showInformationMessage(`Map these component(s)?`, 'Yes', 'No');
+          if (selection == 'Yes') {
             runInTerminal(txt);
           }
+          return;
+        }
+        // Ask to run the command
+        const selection = await window.showInformationMessage(`Run "${txt}" in the terminal?`, 'Execute', 'Exit');
+        if (selection == 'Execute') {
+          runInTerminal(txt);
         }
       }
     }

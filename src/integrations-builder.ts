@@ -18,38 +18,62 @@ export function checkBuilderIntegration(): Tip[] {
     !exists('@builder.io/dev-tools') &&
     (exists('next') || exists('react') || exists('@remix-run/react') || exists('@angular/core') || exists('qwik'))
   )
-    tips.push(
+    return [
       new Tip(
         'Integrate DevTools',
         '',
         TipType.None,
-        'Integrate Builder.io Publish (Visual CMS) into this project?',
-        ['npm init builder.io@latest', runApp],
-        'Add Builder',
-        'Builder support added to your project. Click Run to complete the integration.',
+        'Run Builder.io Develop',
         undefined,
-        'Adding Builder.io DevTools to this Project...',
+        'Add Builder',
+        '',
+        undefined,
+        'Add Builder',
       )
-        .setRunPoints([
-          {
-            title: '',
-            text: 'Would you like to integrate Builder.io with this app?',
-            action: async (message) => {
-              return '\r\n'; // Just press enter
-            },
-          },
-          {
-            title: '',
-            text: 'Which sdk would you like to install?',
-            action: async (message) => {
-              return '\r\n'; // Just press enter to pick the recommended one
-            },
-          },
-        ])
-        .showProgressDialog()
-        .canIgnore(),
-    );
+        .setQueuedAction(addDevTools)
+        .setTooltip('Integrate Builder.io Publish (Visual CMS) into this project?')
+        .canRefreshAfter(),
+    ];
+
+  // Below will do the same thing but it is ignoring the text sent to it
+
+  // tips.push(
+  //   new Tip(
+  //     'Integrate DevTools',
+  //     '',
+  //     TipType.None,
+  //     'Integrate Builder.io Publish (Visual CMS) into this project?',
+  //     ['npm init builder.io@latest', runApp],
+  //     'Add Builder',
+  //     'Builder support added to your project. Click Run to complete the integration.',
+  //     undefined,
+  //     'Adding Builder.io DevTools to this Project...',
+  //   )
+  //     .setRunPoints([
+  //       {
+  //         title: '',
+  //         text: 'Would you like to integrate Builder.io with this app?',
+  //         action: async (message) => {
+  //           return '\r\n'; // Just press enter
+  //         },
+  //       },
+  //       {
+  //         title: '',
+  //         text: 'Which sdk would you like to install?',
+  //         action: async (message) => {
+  //           return '\r\n'; // Just press enter to pick the recommended one
+  //         },
+  //       },
+  //     ])
+  //     .showProgressDialog()
+  //     .canIgnore(),
+  // );
   return tips;
+}
+
+async function addDevTools(queueFunction: QueueFunction) {
+  queueFunction();
+  runInTerminal(`npm init builder.io@latest`);
 }
 
 function runApp(): Promise<void> {
