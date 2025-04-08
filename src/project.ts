@@ -738,11 +738,14 @@ function guessFramework(project: Project) {
 function getPackageManager(folder: string, monoRepoType: MonoRepoType): PackageManager {
   const yarnLock = join(folder, 'yarn.lock');
   const pnpmLock = join(folder, 'pnpm-lock.yaml');
-  const bunLock = join(folder, 'bun.lockb');
+  const bunLockb = join(folder, 'bun.lockb');
+  const bunLock = join(folder, 'bun.lock');
   if (existsSync(yarnLock)) {
     return PackageManager.yarn;
   } else if (existsSync(pnpmLock) || exState.repoType == MonoRepoType.pnpm) {
     return PackageManager.pnpm;
+  } else if (existsSync(bunLockb)) {
+    return PackageManager.bun;
   } else if (existsSync(bunLock)) {
     return PackageManager.bun;
   }

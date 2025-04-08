@@ -1,5 +1,9 @@
 ## Changelog
 
+### Version 2.0.33
+
+- Support projects using bun.lock rather than bun.lockb
+
 ### Version 2.0.32
 
 - Fix to use package manager specified in settings
