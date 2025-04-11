@@ -24,7 +24,7 @@ export enum ExtensionSetting {
   javaHome = 'javaHome',
   manualNewProjects = 'manualNewProjects',
   packageManager = 'packageManager',
-  openRouterKey = 'openRouterKey',
+  aiKey = 'aiKey',
 }
 
 export enum GlobalSetting {

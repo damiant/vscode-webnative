@@ -1,4 +1,4 @@
-import OpenAI from 'openai';
+import Together from 'together-ai';
 import { ExtensionSetting, getExtSetting, getSetting, WorkspaceSetting } from './workspace-state';
 import { showOutput, write, writeError } from './logging';
 import { showProgress } from './utilities';
@@ -25,22 +25,12 @@ export interface Pricing {
   internal_reasoning: string;
 }
 
-function openAI() {
-  if (!_openai) {
-    _openai = new OpenAI({
-      baseURL: 'https://openrouter.ai/api/v1',
-      apiKey: apiKey(),
-      defaultHeaders: {
-        'HTTP-Referer': 'https://webnative.dev', // Optional. Site URL for rankings on openrouter.ai.
-        'X-Title': 'WebNative.dev', // Optional. Site title for rankings on openrouter.ai.
-      },
-    });
-  }
-  return _openai;
+export function getAI(): Together {
+  return new Together({ apiKey: apiKey() });
 }
 
 function apiKey() {
-  const key = getExtSetting(ExtensionSetting.openRouterKey);
+  const key = getExtSetting(ExtensionSetting.aiKey);
   if (!key) {
     writeError(`A key is require to use AI Chat. Set it in settings. Get your key from https://openrouter.ai/`);
     return undefined;
@@ -70,7 +60,8 @@ function includeFiles(folder: string, files: string[], prompts: string): any {
 }
 
 export async function ai(prompt: string, folder: string) {
-  const model = getSetting(WorkspaceSetting.aiModel);
+  let model = getSetting(WorkspaceSetting.aiModel);
+  model = 'Qwen/Qwen2.5-Coder-32B-Instruct';
   if (!model) {
     writeError(`No AI model selected. Select one in settings.`);
     return;
@@ -80,7 +71,7 @@ export async function ai(prompt: string, folder: string) {
   let content = prompt;
   content = includeFiles(join(folder, 'src'), ['main.ts'], content);
   await showProgress('Thinking...', async () => {
-    completion = await openAI().chat.completions.create({
+    completion = await getAI().chat.completions.create({
       model: model,
       messages: [
         {
