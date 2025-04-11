@@ -2,6 +2,8 @@ import OpenAI from 'openai';
 import { ExtensionSetting, getExtSetting, getSetting, WorkspaceSetting } from './workspace-state';
 import { showOutput, write, writeError } from './logging';
 import { showProgress } from './utilities';
+import { readdirSync, readFileSync } from 'fs';
+import { join } from 'path';
 
 let _openai = undefined;
 
@@ -46,20 +48,44 @@ function apiKey() {
   return key;
 }
 
-export async function ai(prompt: string) {
+function includeFiles(folder: string, files: string[], prompts: string): any {
+  const availableFiles = readdirSync(folder);
+  const newContent = [];
+  for (const availableFile of availableFiles) {
+    if (files.includes(availableFile)) {
+      const data = readFileSync(join(folder, availableFile), 'utf8');
+      const file_data = `data:application/x-typescript;base64,${btoa(data)}`;
+      newContent.push({
+        type: 'file',
+        file: {
+          filename: availableFile,
+          file_data: file_data,
+        },
+      });
+      write(`Including "${availableFile}"`);
+    }
+  }
+  newContent.push({ type: 'text', text: prompts });
+  return prompts;
+}
+
+export async function ai(prompt: string, folder: string) {
   const model = getSetting(WorkspaceSetting.aiModel);
   if (!model) {
     writeError(`No AI model selected. Select one in settings.`);
     return;
   }
-  let completion;
+
+  let completion: any;
+  let content = prompt;
+  content = includeFiles(join(folder, 'src'), ['main.ts'], content);
   await showProgress('Thinking...', async () => {
     completion = await openAI().chat.completions.create({
       model: model,
       messages: [
         {
           role: 'user',
-          content: prompt,
+          content: content,
         },
       ],
     });

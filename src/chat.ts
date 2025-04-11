@@ -20,7 +20,7 @@ export async function chat(queueFunction: QueueFunction, project: Project) {
       if (!prompt) return undefined;
       write(`> ${prompt}`);
       showOutput();
-      await ai(prompt);
+      await ai(prompt, project.projectFolder());
     }
     prompt = undefined;
   }
