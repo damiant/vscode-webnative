@@ -51,6 +51,7 @@ import {
 } from './integrations-builder';
 import { webProjectPackages } from './web-configuration';
 import { checkRecommendedExtensions } from './vscode-recommendation';
+import { chat, chatModel } from './chat';
 
 function hasWebPackages() {
   for (const pkg of webProjectPackages) {
@@ -152,6 +153,10 @@ export async function getRecommendations(project: Project, context: ExtensionCon
       project.add(runAndroid);
       exState.runAndroid = runAndroid;
     }
+
+    project.add(new Tip('Chat', '', TipType.Chat, undefined).setQueuedAction(chat, project));
+    project.add(new Tip('Chat Model', '', TipType.Chat, undefined).setQueuedAction(chatModel, project));
+
     if (hasCapIos) {
       const runIos = new Tip(
         CommandTitle.RunForIOS,

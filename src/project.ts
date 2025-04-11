@@ -195,6 +195,9 @@ export class Project {
       case TipType.Idea:
         r.setIcon('lightbulb');
         break;
+      case TipType.Chat:
+        r.setIcon('chat');
+        break;
       case TipType.Files:
         r.setIcon('files');
         break;

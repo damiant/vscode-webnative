@@ -321,6 +321,7 @@ export enum TipType {
   Media,
   Debug,
   Apple,
+  Chat,
   None,
 }
 
