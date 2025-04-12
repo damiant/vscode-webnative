@@ -4,29 +4,44 @@ import { QueueFunction } from './tip';
 import { showOutput, write } from './logging';
 import { ai, ChatRequest } from './ai-chat';
 import { setSetting, WorkspaceSetting } from './workspace-state';
+import { basename } from 'path';
+import { existsSync } from 'fs';
+import { describeProject } from './ai-project-info';
+import { getAllFilenames } from './ai-tool-read-folder';
 
 export async function chat(queueFunction: QueueFunction, project: Project) {
   queueFunction();
   const chatting = true;
   let prompt: string | undefined;
   while (chatting) {
-    const title = `How would you like to modify your project?`;
+    let activeFile = window.activeTextEditor?.document.uri.fsPath;
+    if (!existsSync(activeFile)) {
+      activeFile = undefined;
+    }
+    const activeFileName = activeFile ? basename(activeFile) : 'your project';
+    const title = `How would you like to modify ${activeFileName}?`;
     if (!prompt) {
       prompt = await window.showInputBox({
         title,
-        placeHolder: 'Enter prompt (eg "Create a component called Pricing Page")',
+        placeHolder: `Changes will be done on your ${describeProject()} by AI`,
         ignoreFocusOut: true,
       });
       if (!prompt) return undefined;
       write(`> ${prompt}`);
-      showOutput();
 
-      const activeFile = window.activeTextEditor?.document.uri.fsPath;
+      const files = [];
+      window.visibleTextEditors.forEach((editor) => {
+        if (existsSync(editor.document.uri.fsPath)) {
+          files.push(editor.document.uri.fsPath);
+        }
+      });
+      const otherFiles = getAllFilenames(project.projectFolder(), ['node_modules', 'dist', 'www']);
+      files.push(...otherFiles);
 
       const request: ChatRequest = {
         prompt,
         activeFile,
-        files: window.visibleTextEditors.map((editor) => editor.document.uri.fsPath),
+        files,
       };
       await ai(request, project.projectFolder());
     }

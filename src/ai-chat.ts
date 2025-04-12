@@ -1,14 +1,15 @@
 import Together from 'together-ai';
 import { ExtensionSetting, getExtSetting, getSetting, WorkspaceSetting } from './workspace-state';
-import { write, writeAppend, writeError } from './logging';
+import { showOutput, write, writeAppend, writeError } from './logging';
 import { showProgress } from './utilities';
-import { softwareArchitectPrompt } from './ai-prompts';
+import { systemPrompt } from './ai-prompts';
 import { readFileToolName, readFileFunction, readFile } from './ai-tool-read-file';
 import { writeFile, writeFileFunction, writeFileToolName } from './ai-tool-write-file';
 import { readFolder, readFolderFunction, readFolderToolName } from './ai-tool-read-folder';
 import { searchForFile, searchForFileFunction, searchForFileToolName } from './ai-tool-search-for-file';
 import { ToolResult } from './ai-tool';
 import { existsSync, writeFileSync } from 'fs';
+import { describeProject } from './ai-project-info';
 
 export interface ChatRequest {
   prompt: string;
@@ -42,7 +43,7 @@ export async function ai(request: ChatRequest, folder: string) {
   const path = folder;
   let prompt = request.prompt;
   if (request.activeFile) {
-    prompt += `Use this file to fulfill this request: ${request.activeFile}`;
+    prompt += `\nUse this file to fulfill this request: ${request.activeFile}`;
   }
   if (request.files.length > 0) {
     prompt += `\nThese files can be used to fulfill the request: ${request.files.join(', ')}`;
@@ -66,7 +67,7 @@ export async function ai(request: ChatRequest, folder: string) {
       const messages: any = [
         {
           role: 'system',
-          content: softwareArchitectPrompt,
+          content: systemPrompt.replace('@project', describeProject()),
         },
         {
           role: 'user',
@@ -154,6 +155,7 @@ export async function ai(request: ChatRequest, folder: string) {
                 if (hasQuestions(list)) {
                   // Stop here as the LLM has questions
                   output = list.join('\n');
+                  showOutput();
                 } else {
                   // Have the LLM answer its requests
                   prompts.push(...list);
@@ -177,6 +179,11 @@ function performChanges(input: string): string | undefined {
     const newContent = input.split('\n').slice(1).join('\n');
     if (!existsSync(file)) {
       writeError(`AI wanted to write to file ${file} but it does not exist`);
+      return undefined;
+    }
+    if (newContent.startsWith('```')) {
+      // Looks like it is describing the change rather than providing the file
+      writeError(`AI provided an answer when it was supposed to provide the file "${file}"`);
       return undefined;
     }
     writeFileSync(file, newContent);

@@ -34,6 +34,7 @@ import { viewInEditor } from './preview';
 import { autoRunClipboard } from './features/auto-run-clipboard';
 import { findAndRun, fix, fixIssue, runAction, runAgain } from './features/fix-issue';
 import { trackProjectChange } from './features/track-project-changes';
+import { chat } from './chat';
 
 export const extensionName = 'WebNative';
 
@@ -257,6 +258,12 @@ export async function activate(context: ExtensionContext) {
 
   commands.registerCommand(CommandName.RunIOS, async (recommendation: Recommendation) => {
     runAgain(ionicProvider, rootPath);
+  });
+
+  commands.registerCommand(CommandName.Chat, async () => {
+    if (exState.projectRef) {
+      chat(() => {}, exState.projectRef);
+    }
   });
 
   commands.registerCommand(CommandName.Rebuild, async (recommendation: Recommendation) => {

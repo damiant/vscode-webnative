@@ -17,6 +17,7 @@ export enum CommandName {
   BuildConfig = 'webnative.buildConfig',
   RunConfig = 'webnative.runConfig',
   StatusRun = 'webnative.statusRun',
+  Chat = 'webnative.chat',
 
   LiveReload = 'webnative.liveReload',
   LiveReloadSelected = 'webnative.liveReloadSelected',

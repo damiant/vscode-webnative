@@ -95,16 +95,6 @@
         "view": "wn-tree",
         "contents": "Create a new Web or Mobile App?\n[Start New Project](command:webnative.newProject)\n",
         "when": "noProjectFound == true"
-      },
-      {
-        "view": "wn-tree",
-        "contents": "A free account is required to unlock all extension features or [Skip for Now](command:webnative.skipLogin).\n[Login](command:webnative.login)\n[Sign Up](command:webnative.signUp)\n",
-        "when": "isAnonymous == true && isLoggingIn == false"
-      },
-      {
-        "view": "wn-tree",
-        "contents": "Complete the login in the web browser. This view will change as soon as you login.",
-        "when": "isAnonymous == true && isLoggingIn == true"
       }
     ],
     "viewsContainers": {
@@ -173,10 +163,18 @@
       },
       {
         "command": "webnative.add",
-        "title": "WebNative:Packages",
+        "title": "WebNative: Packages",
         "icon": {
           "light": "resources/light/more.svg",
           "dark": "resources/dark/more.svg"
+        }
+      },
+      {
+        "command": "webnative.chat",
+        "title": "WebNative: Chat",
+        "icon": {
+          "light": "resources/light/chat.svg",
+          "dark": "resources/dark/chat.svg"
         }
       },
       {
@@ -185,15 +183,15 @@
       },
       {
         "command": "webnative.newProject",
-        "title": "WebNative:New Project"
+        "title": "WebNative: New Project"
       },
       {
         "command": "webnative.preview",
-        "title": "WebNative:Preview"
+        "title": "WebNative: Preview"
       },
       {
         "command": "webnative.run",
-        "title": "WebNative:Run"
+        "title": "WebNative: Run"
       },
       {
         "command": "webnative.debug",
@@ -201,7 +199,7 @@
       },
       {
         "command": "webnative.build",
-        "title": "WebNative:Build"
+        "title": "WebNative: Build"
       },
       {
         "command": "webnative.lightbulb",
@@ -213,19 +211,15 @@
       },
       {
         "command": "webnative.fix",
-        "title": "WebNative:Fix Issue"
+        "title": "WebNative: Fix Issue"
       },
       {
         "command": "webnative.signUp",
-        "title": "WebNative:Sign Up"
+        "title": "WebNative: Sign Up"
       },
       {
         "command": "webnative.login",
-        "title": "WebNative:Login"
-      },
-      {
-        "command": "webnative.skipLogin",
-        "title": "WebNative:Skip Login"
+        "title": "WebNative: Login"
       },
       {
         "command": "webnative.open",
@@ -237,31 +231,31 @@
       },
       {
         "command": "webnative.openXcode",
-        "title": "WebNative:Open in XCode"
+        "title": "WebNative: Open in XCode"
       },
       {
         "command": "webnative.openAndroidStudio",
-        "title": "WebNative:Open in Android Studio"
+        "title": "WebNative: Open in Android Studio"
       },
       {
         "command": "webnative.runIOS",
-        "title": "WebNative:Run for iOS"
+        "title": "WebNative: Run for iOS"
       },
       {
         "command": "webnative.runAndroid",
-        "title": "WebNative:Run for Android"
+        "title": "WebNative: Run for Android"
       },
       {
         "command": "webnative.runWeb",
-        "title": "WebNative:Run for Web"
+        "title": "WebNative: Run for Web"
       },
       {
         "command": "webnative.capSync",
-        "title": "WebNative:Sync"
+        "title": "WebNative: Sync"
       },
       {
         "command": "webnative.refreshDebug",
-        "title": "Refresh",
+        "title": "WebNative: Refresh",
         "icon": {
           "light": "resources/light/sync.svg",
           "dark": "resources/dark/sync.svg"
@@ -269,7 +263,7 @@
       },
       {
         "command": "webnative.runConfig",
-        "title": "Run Configuration",
+        "title": "WebNative: Run Configuration",
         "icon": {
           "light": "resources/light/more.svg",
           "dark": "resources/dark/more.svg"
@@ -394,11 +388,14 @@
       }
     ],
     "menus": {
-      "commandPalette": [
+      "editor/title": [
         {
-          "command": "webnative.skipLogin",
-          "when": "false"
-        },
+          "command": "webnative.chat",
+          "when": "resourceLangId == typescript",
+          "group": "navigation"
+        }
+      ],
+      "commandPalette": [
         {
           "command": "webnative.refresh",
           "when": "false"
