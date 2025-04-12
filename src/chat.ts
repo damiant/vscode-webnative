@@ -35,8 +35,10 @@ export async function chat(queueFunction: QueueFunction, project: Project) {
           files.push(editor.document.uri.fsPath);
         }
       });
-      const otherFiles = getAllFilenames(project.projectFolder(), ['node_modules', 'dist', 'www']);
-      files.push(...otherFiles);
+      if (files.length === 0) {
+        const otherFiles = getAllFilenames(project.projectFolder(), ['node_modules', 'dist', 'www']);
+        files.push(...otherFiles);
+      }
 
       const request: ChatRequest = {
         prompt,
