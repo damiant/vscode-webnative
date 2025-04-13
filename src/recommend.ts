@@ -154,8 +154,9 @@ export async function getRecommendations(project: Project, context: ExtensionCon
       exState.runAndroid = runAndroid;
     }
 
-    project.add(new Tip('Chat', '', TipType.Chat, undefined).setQueuedAction(chat, project));
-    project.add(new Tip('Chat Model', '', TipType.Chat, undefined).setQueuedAction(chatModel, project));
+    project.add(
+      new Tip('Chat', '', TipType.Chat, undefined).setQueuedAction(chat, project).setContextValue(Context.chat),
+    );
 
     if (hasCapIos) {
       const runIos = new Tip(

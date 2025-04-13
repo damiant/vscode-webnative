@@ -10,6 +10,7 @@ import { searchForFile, searchForFileFunction, searchForFileToolName } from './a
 import { ToolResult } from './ai-tool';
 import { existsSync, writeFileSync } from 'fs';
 import { describeProject } from './ai-project-info';
+import { Progress } from 'vscode';
 
 export interface ChatRequest {
   prompt: string;
@@ -21,7 +22,7 @@ export function getAI(): Together {
   return new Together({ apiKey: apiKey() });
 }
 
-function apiKey() {
+export function apiKey() {
   const key = getExtSetting(ExtensionSetting.aiKey);
   if (!key) {
     writeError(`A key is require to use AI Chat. Set it in settings. Get your key from https://openrouter.ai/`);
@@ -32,7 +33,12 @@ function apiKey() {
 
 export async function ai(request: ChatRequest, folder: string) {
   let model = getSetting(WorkspaceSetting.aiModel);
-  model = 'Qwen/Qwen2.5-72B-Instruct-Turbo'; // 'Qwen/Qwen2.5-Coder-32B-Instruct';
+  //model = 'deepseek-ai/DeepSeek-R1-Distill-Llama-70B-free';
+  if (model === '' || !model) {
+    model = 'meta-llama/Llama-3.3-70B-Instruct-Turbo-Free';
+  }
+
+  //  model = 'Qwen/Qwen2.5-72B-Instruct-Turbo'; // 'Qwen/Qwen2.5-Coder-32B-Instruct';
   if (!model) {
     writeError(`No AI model selected. Select one in settings.`);
     return;
@@ -51,7 +57,7 @@ export async function ai(request: ChatRequest, folder: string) {
 
   const prompts = [prompt];
 
-  await showProgress('Thinking...', async () => {
+  await showProgress('Thinking...', async (progress: Progress<{ message?: string; increment?: number }>) => {
     let repeating = true;
     let lastResult = '';
     while (repeating) {
@@ -75,6 +81,7 @@ export async function ai(request: ChatRequest, folder: string) {
         },
       ];
       write(`> ${prompt}`);
+      progress.report({ message: `${prompt}...` });
       let toolHasResult = true;
       let firstTime = true;
       while (toolHasResult || firstTime) {
@@ -176,15 +183,18 @@ function performChanges(input: string): string | undefined {
   if (input.startsWith('@changefile:')) {
     const file = input.split('@changefile:')[1].split('\n')[0].trim();
     // newContent is everything after the first line
-    const newContent = input.split('\n').slice(1).join('\n');
+    let newContent = input.split('\n').slice(1).join('\n');
     if (!existsSync(file)) {
       writeError(`AI wanted to write to file ${file} but it does not exist`);
+      showOutput();
       return undefined;
     }
     if (newContent.startsWith('```')) {
       // Looks like it is describing the change rather than providing the file
       writeError(`AI provided an answer when it was supposed to provide the file "${file}"`);
-      return undefined;
+      const lines = newContent.split('\n').slice(1);
+      lines.pop();
+      newContent = lines.join('\n');
     }
     writeFileSync(file, newContent);
     return `Changed file ${file}`;

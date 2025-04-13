@@ -286,6 +286,14 @@
         }
       },
       {
+        "command": "webnative.chatModel",
+        "title": "Chat Model",
+        "icon": {
+          "light": "resources/light/more.svg",
+          "dark": "resources/dark/more.svg"
+        }
+      },
+      {
         "command": "webnative.webOpenBrowser",
         "title": "Open in a web browser",
         "icon": {
@@ -391,7 +399,7 @@
       "editor/title": [
         {
           "command": "webnative.chat",
-          "when": "resourceLangId == typescript",
+          "when": "resourceLangId !== markdown",
           "group": "navigation"
         }
       ],
@@ -520,6 +528,11 @@
         {
           "command": "webnative.buildConfig",
           "when": "view == wn-tree && viewItem == buildConfig",
+          "group": "inline"
+        },
+        {
+          "command": "webnative.chatModel",
+          "when": "view == wn-tree && viewItem == chat",
           "group": "inline"
         },
         {

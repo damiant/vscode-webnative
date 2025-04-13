@@ -57,6 +57,8 @@ export enum Context {
 
   // Refresh used for debug instances
   refreshDebug = 'refreshDebug',
+
+  chat = 'chat',
 }
 
 // Commands from vs code

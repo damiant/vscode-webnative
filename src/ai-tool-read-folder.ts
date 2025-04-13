@@ -43,7 +43,7 @@ export function getAllFilenames(dir: string, ignoreFolders: string[] = []): stri
       const fullPath = join(currentDir, entry.name);
 
       if (entry.isDirectory()) {
-        if (!ignoreFolders.includes(entry.name)) {
+        if (!ignoreFolders.includes(entry.name) && !entry.name.startsWith('.')) {
           walk(fullPath);
         }
       } else if (entry.isFile()) {

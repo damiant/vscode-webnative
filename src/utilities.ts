@@ -16,7 +16,7 @@ import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { ChildProcess, exec, ExecException, ExecOptionsWithStringEncoding, spawn } from 'child_process';
 import { startStopLogServer } from './log-server';
 import { qrView } from './webview-debug';
-import { CancellationToken, ProgressLocation, Uri, commands, window, workspace } from 'vscode';
+import { CancellationToken, Progress, ProgressLocation, Uri, commands, window, workspace } from 'vscode';
 import { uncolor } from './uncolor';
 import { kill } from 'process';
 import { getStringFrom, replaceAllStringIn } from './utils-strings';
@@ -765,7 +765,10 @@ export function toTitleCase(text: string) {
     .trim();
 }
 
-export async function showProgress(message: string, func: () => Promise<any>) {
+export async function showProgress(
+  message: string,
+  func: (p?: Progress<{ message?: string; increment?: number }>) => Promise<any>,
+) {
   return await window.withProgress(
     {
       location: ProgressLocation.Notification,
@@ -773,7 +776,7 @@ export async function showProgress(message: string, func: () => Promise<any>) {
       cancellable: false,
     },
     async (progress, token) => {
-      return await func();
+      return await func(progress);
     },
   );
 }

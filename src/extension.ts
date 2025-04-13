@@ -34,7 +34,7 @@ import { viewInEditor } from './preview';
 import { autoRunClipboard } from './features/auto-run-clipboard';
 import { findAndRun, fix, fixIssue, runAction, runAgain } from './features/fix-issue';
 import { trackProjectChange } from './features/track-project-changes';
-import { chat } from './chat';
+import { chat, chatModel } from './chat';
 
 export const extensionName = 'WebNative';
 
@@ -86,6 +86,10 @@ export async function activate(context: ExtensionContext) {
   exState.openWebStatusBar = statusBarOpenWeb;
   commands.registerCommand(CommandName.OpenWeb, async () => {
     openUri(exState.localUrl);
+  });
+
+  commands.registerCommand(CommandName.ChatModel, async () => {
+    chatModel(() => {}, exState.projectRef);
   });
 
   const statusBarOpenEditor = window.createStatusBarItem(StatusBarAlignment.Left, 100);
