@@ -3,7 +3,7 @@ import { Project } from './project';
 import { QueueFunction } from './tip';
 import { showOutput, write } from './logging';
 import { ai, apiKey, ChatRequest } from './ai-chat';
-import { setSetting, WorkspaceSetting } from './workspace-state';
+import { getSetting, setSetting, WorkspaceSetting } from './workspace-state';
 import { basename } from 'path';
 import { existsSync } from 'fs';
 import { describeProject } from './ai-project-info';
@@ -27,7 +27,6 @@ export async function chat(queueFunction: QueueFunction, project: Project) {
         ignoreFocusOut: true,
       });
       if (!prompt) return undefined;
-      write(`> ${prompt}`);
 
       const files = [];
       window.visibleTextEditors.forEach((editor) => {
@@ -38,6 +37,7 @@ export async function chat(queueFunction: QueueFunction, project: Project) {
       if (files.length === 0) {
         const otherFiles = getAllFilenames(project.projectFolder(), ['node_modules', 'dist', 'www']);
         files.push(...otherFiles);
+        files.filter((file) => file !== activeFile);
       }
 
       const request: ChatRequest = {
@@ -57,6 +57,7 @@ export async function chatModel(queueFunction: QueueFunction, project: Project) 
   let models: any[] = await getModels();
   models = models.filter((model) => availableModels().includes(model.id));
   models.sort((a, b) => a.display_name.localeCompare(b.display_name));
+  const currentModel = getSetting(WorkspaceSetting.aiModel);
   const items: QuickPickItem[] = models.map((model) => {
     // {hourly: 0, input: 0, output: 0, base: 0, finetune: 0}
     const price =
@@ -67,28 +68,33 @@ export async function chatModel(queueFunction: QueueFunction, project: Project) 
       model.pricing.finetune == 0
         ? 'Free'
         : `Paid in:${model.pricing.input.toFixed(2)} out:${model.pricing.output.toFixed(2)}`;
-    let icon = '$(file-binary)';
-    if (model.type == 'embedding') {
-      icon = '$(file)';
-    }
-    if (model.type == 'chat') {
-      icon = '$(comment-discussion)';
-    }
-    if (model.type == 'image') {
-      icon = '$(eye)';
-    }
-    if (model.type == 'code') {
-      icon = '$(code)';
-    }
-    return { label: `${icon} ${model.display_name}`, description: `(${price})` };
+
+    return { label: labelFor(model), description: `(${price})`, picked: model.id == currentModel };
   });
   const result = await window.showQuickPick(items, {
     placeHolder: 'Select an AI Model',
     canPickMany: false,
   });
   if (!result) return;
-  const model = models.find((m) => m.display_name == result.label);
+  const model = models.find((m) => labelFor(m) == result.label);
   setSetting(WorkspaceSetting.aiModel, model.id);
+}
+
+function labelFor(model: any): string {
+  let icon = '$(file-binary)';
+  if (model.type == 'embedding') {
+    icon = '$(file)';
+  }
+  if (model.type == 'chat') {
+    icon = '$(comment-discussion)';
+  }
+  if (model.type == 'image') {
+    icon = '$(eye)';
+  }
+  if (model.type == 'code') {
+    icon = '$(code)';
+  }
+  return `${icon} ${model.display_name}`;
 }
 
 function availableModels(): string[] {

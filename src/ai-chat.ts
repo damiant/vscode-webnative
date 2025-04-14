@@ -8,9 +8,10 @@ import { writeFile, writeFileFunction, writeFileToolName } from './ai-tool-write
 import { readFolder, readFolderFunction, readFolderToolName } from './ai-tool-read-folder';
 import { searchForFile, searchForFileFunction, searchForFileToolName } from './ai-tool-search-for-file';
 import { ToolResult } from './ai-tool';
-import { existsSync, writeFileSync } from 'fs';
+import { readFileSync, writeFileSync } from 'fs';
 import { describeProject } from './ai-project-info';
-import { Progress } from 'vscode';
+import { Progress, window } from 'vscode';
+import { aiLog, aiWriteLog } from './ai-log';
 
 export interface ChatRequest {
   prompt: string;
@@ -31,7 +32,14 @@ export function apiKey() {
   return key;
 }
 
+interface Options {
+  useTools: boolean;
+}
+
 export async function ai(request: ChatRequest, folder: string) {
+  const options: Options = {
+    useTools: false,
+  };
   let model = getSetting(WorkspaceSetting.aiModel);
   //model = 'deepseek-ai/DeepSeek-R1-Distill-Llama-70B-free';
   if (model === '' || !model) {
@@ -44,95 +52,112 @@ export async function ai(request: ChatRequest, folder: string) {
     return;
   }
 
+  showOutput();
   let response;
-  const stream = false;
+  const stream = true;
   const path = folder;
   let prompt = request.prompt;
   if (request.activeFile) {
-    prompt += `\nUse this file to fulfill this request: ${request.activeFile}`;
+    if (!options.useTools) {
+      prompt = `${prompt}\nInput file:\n${readFileSync(request.activeFile, 'utf8')}`;
+    } else {
+      prompt = `Modify this file ${request.activeFile}: ${prompt}`;
+    }
   }
-  if (request.files.length > 0) {
+  if (request.files.length > 0 && options.useTools) {
     prompt += `\nThese files can be used to fulfill the request: ${request.files.join(', ')}`;
   }
 
-  const prompts = [prompt];
+  let prompts = [prompt];
+  let iteration = 0;
+  let content = '';
 
-  await showProgress('Thinking...', async (progress: Progress<{ message?: string; increment?: number }>) => {
-    let repeating = true;
-    let lastResult = '';
-    while (repeating) {
-      let prompt = prompts.shift();
-      if (!prompt) {
-        repeating = false;
-        return;
-      }
-
-      if (lastResult && lastResult !== '') {
-        prompt = prompt + lastResult;
-      }
-      const messages: any = [
-        {
-          role: 'system',
-          content: systemPrompt.replace('@project', describeProject()),
-        },
-        {
-          role: 'user',
-          content: prompt,
-        },
-      ];
-      write(`> ${prompt}`);
-      progress.report({ message: `${prompt}...` });
-      let toolHasResult = true;
-      let firstTime = true;
-      while (toolHasResult || firstTime) {
-        if (toolHasResult) {
-          // write(`> Resuming after getting more information`);
-        }
-        toolHasResult = false;
-        firstTime = false;
-        response = await getAI().chat.completions.create({
-          model: model,
-          stream,
-          tools: [readFileFunction(), searchForFileFunction(), readFolderFunction(), writeFileFunction()],
-          tool_choice: 'auto',
-          messages: messages,
-        });
-
-        if (stream) {
-          for await (const chunk of response) {
-            writeAppend(chunk.choices[0]?.delta?.content || '');
-          }
-        }
-        let toolResult: ToolResult | undefined;
-        if (response.error) {
-          writeError(response.error.message);
+  await showProgress(
+    `AI: ${request.prompt}...`,
+    async (progress: Progress<{ message?: string; increment?: number }>) => {
+      let repeating = true;
+      let lastResult = '';
+      while (repeating) {
+        let prompt = prompts.shift();
+        if (!prompt) {
           repeating = false;
-        } else {
-          if (!stream) {
-            const calls = response.choices[0].message.tool_calls;
-            if (calls && calls.length > 0) {
-              for (const call of calls) {
-                const id = call.id;
-                const name = call.function.name;
-                const args = JSON.parse(call.function.arguments);
-                //write(`> ${name}`);
+          return;
+        }
 
-                switch (name) {
-                  case readFileToolName:
-                    toolResult = readFile(path, args);
-                    break;
-                  case writeFileToolName:
-                    toolResult = writeFile(path, args);
-                    break;
-                  case readFolderToolName:
-                    toolResult = readFolder(path, args);
-                    break;
-                  case searchForFileToolName:
-                    toolResult = searchForFile(path, args);
-                    break;
-                  default:
-                    throw new Error(`Unknown tool ${name}`);
-                    break;
+        if (lastResult && lastResult !== '') {
+          prompt = prompt + lastResult;
+        }
+        const messages: any = [
+          {
+            role: 'system',
+            content: systemPrompt.replace('@project', describeProject()),
+          },
+          {
+            role: 'user',
+            content: prompt,
+          },
+        ];
+        write(`> ${prompt}`);
+        iteration++;
+        aiLog(`#### ${prompt}`);
+        aiLog('```typescript');
+        aiLog(JSON.stringify(messages, null, 2));
+        aiLog('```');
+
+        aiLog(`### Result`);
+        progress.report({ increment: iteration });
+        //progress.report({ message: `${prompt}...` });
+        let toolHasResult = true;
+        let firstTime = true;
+        while (toolHasResult || firstTime) {
+          if (toolHasResult) {
+            // write(`> Resuming after getting more information`);
+          }
+          toolHasResult = false;
+          firstTime = false;
+          const body: any = {
+            model: model,
+            stream,
+            messages: messages,
+          };
+          if (options.useTools) {
+            body.tool_choice = 'required';
+            body.tools = [readFileFunction(), searchForFileFunction(), readFolderFunction(), writeFileFunction()];
+          }
+          response = await getAI().chat.completions.create(body);
+
+          let toolResult: ToolResult | undefined;
+          if (response.error) {
+            writeError(response.error.message);
+            repeating = false;
+          } else {
+            let aggregatedToolCall: {
+              id?: string;
+              function?: { name?: string; arguments?: string };
+            } = {};
+            let count = 0;
+            for await (const chunk of response) {
+              aiLog(`### Chunk ${count++}`);
+              aiLog('```json');
+              aiLog(JSON.stringify(chunk, null, 2));
+              aiLog('```');
+              const choice = chunk.choices[0];
+              content += choice?.delta?.content || '';
+              writeAppend(choice?.delta?.content || '');
+              aggregateToolCall(choice, aggregatedToolCall);
+
+              if (!choice?.finish_reason) {
+                continue;
+              }
+              const call = aggregatedToolCall;
+              if (call && call.function) {
+                let id;
+                let name;
+                try {
+                  ({ id, name, toolResult } = callFunction(call, toolResult));
+                } catch (e) {
+                  aiWriteLog(path);
+                  writeError(`Error calling function ${call.function.name}: ${e}`);
                 }
                 messages.push({
                   tool_call_id: id,
@@ -140,66 +165,123 @@ export async function ai(request: ChatRequest, folder: string) {
                   name: name,
                   content: toolResult.result,
                 });
+                aggregatedToolCall = {};
                 toolHasResult = true;
               }
-            }
 
-            if (!toolHasResult) {
-              const result = response.choices[0].message.content;
-              let output = result;
-              if (result) {
-                const newOutput = performChanges(`${result}`);
-                if (newOutput) {
-                  output = newOutput;
-                }
-                lastResult = result;
-              }
-              if (!result) {
-                lastResult = `\n${toolResult.context}:\n${toolResult.result}`;
-              }
-              if (result && result.includes('@prompt')) {
-                const list = extractPrompts(result);
-                if (hasQuestions(list)) {
-                  // Stop here as the LLM has questions
-                  output = list.join('\n');
-                  showOutput();
+              if (!toolHasResult) {
+                if (content && content.includes('@prompt')) {
+                  const list = extractPrompts(content);
+                  if (hasQuestions(list)) {
+                    // Stop here as the LLM has questions
+                    const newPrompt = await askQuestions(prompt, list);
+                    if (newPrompt) {
+                      repeating = true;
+                      prompts = [newPrompt];
+                      lastResult = '';
+                    }
+                    // content = list.join('\n');
+                    // showOutput();
+                  } else {
+                    // Have the LLM answer its requests
+                    prompts.push(...list);
+                    lastResult = '';
+                  }
                 } else {
-                  // Have the LLM answer its requests
-                  prompts.push(...list);
-                  lastResult = '';
+                  performChanges(content, request.activeFile);
+                }
+                // const result = chunk.choices[0].delta.content;
+                // let output = result;
+                if (content) {
+                  // const newOutput = performChanges(`${content}`);
+                  // if (newOutput) {
+                  //   content = newOutput;
+                  // }
+                  lastResult = content;
+                }
+                if (!content && toolResult) {
+                  lastResult = `\n${toolResult.context}:\n${toolResult.result}`;
                 }
               }
-
-              write(`${output}`);
             }
           }
         }
+        aiWriteLog(path);
+      }
+    },
+  );
+
+  function callFunction(
+    call: { id?: string; function?: { name?: string; arguments?: string } },
+    toolResult: ToolResult,
+  ) {
+    const id = call.id;
+    const name = call.function.name;
+    const args = JSON.parse(call.function.arguments);
+
+    switch (name) {
+      case readFileToolName:
+        toolResult = readFile(path, args);
+        break;
+      case writeFileToolName:
+        toolResult = writeFile(path, args);
+        break;
+      case readFolderToolName:
+        toolResult = readFolder(path, args);
+        break;
+      case searchForFileToolName:
+        toolResult = searchForFile(path, args);
+        break;
+      default:
+        throw new Error(`Unknown tool ${name}`);
+        break;
+    }
+    return { id, name, toolResult };
+  }
+
+  function aggregateToolCall(
+    choice: any,
+    aggregatedToolCall: { id?: string; function?: { name?: string; arguments?: string } },
+  ) {
+    if (choice.delta.tool_calls?.[0]) {
+      const toolCall = choice.delta.tool_calls[0];
+      if (toolCall.id) aggregatedToolCall.id = toolCall.id;
+      if (toolCall.function) {
+        if (!aggregatedToolCall.function) aggregatedToolCall.function = {};
+        if (toolCall.function.name) aggregatedToolCall.function.name = toolCall.function.name;
+        if (toolCall.function.arguments)
+          aggregatedToolCall.function.arguments =
+            (aggregatedToolCall.function.arguments || '') + toolCall.function.arguments;
       }
     }
-  });
+  }
 }
 
-function performChanges(input: string): string | undefined {
-  if (input.startsWith('@changefile:')) {
-    const file = input.split('@changefile:')[1].split('\n')[0].trim();
-    // newContent is everything after the first line
-    let newContent = input.split('\n').slice(1).join('\n');
-    if (!existsSync(file)) {
-      writeError(`AI wanted to write to file ${file} but it does not exist`);
-      showOutput();
+async function askQuestions(firstPrompt: string, prompts: string[]): Promise<string | undefined> {
+  let newPrompt = firstPrompt;
+  for (const prompt of prompts) {
+    const response = prompt.trim();
+    const answer = await window.showInputBox({ prompt, ignoreFocusOut: true });
+    if (answer && answer !== '') {
+      newPrompt += `\n${response}: ${answer}`;
+    } else {
       return undefined;
     }
-    if (newContent.startsWith('```')) {
-      // Looks like it is describing the change rather than providing the file
-      writeError(`AI provided an answer when it was supposed to provide the file "${file}"`);
-      const lines = newContent.split('\n').slice(1);
-      lines.pop();
-      newContent = lines.join('\n');
-    }
-    writeFileSync(file, newContent);
-    return `Changed file ${file}`;
   }
-  return undefined;
+  return newPrompt;
+}
+
+function performChanges(input: string, filename: string): void {
+  if (input.startsWith('```')) {
+    const lines = input.split('\n').slice(1);
+    lines.pop();
+    input = lines.join('\n');
+  }
+  if (!filename) {
+    writeError(`No file was specified.`);
+  }
+  writeFileSync(filename, input);
+  write(`Changed file ${filename}`);
 }
 
 function hasQuestions(list: string[]): boolean {

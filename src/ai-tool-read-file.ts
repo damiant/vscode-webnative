@@ -7,7 +7,7 @@ import { ToolResult } from './ai-tool';
 export const readFileToolName = 'read_file';
 
 export function readFile(path: string, args: any): ToolResult {
-  let pth = join(path, args.filename);
+  let pth = args.filename ? join(path, args.filename) : args;
   if (!existsSync(pth)) {
     const filename = closestMatch(args.filename, path);
     if (!filename) {
