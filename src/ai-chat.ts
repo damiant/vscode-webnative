@@ -26,7 +26,7 @@ export function getAI(): Together {
 export function apiKey() {
   const key = getExtSetting(ExtensionSetting.aiKey);
   if (!key) {
-    writeError(`A key is require to use AI Chat. Set it in settings. Get your key from https://openrouter.ai/`);
+    writeError(`A key is require to use AI Chat. Set it in settings.`);
     return undefined;
   }
   return key;
@@ -34,19 +34,19 @@ export function apiKey() {
 
 interface Options {
   useTools: boolean;
+  stream: boolean;
 }
 
 export async function ai(request: ChatRequest, folder: string) {
   const options: Options = {
     useTools: false,
+    stream: true,
   };
   let model = getSetting(WorkspaceSetting.aiModel);
-  //model = 'deepseek-ai/DeepSeek-R1-Distill-Llama-70B-free';
   if (model === '' || !model) {
-    model = 'meta-llama/Llama-3.3-70B-Instruct-Turbo-Free';
+    model = 'Qwen/Qwen2.5-72B-Instruct-Turbo';
   }
 
-  //  model = 'Qwen/Qwen2.5-72B-Instruct-Turbo'; // 'Qwen/Qwen2.5-Coder-32B-Instruct';
   if (!model) {
     writeError(`No AI model selected. Select one in settings.`);
     return;
@@ -54,7 +54,6 @@ export async function ai(request: ChatRequest, folder: string) {
 
   showOutput();
   let response;
-  const stream = true;
   const path = folder;
   let prompt = request.prompt;
   if (request.activeFile) {
@@ -117,14 +116,20 @@ export async function ai(request: ChatRequest, folder: string) {
           firstTime = false;
           const body: any = {
             model: model,
-            stream,
+            stream: options.stream,
             messages: messages,
           };
           if (options.useTools) {
             body.tool_choice = 'required';
             body.tools = [readFileFunction(), searchForFileFunction(), readFolderFunction(), writeFileFunction()];
           }
-          response = await getAI().chat.completions.create(body);
+          try {
+            response = await getAI().chat.completions.create(body);
+          } catch (e) {
+            writeError(`Error: ${e}`);
+            showOutput();
+            break;
+          }
 
           let toolResult: ToolResult | undefined;
           if (response.error) {
@@ -281,6 +286,7 @@ function performChanges(input: string, filename: string): void {
     writeError(`No file was specified.`);
   }
   writeFileSync(filename, input);
+  write(``);
   write(`Changed file ${filename}`);
 }
 
