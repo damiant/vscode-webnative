@@ -15,7 +15,7 @@ import { getSetting, setSetting, WorkspaceSetting } from './workspace-state';
 import { debugSkipFiles, openUri } from './utilities';
 import { cancelLastOperation } from './tasks';
 import { nexusURL } from './webview-debug';
-import { chat, hasBuilder } from './integrations-builder';
+import { chat } from './chat';
 
 enum MessageType {
   setMobile = 'setMobile',
@@ -94,7 +94,7 @@ export function viewInEditor(
 
   if (device) {
     panel.title = device.name;
-    const hasChat = hasBuilder();
+    const hasChat = true; // was hasBuilder();
     panel.webview.postMessage({ command: MessageType.device, device, baseUrl: url, id, assetsUri: assetsUri, hasChat });
   }
   if (existingPanel || stopSpinner) {
@@ -118,7 +118,7 @@ export function viewInEditor(
       return;
     }
     if (message.command == 'chat') {
-      await chat(exState.projectRef.projectFolder());
+      await chat(() => {}, exState.projectRef);
       return;
     }
     if (message.command == 'qr') {

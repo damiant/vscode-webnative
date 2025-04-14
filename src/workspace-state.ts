@@ -16,6 +16,7 @@ export enum WorkspaceSetting {
   cocoaPods = 'cocoaPods2',
   recCheck = 'recCheck',
   builderAuthenticated = 'builderAuthenticated',
+  aiModel = 'aiModel',
 }
 
 export enum ExtensionSetting {
@@ -23,6 +24,7 @@ export enum ExtensionSetting {
   javaHome = 'javaHome',
   manualNewProjects = 'manualNewProjects',
   packageManager = 'packageManager',
+  aiKey = 'aiKey',
 }
 
 export enum GlobalSetting {

@@ -17,6 +17,7 @@ export enum CommandName {
   BuildConfig = 'webnative.buildConfig',
   RunConfig = 'webnative.runConfig',
   StatusRun = 'webnative.statusRun',
+  Chat = 'webnative.chat',
 
   LiveReload = 'webnative.liveReload',
   LiveReloadSelected = 'webnative.liveReloadSelected',
@@ -44,6 +45,7 @@ export enum CommandName {
   Sync = 'webnative.capSync',
   Debug = 'webnative.debug',
   Build = 'webnative.build',
+  ChatModel = 'webnative.chatModel',
   OpenInXCode = 'webnative.openXcode',
   OpenInAndroidStudio = 'webnative.openAndroidStudio',
   ViewDevServer = 'webnative.viewDevServer', // View the dev server window
