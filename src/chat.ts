@@ -1,13 +1,13 @@
-import { QuickPickItem, ThemeIcon, window } from 'vscode';
+import { QuickPickItem, window } from 'vscode';
 import { Project } from './project';
 import { QueueFunction } from './tip';
-import { showOutput, write } from './logging';
-import { ai, apiKey, ChatRequest } from './ai-chat';
+import { ai, ChatRequest } from './ai-chat';
 import { getSetting, setSetting, WorkspaceSetting } from './workspace-state';
 import { basename } from 'path';
 import { existsSync } from 'fs';
 import { describeProject } from './ai-project-info';
 import { getAllFilenames } from './ai-tool-read-folder';
+import { getModels, Model } from './ai-openrouter';
 
 export async function chat(queueFunction: QueueFunction, project: Project) {
   queueFunction();
@@ -28,7 +28,7 @@ export async function chat(queueFunction: QueueFunction, project: Project) {
       });
       if (!prompt) return undefined;
 
-      const files = [];
+      let files = [];
       window.visibleTextEditors.forEach((editor) => {
         if (existsSync(editor.document.uri.fsPath)) {
           files.push(editor.document.uri.fsPath);
@@ -37,7 +37,7 @@ export async function chat(queueFunction: QueueFunction, project: Project) {
       if (files.length === 0) {
         const otherFiles = getAllFilenames(project.projectFolder(), ['node_modules', 'dist', 'www']);
         files.push(...otherFiles);
-        files.filter((file) => file !== activeFile);
+        files = files.filter((file) => file !== activeFile);
       }
 
       const request: ChatRequest = {
@@ -54,20 +54,22 @@ export async function chat(queueFunction: QueueFunction, project: Project) {
 // Not used yet
 export async function chatModel(queueFunction: QueueFunction, project: Project) {
   queueFunction();
-  let models: any[] = await getModels();
-  models = models.filter((model) => availableModels().includes(model.id));
-  models.sort((a, b) => a.display_name.localeCompare(b.display_name));
+  let models: Model[] = await getModels();
+  models.sort((a, b) => a.name.localeCompare(b.name));
   const currentModel = getSetting(WorkspaceSetting.aiModel);
   const items: QuickPickItem[] = models.map((model) => {
     // {hourly: 0, input: 0, output: 0, base: 0, finetune: 0}
     const price =
-      model.pricing.hourly == 0 &&
-      model.pricing.input == 0 &&
-      model.pricing.output == 0 &&
-      model.pricing.base == 0 &&
-      model.pricing.finetune == 0
+      model.pricing.prompt == '0' &&
+      model.pricing.completion == '0' &&
+      model.pricing.image == '0' &&
+      model.pricing.request == '0' &&
+      model.pricing.input_cache_read == '0' &&
+      model.pricing.input_cache_write == '0' &&
+      model.pricing.web_search == '0' &&
+      model.pricing.internal_reasoning == '0'
         ? 'Free'
-        : `Paid in:${model.pricing.input.toFixed(2)} out:${model.pricing.output.toFixed(2)}`;
+        : `Paid in:${model.pricing.prompt} out:${model.pricing.completion}`;
 
     return { label: labelFor(model), description: `(${price})`, picked: model.id == currentModel };
   });
@@ -80,40 +82,11 @@ export async function chatModel(queueFunction: QueueFunction, project: Project) 
   setSetting(WorkspaceSetting.aiModel, model.id);
 }
 
-function labelFor(model: any): string {
+function labelFor(model: Model): string {
   let icon = '$(file-binary)';
-  if (model.type == 'embedding') {
-    icon = '$(file)';
-  }
-  if (model.type == 'chat') {
-    icon = '$(comment-discussion)';
-  }
-  if (model.type == 'image') {
+  if (model.architecture.input_modalities.includes('image')) {
     icon = '$(eye)';
   }
-  if (model.type == 'code') {
-    icon = '$(code)';
-  }
-  return `${icon} ${model.display_name}`;
-}
 
-function availableModels(): string[] {
-  // Only some models can use function calling
-  // https://docs.together.ai/docs/function-calling#supported-models
-  return [
-    'meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8',
-    'meta-llama/Llama-4-Scout-17B-16E-Instruct',
-    'Qwen/Qwen2.5-7B-Instruct-Turbo',
-    'Qwen/Qwen2.5-72B-Instruct-Turbo',
-    'meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo',
-    'meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo',
-    'meta-llama/Meta-Llama-3.1-405B-Instruct-Turbo',
-    'meta-llama/Llama-3.3-70B-Instruct-Turbo',
-  ];
-}
-
-async function getModels(): Promise<any[]> {
-  const res = await fetch('https://api.together.xyz/v1/models', { headers: { Authorization: 'Bearer ' + apiKey() } });
-  const list = await res.json();
-  return list;
+  return `${icon} ${model.name}`;
 }

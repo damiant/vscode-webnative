@@ -716,7 +716,6 @@
     "rimraf": "6.0.1",
     "semver": "7.7.1",
     "simple-plist": "1.3.0",
-    "together-ai": "^0.15.0",
     "ts-morph": "25.0.1",
     "typescript-eslint": "^8.26.1",
     "xcode": "3.0.1"

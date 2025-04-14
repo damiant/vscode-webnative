@@ -1,5 +1,4 @@
-import Together from 'together-ai';
-import { ExtensionSetting, getExtSetting, getSetting, WorkspaceSetting } from './workspace-state';
+import { getSetting, WorkspaceSetting } from './workspace-state';
 import { showOutput, write, writeAppend, writeError } from './logging';
 import { showProgress } from './utilities';
 import { systemPrompt } from './ai-prompts';
@@ -12,24 +11,12 @@ import { readFileSync, writeFileSync } from 'fs';
 import { describeProject } from './ai-project-info';
 import { Progress, window } from 'vscode';
 import { aiLog, aiWriteLog } from './ai-log';
+import { AIBody, completions, Message, AIResponse } from './ai-openrouter';
 
 export interface ChatRequest {
   prompt: string;
   activeFile: string | undefined;
   files: string[];
-}
-
-export function getAI(): Together {
-  return new Together({ apiKey: apiKey() });
-}
-
-export function apiKey() {
-  const key = getExtSetting(ExtensionSetting.aiKey);
-  if (!key) {
-    writeError(`A key is require to use AI Chat. Set it in settings.`);
-    return undefined;
-  }
-  return key;
 }
 
 interface Options {
@@ -39,8 +26,8 @@ interface Options {
 
 export async function ai(request: ChatRequest, folder: string) {
   const options: Options = {
-    useTools: false,
-    stream: true,
+    useTools: true,
+    stream: false, // OpenAI SDK jacks up calls for streaming through OpenRouter
   };
   let model = getSetting(WorkspaceSetting.aiModel);
   if (model === '' || !model) {
@@ -53,7 +40,7 @@ export async function ai(request: ChatRequest, folder: string) {
   }
 
   showOutput();
-  let response;
+  let response: AIResponse;
   const path = folder;
   let prompt = request.prompt;
   if (request.activeFile) {
@@ -70,6 +57,7 @@ export async function ai(request: ChatRequest, folder: string) {
   let prompts = [prompt];
   let iteration = 0;
   let content = '';
+  callHistory = [];
 
   await showProgress(
     `AI: ${request.prompt}...`,
@@ -86,7 +74,7 @@ export async function ai(request: ChatRequest, folder: string) {
         if (lastResult && lastResult !== '') {
           prompt = prompt + lastResult;
         }
-        const messages: any = [
+        const messages: Message[] = [
           {
             role: 'system',
             content: systemPrompt.replace('@project', describeProject()),
@@ -114,17 +102,19 @@ export async function ai(request: ChatRequest, folder: string) {
           }
           toolHasResult = false;
           firstTime = false;
-          const body: any = {
+          const body: AIBody = {
             model: model,
             stream: options.stream,
             messages: messages,
           };
           if (options.useTools) {
-            body.tool_choice = 'required';
+            //body.tool_choice = 'required';
             body.tools = [readFileFunction(), searchForFileFunction(), readFolderFunction(), writeFileFunction()];
           }
           try {
-            response = await getAI().chat.completions.create(body);
+            aiLog(`### Completion Request`);
+            aiLog(JSON.stringify(body, null, 2));
+            response = await completions(body);
           } catch (e) {
             writeError(`Error: ${e}`);
             showOutput();
@@ -134,79 +124,71 @@ export async function ai(request: ChatRequest, folder: string) {
           let toolResult: ToolResult | undefined;
           if (response.error) {
             writeError(response.error.message);
+            writeError(JSON.stringify(response.error.metadata));
             repeating = false;
           } else {
-            let aggregatedToolCall: {
-              id?: string;
-              function?: { name?: string; arguments?: string };
-            } = {};
-            let count = 0;
-            for await (const chunk of response) {
-              aiLog(`### Chunk ${count++}`);
-              aiLog('```json');
-              aiLog(JSON.stringify(chunk, null, 2));
-              aiLog('```');
-              const choice = chunk.choices[0];
-              content += choice?.delta?.content || '';
-              writeAppend(choice?.delta?.content || '');
-              aggregateToolCall(choice, aggregatedToolCall);
+            content = (response.choices[0].message.content || '') as string;
+            const toolCalls = response.choices[0].message.tool_calls;
+            if (toolCalls) {
+              for (const call of toolCalls) {
+                if (call && call.function) {
+                  let id;
+                  let name;
+                  try {
+                    write(`\n`); // End the last message to the UI
+                    ({ id, name, toolResult } = callFunction(path, call, toolResult));
+                  } catch (e) {
+                    aiWriteLog(path);
+                    writeError(`Error calling function ${call.function.name}: ${e}`);
+                  }
+                  if (!id) {
+                    break;
+                  }
+                  messages.push({
+                    //tool_use_id: id,
+                    role: 'user',
+                    toolCallId: id,
+                    name: name,
+                    content: JSON.stringify([{ type: 'tool_result', tool_use_id: id, content: toolResult.result }]),
+                  });
 
-              if (!choice?.finish_reason) {
-                continue;
-              }
-              const call = aggregatedToolCall;
-              if (call && call.function) {
-                let id;
-                let name;
-                try {
-                  ({ id, name, toolResult } = callFunction(call, toolResult));
-                } catch (e) {
-                  aiWriteLog(path);
-                  writeError(`Error calling function ${call.function.name}: ${e}`);
+                  toolHasResult = true;
                 }
-                messages.push({
-                  tool_call_id: id,
-                  role: 'tool',
-                  name: name,
-                  content: toolResult.result,
-                });
-                aggregatedToolCall = {};
-                toolHasResult = true;
               }
+            }
 
-              if (!toolHasResult) {
-                if (content && content.includes('@prompt')) {
-                  const list = extractPrompts(content);
-                  if (hasQuestions(list)) {
-                    // Stop here as the LLM has questions
-                    const newPrompt = await askQuestions(prompt, list);
-                    if (newPrompt) {
-                      repeating = true;
-                      prompts = [newPrompt];
-                      lastResult = '';
-                    }
-                    // content = list.join('\n');
-                    // showOutput();
-                  } else {
-                    // Have the LLM answer its requests
-                    prompts.push(...list);
+            if (!toolHasResult) {
+              if (content && content.includes('@prompt')) {
+                const list = extractPrompts(content);
+                if (hasQuestions(list)) {
+                  // Stop here as the LLM has questions
+                  const newPrompt = await askQuestions(prompt, list);
+                  if (newPrompt) {
+                    repeating = true;
+                    prompts = [newPrompt];
                     lastResult = '';
                   }
+                  // content = list.join('\n');
+                  // showOutput();
                 } else {
-                  performChanges(content, request.activeFile);
+                  // Have the LLM answer its requests
+                  prompts.push(...list);
+                  lastResult = '';
                 }
-                // const result = chunk.choices[0].delta.content;
-                // let output = result;
-                if (content) {
-                  // const newOutput = performChanges(`${content}`);
-                  // if (newOutput) {
-                  //   content = newOutput;
-                  // }
-                  lastResult = content;
-                }
-                if (!content && toolResult) {
-                  lastResult = `\n${toolResult.context}:\n${toolResult.result}`;
-                }
+              } else {
+                performChanges(content, request.activeFile);
+              }
+              // const result = chunk.choices[0].delta.content;
+              // let output = result;
+              if (content) {
+                // const newOutput = performChanges(`${content}`);
+                // if (newOutput) {
+                //   content = newOutput;
+                // }
+                lastResult = content;
+              }
+              if (!content && toolResult) {
+                lastResult = `\n${toolResult.context}:\n${toolResult.result}`;
               }
             }
           }
@@ -215,34 +197,6 @@ export async function ai(request: ChatRequest, folder: string) {
       }
     },
   );
-
-  function callFunction(
-    call: { id?: string; function?: { name?: string; arguments?: string } },
-    toolResult: ToolResult,
-  ) {
-    const id = call.id;
-    const name = call.function.name;
-    const args = JSON.parse(call.function.arguments);
-
-    switch (name) {
-      case readFileToolName:
-        toolResult = readFile(path, args);
-        break;
-      case writeFileToolName:
-        toolResult = writeFile(path, args);
-        break;
-      case readFolderToolName:
-        toolResult = readFolder(path, args);
-        break;
-      case searchForFileToolName:
-        toolResult = searchForFile(path, args);
-        break;
-      default:
-        throw new Error(`Unknown tool ${name}`);
-        break;
-    }
-    return { id, name, toolResult };
-  }
 
   function aggregateToolCall(
     choice: any,
@@ -260,6 +214,48 @@ export async function ai(request: ChatRequest, folder: string) {
       }
     }
   }
+}
+
+interface Call {
+  name: string;
+  args?: string;
+}
+let callHistory: Call[] = [];
+
+function callFunction(
+  path: string,
+  call: { id?: string; function?: { name?: string; arguments?: string } },
+  toolResult: ToolResult,
+) {
+  const id = call.id;
+  const name = call.function.name;
+  const args = JSON.parse(call.function.arguments);
+
+  const alreadyCalled = callHistory.find((c) => c.name === name && c.args === args);
+  if (alreadyCalled) {
+    writeError(`${name} already called with args ${args}. Aborting`);
+    return undefined;
+  }
+  callHistory.push({ name, args });
+
+  switch (name) {
+    case readFileToolName:
+      toolResult = readFile(path, args);
+      break;
+    case writeFileToolName:
+      toolResult = writeFile(path, args);
+      break;
+    case readFolderToolName:
+      toolResult = readFolder(path, args);
+      break;
+    case searchForFileToolName:
+      toolResult = searchForFile(path, args);
+      break;
+    default:
+      throw new Error(`Unknown tool ${name}`);
+      break;
+  }
+  return { id, name, toolResult };
 }
 
 async function askQuestions(firstPrompt: string, prompts: string[]): Promise<string | undefined> {
