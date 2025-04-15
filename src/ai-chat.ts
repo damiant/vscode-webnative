@@ -276,6 +276,9 @@ function performChanges(input: string, request: ChatRequest, result: ChatResult)
       }
     }
   }
+  if (contents !== '') {
+    result.comments.push(contents);
+  }
   return changed;
 }
 
@@ -295,13 +298,19 @@ function revert(result: ChatResult): void {
 
 function getFilenameFrom(line: string, request: ChatRequest): string {
   const name = line.replace('@ChangeFile', '').trim();
-  let fullFilename = request.fileMap[name];
-  if (!fullFilename) {
-    fullFilename = request.fileMap['[root]/' + name];
-  }
-  if (fullFilename) {
-    return fullFilename;
-  } else {
+  try {
+    let fullFilename = request.fileMap[name];
+    if (!fullFilename) {
+      fullFilename = request.fileMap['[root]/' + name];
+    }
+    if (fullFilename) {
+      return fullFilename;
+    } else {
+      return name;
+    }
+  } catch (error) {
+    writeError(`Error getting filename from ${line}`);
+    showOutput();
     return name;
   }
 }
