@@ -9,6 +9,7 @@ export interface Model {
   pricing: Pricing;
   context_length: number;
   architecture: Architecture;
+  ppm: number;
 }
 
 interface Architecture {
@@ -16,7 +17,7 @@ interface Architecture {
   output_modalities: string[];
 }
 
-interface Pricing {
+export interface Pricing {
   prompt: string;
   completion: string;
   image: string;

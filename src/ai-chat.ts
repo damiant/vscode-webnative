@@ -1,5 +1,5 @@
 import { getSetting, WorkspaceSetting } from './workspace-state';
-import { showOutput, write, writeAppend, writeError } from './logging';
+import { showOutput, write, writeAppend, writeError, writeWN } from './logging';
 import { showProgress } from './utilities';
 import { systemPrompt } from './ai-prompts';
 import { readFileToolName, readFileFunction, readFile } from './ai-tool-read-file';
@@ -7,23 +7,20 @@ import { writeFile, writeFileFunction, writeFileToolName } from './ai-tool-write
 import { readFolder, readFolderFunction, readFolderToolName } from './ai-tool-read-folder';
 import { searchForFile, searchForFileFunction, searchForFileToolName } from './ai-tool-search-for-file';
 import { Call, CallResult, ChatRequest, Options, ToolResult } from './ai-tool';
-import { readFileSync, writeFileSync } from 'fs';
+import { writeFileSync } from 'fs';
 import { describeProject } from './ai-project-info';
 import { Progress, window } from 'vscode';
 import { aiLog, aiWriteLog } from './ai-log';
 import { AIBody, completions, Message, AIResponse } from './ai-openrouter';
+import { inputFiles } from './ai-utils';
 
 export async function ai(request: ChatRequest, folder: string) {
   const options: Options = {
-    useTools: true,
+    useTools: false, // Tools works for some models. Note: tools repeat requests with OpenRouter
     stream: false, // OpenAI SDK jacks up calls for streaming through OpenRouter
   };
   let model = getSetting(WorkspaceSetting.aiModel);
   if (model === '' || !model) {
-    model = 'Qwen/Qwen2.5-72B-Instruct-Turbo';
-  }
-
-  if (!model) {
     writeError(`No AI model selected. Select one in settings.`);
     return;
   }
@@ -34,7 +31,7 @@ export async function ai(request: ChatRequest, folder: string) {
   let prompt = request.prompt;
   if (request.activeFile) {
     if (!options.useTools) {
-      prompt = `${prompt}\nInput file:\n${readFileSync(request.activeFile, 'utf8')}`;
+      prompt = `${prompt}\n${inputFiles(request)}`;
     } else {
       prompt = `Modify this file ${request.activeFile}: ${prompt}`;
     }
@@ -160,7 +157,7 @@ export async function ai(request: ChatRequest, folder: string) {
                   prompts.push(...list);
                 }
               } else {
-                //performChanges(content, request.activeFile);
+                performChanges(content, request);
               }
             }
           }
@@ -223,18 +220,30 @@ async function askQuestions(firstPrompt: string, prompts: string[]): Promise<str
   return newPrompt;
 }
 
-function performChanges(input: string, filename: string): void {
-  if (input.startsWith('```')) {
-    const lines = input.split('\n').slice(1);
-    lines.pop();
-    input = lines.join('\n');
+function performChanges(input: string, request: ChatRequest): void {
+  const lines = input.split('\n');
+  let currentFilename = undefined;
+  let contents = '';
+  for (const line of lines) {
+    if (line.startsWith('```')) {
+      if (line.trim() == '```') {
+        if (!contents.includes('[DO-NOT-CHANGE] CHANGES')) {
+          writeWN(`Updated ${currentFilename}`);
+          writeFileSync(currentFilename, contents, 'utf-8');
+        }
+        contents = '';
+      } else {
+        currentFilename = getFilenameFrom(line, request);
+      }
+    } else {
+      contents += line + '\n';
+    }
   }
-  if (!filename) {
-    writeError(`No file was specified.`);
-  }
-  writeFileSync(filename, input);
-  write(``);
-  write(`Changed file ${filename}`);
+}
+
+function getFilenameFrom(line: string, request: ChatRequest): string {
+  const name = line.substring(line.indexOf(' ') + 1);
+  return request.fileMap[name] || name;
 }
 
 function hasQuestions(list: string[]): boolean {

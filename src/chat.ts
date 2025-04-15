@@ -7,7 +7,7 @@ import { basename } from 'path';
 import { existsSync } from 'fs';
 import { describeProject } from './ai-project-info';
 import { getAllFilenames } from './ai-tool-read-folder';
-import { getModels, Model } from './ai-openrouter';
+import { getModels, Model, Pricing } from './ai-openrouter';
 import { ChatRequest } from './ai-tool';
 
 export async function chat(queueFunction: QueueFunction, project: Project) {
@@ -30,11 +30,22 @@ export async function chat(queueFunction: QueueFunction, project: Project) {
       if (!prompt) return undefined;
 
       let files = [];
-      window.visibleTextEditors.forEach((editor) => {
-        if (existsSync(editor.document.uri.fsPath)) {
-          files.push(editor.document.uri.fsPath);
+      for (const tabGroup of window.tabGroups.all) {
+        for (const tab of tabGroup.tabs) {
+          const uri = (tab.input as any).uri;
+          if (uri && existsSync(uri.fsPath)) {
+            files.push(uri.fsPath);
+          }
         }
-      });
+      }
+      // window.visibleTextEditors.forEach((editor) => {
+      //   if (existsSync(editor.document.uri.fsPath)) {
+      //     files.push(editor.document.uri.fsPath);
+      //   }
+      // });
+      if (!activeFile && files.length > 0) {
+        activeFile = files[0];
+      }
       files = files.filter((file) => file !== activeFile);
       if (files.length === 0) {
         const otherFiles = getAllFilenames(project.projectFolder(), ['node_modules', 'dist', 'www']);
@@ -52,11 +63,24 @@ export async function chat(queueFunction: QueueFunction, project: Project) {
   }
 }
 
+function totalPrice(price: Pricing): number {
+  const total = v(price.prompt) + v(price.completion);
+
+  return total * 1000000;
+}
+
+function v(s: string): number {
+  if (!s) return 0;
+  return Number(s);
+}
+
 // Not used yet
 export async function chatModel(queueFunction: QueueFunction, project: Project) {
   queueFunction();
   const models: Model[] = await getModels();
-  models.sort((a, b) => a.name.localeCompare(b.name));
+  models.map((m) => (m.ppm = totalPrice(m.pricing)));
+  //models.sort((a, b) => a.name.localeCompare(b.name));
+  models.sort((a, b) => a.ppm - b.ppm);
   const currentModel = getSetting(WorkspaceSetting.aiModel);
   const items: QuickPickItem[] = models.map((model) => {
     // {hourly: 0, input: 0, output: 0, base: 0, finetune: 0}
@@ -69,8 +93,8 @@ export async function chatModel(queueFunction: QueueFunction, project: Project) 
       model.pricing.input_cache_write == '0' &&
       model.pricing.web_search == '0' &&
       model.pricing.internal_reasoning == '0'
-        ? 'Free'
-        : `Paid in:${model.pricing.prompt} out:${model.pricing.completion}`;
+        ? ''
+        : `$${totalPrice(model.pricing).toFixed(2)}m`;
 
     return { label: labelFor(model), description: `(${price})`, picked: model.id == currentModel };
   });
