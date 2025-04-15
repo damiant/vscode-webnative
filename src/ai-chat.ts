@@ -6,23 +6,12 @@ import { readFileToolName, readFileFunction, readFile } from './ai-tool-read-fil
 import { writeFile, writeFileFunction, writeFileToolName } from './ai-tool-write-file';
 import { readFolder, readFolderFunction, readFolderToolName } from './ai-tool-read-folder';
 import { searchForFile, searchForFileFunction, searchForFileToolName } from './ai-tool-search-for-file';
-import { ToolResult } from './ai-tool';
+import { Call, CallResult, ChatRequest, Options, ToolResult } from './ai-tool';
 import { readFileSync, writeFileSync } from 'fs';
 import { describeProject } from './ai-project-info';
 import { Progress, window } from 'vscode';
 import { aiLog, aiWriteLog } from './ai-log';
 import { AIBody, completions, Message, AIResponse } from './ai-openrouter';
-
-export interface ChatRequest {
-  prompt: string;
-  activeFile: string | undefined;
-  files: string[];
-}
-
-interface Options {
-  useTools: boolean;
-  stream: boolean;
-}
 
 export async function ai(request: ChatRequest, folder: string) {
   const options: Options = {
@@ -51,7 +40,7 @@ export async function ai(request: ChatRequest, folder: string) {
     }
   }
   if (request.files.length > 0 && options.useTools) {
-    prompt += `\nThese files can be used to fulfill the request: ${request.files.join(', ')}`;
+    //prompt += `\nThese files can be used to fulfill the request: ${request.files.join(', ')}`;
   }
 
   let prompts = [prompt];
@@ -63,17 +52,13 @@ export async function ai(request: ChatRequest, folder: string) {
     `AI: ${request.prompt}...`,
     async (progress: Progress<{ message?: string; increment?: number }>) => {
       let repeating = true;
-      let lastResult = '';
       while (repeating) {
-        let prompt = prompts.shift();
+        const prompt = prompts.shift();
         if (!prompt) {
           repeating = false;
           return;
         }
 
-        if (lastResult && lastResult !== '') {
-          prompt = prompt + lastResult;
-        }
         const messages: Message[] = [
           {
             role: 'system',
@@ -92,7 +77,7 @@ export async function ai(request: ChatRequest, folder: string) {
         aiLog('```');
 
         aiLog(`### Result`);
-        progress.report({ increment: iteration });
+        progress.report({ increment: iteration * 10 });
         //progress.report({ message: `${prompt}...` });
         let toolHasResult = true;
         let firstTime = true;
@@ -121,35 +106,38 @@ export async function ai(request: ChatRequest, folder: string) {
             break;
           }
 
-          let toolResult: ToolResult | undefined;
           if (response.error) {
             writeError(response.error.message);
             writeError(JSON.stringify(response.error.metadata));
             repeating = false;
           } else {
             content = (response.choices[0].message.content || '') as string;
+            if (content.length > 0) {
+              write(`\n${content}`);
+            }
+            progress.report({ message: content });
             const toolCalls = response.choices[0].message.tool_calls;
             if (toolCalls) {
               for (const call of toolCalls) {
                 if (call && call.function) {
-                  let id;
-                  let name;
+                  let callResult: CallResult;
                   try {
-                    write(`\n`); // End the last message to the UI
-                    ({ id, name, toolResult } = callFunction(path, call, toolResult));
+                    callResult = callFunction(path, call);
                   } catch (e) {
                     aiWriteLog(path);
                     writeError(`Error calling function ${call.function.name}: ${e}`);
                   }
-                  if (!id) {
+                  if (!callResult) {
                     break;
                   }
                   messages.push({
                     //tool_use_id: id,
                     role: 'user',
-                    toolCallId: id,
-                    name: name,
-                    content: JSON.stringify([{ type: 'tool_result', tool_use_id: id, content: toolResult.result }]),
+                    toolCallId: callResult.id,
+                    name: callResult.name,
+                    content: JSON.stringify([
+                      { type: 'tool_result', tool_use_id: callResult.id, content: callResult.toolResult.result },
+                    ]),
                   });
 
                   toolHasResult = true;
@@ -166,29 +154,13 @@ export async function ai(request: ChatRequest, folder: string) {
                   if (newPrompt) {
                     repeating = true;
                     prompts = [newPrompt];
-                    lastResult = '';
                   }
-                  // content = list.join('\n');
-                  // showOutput();
                 } else {
                   // Have the LLM answer its requests
                   prompts.push(...list);
-                  lastResult = '';
                 }
               } else {
-                performChanges(content, request.activeFile);
-              }
-              // const result = chunk.choices[0].delta.content;
-              // let output = result;
-              if (content) {
-                // const newOutput = performChanges(`${content}`);
-                // if (newOutput) {
-                //   content = newOutput;
-                // }
-                lastResult = content;
-              }
-              if (!content && toolResult) {
-                lastResult = `\n${toolResult.context}:\n${toolResult.result}`;
+                //performChanges(content, request.activeFile);
               }
             }
           }
@@ -197,46 +169,25 @@ export async function ai(request: ChatRequest, folder: string) {
       }
     },
   );
-
-  function aggregateToolCall(
-    choice: any,
-    aggregatedToolCall: { id?: string; function?: { name?: string; arguments?: string } },
-  ) {
-    if (choice.delta.tool_calls?.[0]) {
-      const toolCall = choice.delta.tool_calls[0];
-      if (toolCall.id) aggregatedToolCall.id = toolCall.id;
-      if (toolCall.function) {
-        if (!aggregatedToolCall.function) aggregatedToolCall.function = {};
-        if (toolCall.function.name) aggregatedToolCall.function.name = toolCall.function.name;
-        if (toolCall.function.arguments)
-          aggregatedToolCall.function.arguments =
-            (aggregatedToolCall.function.arguments || '') + toolCall.function.arguments;
-      }
-    }
-  }
 }
 
-interface Call {
-  name: string;
-  args?: string;
-}
 let callHistory: Call[] = [];
 
 function callFunction(
   path: string,
   call: { id?: string; function?: { name?: string; arguments?: string } },
-  toolResult: ToolResult,
-) {
+): CallResult {
   const id = call.id;
   const name = call.function.name;
   const args = JSON.parse(call.function.arguments);
+  let toolResult: ToolResult;
 
-  const alreadyCalled = callHistory.find((c) => c.name === name && c.args === args);
+  const alreadyCalled = callHistory.find((c) => c.name === name && c.args === call.function.arguments);
   if (alreadyCalled) {
-    writeError(`${name} already called with args ${args}. Aborting`);
+    writeError(`${name} already called. Aborting`);
     return undefined;
   }
-  callHistory.push({ name, args });
+  callHistory.push({ name, args: call.function.arguments });
 
   switch (name) {
     case readFileToolName:

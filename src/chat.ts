@@ -1,20 +1,21 @@
 import { QuickPickItem, window } from 'vscode';
 import { Project } from './project';
 import { QueueFunction } from './tip';
-import { ai, ChatRequest } from './ai-chat';
+import { ai } from './ai-chat';
 import { getSetting, setSetting, WorkspaceSetting } from './workspace-state';
 import { basename } from 'path';
 import { existsSync } from 'fs';
 import { describeProject } from './ai-project-info';
 import { getAllFilenames } from './ai-tool-read-folder';
 import { getModels, Model } from './ai-openrouter';
+import { ChatRequest } from './ai-tool';
 
 export async function chat(queueFunction: QueueFunction, project: Project) {
   queueFunction();
   const chatting = true;
   let prompt: string | undefined;
+  let activeFile = window.activeTextEditor?.document.uri.fsPath;
   while (chatting) {
-    let activeFile = window.activeTextEditor?.document.uri.fsPath;
     if (!existsSync(activeFile)) {
       activeFile = undefined;
     }
@@ -34,10 +35,10 @@ export async function chat(queueFunction: QueueFunction, project: Project) {
           files.push(editor.document.uri.fsPath);
         }
       });
+      files = files.filter((file) => file !== activeFile);
       if (files.length === 0) {
         const otherFiles = getAllFilenames(project.projectFolder(), ['node_modules', 'dist', 'www']);
         files.push(...otherFiles);
-        files = files.filter((file) => file !== activeFile);
       }
 
       const request: ChatRequest = {
@@ -54,7 +55,7 @@ export async function chat(queueFunction: QueueFunction, project: Project) {
 // Not used yet
 export async function chatModel(queueFunction: QueueFunction, project: Project) {
   queueFunction();
-  let models: Model[] = await getModels();
+  const models: Model[] = await getModels();
   models.sort((a, b) => a.name.localeCompare(b.name));
   const currentModel = getSetting(WorkspaceSetting.aiModel);
   const items: QuickPickItem[] = models.map((model) => {

@@ -1,4 +1,4 @@
-import { existsSync, readdirSync, readFileSync } from 'fs';
+import { readdirSync } from 'fs';
 import { join } from 'path';
 import { write } from './logging';
 import { ToolResult } from './ai-tool';
@@ -19,15 +19,10 @@ export function readFolderFunction(): any {
     type: 'function',
     function: {
       name: readFolderToolName,
-      description: 'Read a folder and return all of the files it contains',
+      description: 'Get all the projects filenames to know what to change',
       parameters: {
         type: 'object',
-        properties: {
-          folder: {
-            type: 'string',
-            description: 'The folder to read',
-          },
-        },
+        properties: {},
       },
     },
   };
