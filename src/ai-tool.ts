@@ -20,6 +20,13 @@ export interface ChatRequest {
   fileMap?: { [key: string]: string };
 }
 
+export interface ChatResult {
+  filesChanged?: { [key: string]: string };
+  filesCreated?: { [key: string]: string };
+  comments: string[];
+  buildFailed: boolean;
+}
+
 export interface Options {
   useTools: boolean;
   stream: boolean;

@@ -563,8 +563,9 @@ export async function getRunOutput(
   shell?: string,
   hideErrors?: boolean,
   ignoreErrors?: boolean,
+  detectExitCode?: boolean,
 ): Promise<string> {
-  return getExecOutput(command, folder, shell, hideErrors, ignoreErrors);
+  return getExecOutput(command, folder, shell, hideErrors, ignoreErrors, detectExitCode);
 
   // Problems with spawn with some commands (eg windows, npx ng generate)
   //return getSpawnOutput(command, folder, shell, hideErrors, ignoreErrors);
@@ -576,6 +577,7 @@ export async function getExecOutput(
   shell?: string,
   hideErrors?: boolean,
   ignoreErrors?: boolean,
+  detectExitCode?: boolean,
 ): Promise<string> {
   return new Promise((resolve, reject) => {
     let out = '';
@@ -611,9 +613,13 @@ export async function getExecOutput(
             reject(stdError);
           }
         } else {
-          // This is to fix a bug in npm outdated where it returns an exit code when it succeeds
           tEnd(command);
-          resolve(out);
+          if (detectExitCode) {
+            reject(out);
+          } else {
+            // This is to fix a bug in npm outdated where it returns an exit code when it succeeds
+            resolve(out);
+          }
         }
       }
     });

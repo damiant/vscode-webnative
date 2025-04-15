@@ -1,20 +1,22 @@
 import { getSetting, WorkspaceSetting } from './workspace-state';
-import { showOutput, write, writeAppend, writeError, writeWN } from './logging';
-import { showProgress } from './utilities';
+import { showOutput, write, writeError, writeWN } from './logging';
+import { delay, getRunOutput, showProgress } from './utilities';
 import { systemPrompt } from './ai-prompts';
 import { readFileToolName, readFileFunction, readFile } from './ai-tool-read-file';
 import { writeFile, writeFileFunction, writeFileToolName } from './ai-tool-write-file';
 import { readFolder, readFolderFunction, readFolderToolName } from './ai-tool-read-folder';
 import { searchForFile, searchForFileFunction, searchForFileToolName } from './ai-tool-search-for-file';
-import { Call, CallResult, ChatRequest, Options, ToolResult } from './ai-tool';
-import { writeFileSync } from 'fs';
+import { Call, CallResult, ChatRequest, ChatResult, Options, ToolResult } from './ai-tool';
+import { existsSync, readFileSync, unlinkSync, writeFileSync } from 'fs';
 import { describeProject } from './ai-project-info';
 import { Progress, window } from 'vscode';
 import { aiLog, aiWriteLog } from './ai-log';
 import { AIBody, completions, Message, AIResponse } from './ai-openrouter';
 import { inputFiles } from './ai-utils';
+import { build } from './build';
+import { Project } from './project';
 
-export async function ai(request: ChatRequest, folder: string) {
+export async function ai(request: ChatRequest, project: Project) {
   const options: Options = {
     useTools: false, // Tools works for some models. Note: tools repeat requests with OpenRouter
     stream: false, // OpenAI SDK jacks up calls for streaming through OpenRouter
@@ -25,9 +27,9 @@ export async function ai(request: ChatRequest, folder: string) {
     return;
   }
 
-  showOutput();
   let response: AIResponse;
-  const path = folder;
+  const result: ChatResult = { filesChanged: {}, filesCreated: {}, comments: [], buildFailed: false };
+  const path = project.projectFolder();
   let prompt = request.prompt;
   if (request.activeFile) {
     if (!options.useTools) {
@@ -43,129 +45,153 @@ export async function ai(request: ChatRequest, folder: string) {
   let prompts = [prompt];
   let iteration = 0;
   let content = '';
+  let changedFiles = false;
   callHistory = [];
 
-  await showProgress(
-    `AI: ${request.prompt}...`,
-    async (progress: Progress<{ message?: string; increment?: number }>) => {
-      let repeating = true;
-      while (repeating) {
-        const prompt = prompts.shift();
-        if (!prompt) {
-          repeating = false;
-          return;
+  await showProgress(`AI: `, async (progress: Progress<{ message?: string; increment?: number }>) => {
+    let repeating = true;
+    while (repeating) {
+      const prompt = prompts.shift();
+
+      if (!prompt) {
+        repeating = false;
+        return;
+      }
+      progress.report({ message: request.prompt });
+
+      const messages: Message[] = [
+        {
+          role: 'system',
+          content: systemPrompt.replace('@project', describeProject()),
+        },
+        {
+          role: 'user',
+          content: prompt,
+        },
+      ];
+      write(`> ${prompt}`);
+      iteration++;
+      aiLog(`#### ${prompt}`);
+      aiLog('```typescript');
+      aiLog(JSON.stringify(messages, null, 2));
+      aiLog('```');
+
+      aiLog(`### Result`);
+      progress.report({ message: request.prompt, increment: iteration * 10 });
+      //progress.report({ message: `${prompt}...` });
+      let toolHasResult = true;
+      let firstTime = true;
+      while (toolHasResult || firstTime) {
+        if (toolHasResult) {
+          // write(`> Resuming after getting more information`);
+        }
+        toolHasResult = false;
+        firstTime = false;
+        const body: AIBody = {
+          model: model,
+          stream: options.stream,
+          messages: messages,
+        };
+        if (options.useTools) {
+          //body.tool_choice = 'required';
+          body.tools = [readFileFunction(), searchForFileFunction(), readFolderFunction(), writeFileFunction()];
+        }
+        try {
+          aiLog(`### Completion Request`);
+          aiLog(JSON.stringify(body, null, 2));
+          response = await completions(body);
+        } catch (e) {
+          writeError(`Error: ${e}`);
+          showOutput();
+          break;
         }
 
-        const messages: Message[] = [
-          {
-            role: 'system',
-            content: systemPrompt.replace('@project', describeProject()),
-          },
-          {
-            role: 'user',
-            content: prompt,
-          },
-        ];
-        write(`> ${prompt}`);
-        iteration++;
-        aiLog(`#### ${prompt}`);
-        aiLog('```typescript');
-        aiLog(JSON.stringify(messages, null, 2));
-        aiLog('```');
-
-        aiLog(`### Result`);
-        progress.report({ increment: iteration * 10 });
-        //progress.report({ message: `${prompt}...` });
-        let toolHasResult = true;
-        let firstTime = true;
-        while (toolHasResult || firstTime) {
-          if (toolHasResult) {
-            // write(`> Resuming after getting more information`);
+        if (response.error) {
+          writeError(response.error.message);
+          writeError(JSON.stringify(response.error.metadata));
+          repeating = false;
+        } else {
+          content = (response.choices[0].message.content || '') as string;
+          if (content.length > 0) {
+            write(`\n${content}`);
           }
-          toolHasResult = false;
-          firstTime = false;
-          const body: AIBody = {
-            model: model,
-            stream: options.stream,
-            messages: messages,
-          };
-          if (options.useTools) {
-            //body.tool_choice = 'required';
-            body.tools = [readFileFunction(), searchForFileFunction(), readFolderFunction(), writeFileFunction()];
-          }
-          try {
-            aiLog(`### Completion Request`);
-            aiLog(JSON.stringify(body, null, 2));
-            response = await completions(body);
-          } catch (e) {
-            writeError(`Error: ${e}`);
-            showOutput();
-            break;
-          }
-
-          if (response.error) {
-            writeError(response.error.message);
-            writeError(JSON.stringify(response.error.metadata));
-            repeating = false;
-          } else {
-            content = (response.choices[0].message.content || '') as string;
-            if (content.length > 0) {
-              write(`\n${content}`);
-            }
-            progress.report({ message: content });
-            const toolCalls = response.choices[0].message.tool_calls;
-            if (toolCalls) {
-              for (const call of toolCalls) {
-                if (call && call.function) {
-                  let callResult: CallResult;
-                  try {
-                    callResult = callFunction(path, call);
-                  } catch (e) {
-                    aiWriteLog(path);
-                    writeError(`Error calling function ${call.function.name}: ${e}`);
-                  }
-                  if (!callResult) {
-                    break;
-                  }
-                  messages.push({
-                    //tool_use_id: id,
-                    role: 'user',
-                    toolCallId: callResult.id,
-                    name: callResult.name,
-                    content: JSON.stringify([
-                      { type: 'tool_result', tool_use_id: callResult.id, content: callResult.toolResult.result },
-                    ]),
-                  });
-
-                  toolHasResult = true;
+          const toolCalls = response.choices[0].message.tool_calls;
+          if (toolCalls) {
+            for (const call of toolCalls) {
+              if (call && call.function) {
+                let callResult: CallResult;
+                try {
+                  callResult = callFunction(path, call);
+                } catch (e) {
+                  aiWriteLog(path);
+                  writeError(`Error calling function ${call.function.name}: ${e}`);
                 }
+                if (!callResult) {
+                  break;
+                }
+                messages.push({
+                  //tool_use_id: id,
+                  role: 'user',
+                  toolCallId: callResult.id,
+                  name: callResult.name,
+                  content: JSON.stringify([
+                    { type: 'tool_result', tool_use_id: callResult.id, content: callResult.toolResult.result },
+                  ]),
+                });
+
+                toolHasResult = true;
               }
             }
+          }
 
-            if (!toolHasResult) {
-              if (content && content.includes('@prompt')) {
-                const list = extractPrompts(content);
-                if (hasQuestions(list)) {
-                  // Stop here as the LLM has questions
-                  const newPrompt = await askQuestions(prompt, list);
-                  if (newPrompt) {
-                    repeating = true;
-                    prompts = [newPrompt];
-                  }
-                } else {
-                  // Have the LLM answer its requests
-                  prompts.push(...list);
+          if (!toolHasResult) {
+            if (content && content.includes('@prompt')) {
+              const list = extractPrompts(content);
+              if (hasQuestions(list)) {
+                // Stop here as the LLM has questions
+                const newPrompt = await askQuestions(prompt, list);
+                if (newPrompt) {
+                  repeating = true;
+                  prompts = [newPrompt];
                 }
               } else {
-                performChanges(content, request);
+                // Have the LLM answer its requests
+                prompts.push(...list);
+              }
+            } else {
+              progress.report({ message: 'Changing Files....' });
+              changedFiles = performChanges(content, request, result);
+              if (changedFiles || result.buildFailed) {
+                progress.report({ message: 'Building Project....' });
+                const abort = await buildProject(project, request, result, prompts);
+                if (abort) {
+                  progress.report({ message: 'Reverting....' });
+                  revert(result);
+                } else if (result.buildFailed) {
+                  progress.report({ message: 'Fixing Errors....' });
+                  // Try again. New prompt was added
+                  repeating = true;
+                }
               }
             }
           }
         }
-        aiWriteLog(path);
       }
-    },
-  );
+      aiWriteLog(path);
+    }
+  });
+
+  const more = 'Info';
+  const revertChanges = 'Revert';
+  const accept = changedFiles ? 'Accept' : 'Ok';
+  const message = result.comments.length > 0 ? result.comments.join(' ') : `Completed: ${request.prompt}`;
+  const res = await window.showInformationMessage(message, accept, revertChanges, more);
+  if (res == revertChanges) {
+    revert(result);
+  }
+  if (res === more) {
+    showOutput();
+  }
 }
 
 let callHistory: Call[] = [];
@@ -220,30 +246,64 @@ async function askQuestions(firstPrompt: string, prompts: string[]): Promise<str
   return newPrompt;
 }
 
-function performChanges(input: string, request: ChatRequest): void {
+function performChanges(input: string, request: ChatRequest, result: ChatResult): boolean {
   const lines = input.split('\n');
   let currentFilename = undefined;
   let contents = '';
+  let changed = false;
   for (const line of lines) {
-    if (line.startsWith('```')) {
-      if (line.trim() == '```') {
-        if (!contents.includes('[DO-NOT-CHANGE] CHANGES')) {
-          writeWN(`Updated ${currentFilename}`);
-          writeFileSync(currentFilename, contents, 'utf-8');
-        }
-        contents = '';
-      } else {
-        currentFilename = getFilenameFrom(line, request);
+    if (line.startsWith('@ChangeFile')) {
+      currentFilename = getFilenameFrom(line, request);
+      if (contents !== '') {
+        result.comments.push(contents);
       }
+      write(`${contents}`);
+      contents = '';
+    } else if (line.startsWith('@WriteFile')) {
+      writeWN(`Updated ${currentFilename}`);
+      if (existsSync(currentFilename)) {
+        const previousContents = readFileSync(currentFilename, 'utf-8');
+        result.filesChanged[currentFilename] = previousContents;
+      } else {
+        result.filesCreated[currentFilename] = contents;
+      }
+      writeFileSync(currentFilename, contents, 'utf-8');
+      changed = true;
+      contents = '';
     } else {
-      contents += line + '\n';
+      if (!line.startsWith('```')) {
+        contents += line + '\n';
+      }
     }
   }
+  return changed;
+}
+
+function revert(result: ChatResult): void {
+  for (const filename in result.filesChanged) {
+    const contents = result.filesChanged[filename];
+    writeFileSync(filename, contents, 'utf-8');
+  }
+  for (const filename in result.filesCreated) {
+    const contents = result.filesCreated[filename];
+    if (existsSync(filename)) {
+      unlinkSync(filename);
+    }
+  }
+  writeWN(`Reverted changes.`);
 }
 
 function getFilenameFrom(line: string, request: ChatRequest): string {
-  const name = line.substring(line.indexOf(' ') + 1);
-  return request.fileMap[name] || name;
+  const name = line.replace('@ChangeFile', '').trim();
+  let fullFilename = request.fileMap[name];
+  if (!fullFilename) {
+    fullFilename = request.fileMap['[root]/' + name];
+  }
+  if (fullFilename) {
+    return fullFilename;
+  } else {
+    return name;
+  }
 }
 
 function hasQuestions(list: string[]): boolean {
@@ -267,4 +327,28 @@ function extractPrompts(input: string): string[] {
   }
 
   return prompts;
+}
+
+// Returns true if we are aborting
+async function buildProject(
+  project: Project,
+  request: ChatRequest,
+  result: ChatResult,
+  prompts: string[],
+): Promise<boolean> {
+  const cmd = await build(project, {});
+  try {
+    let data = await getRunOutput(cmd, project.projectFolder(), undefined, true, false, true);
+    result.buildFailed = false;
+    return false;
+  } catch (error) {
+    if (!result.buildFailed) {
+      result.buildFailed = true;
+      prompts.push(`The build is failing with these errors that need to be fixed:\n${error}\n${inputFiles(request)}`);
+      return false;
+    } else {
+      // We tried fixing once. Time to abort and revert
+      return true;
+    }
+  }
 }

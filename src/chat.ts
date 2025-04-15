@@ -57,7 +57,7 @@ export async function chat(queueFunction: QueueFunction, project: Project) {
         activeFile,
         files,
       };
-      await ai(request, project.projectFolder());
+      await ai(request, project);
     }
     prompt = undefined;
   }

@@ -22,10 +22,10 @@ export function inputFiles(request: ChatRequest): string {
   let result = '';
   request.fileMap = {};
   for (let file of relatedFiles) {
-    result += '\n```' + nameFor(extname(file)) + ' ' + basename(file);
+    result += '\n```' + nameFor(extname(file)) + ' [root]/' + basename(file);
     result += `\n${readFileSync(file, 'utf8')}`;
     result += '\n```';
-    request.fileMap[basename(file)] = file;
+    request.fileMap[`[root]/${basename(file)}`] = file;
   }
   return result;
 }
