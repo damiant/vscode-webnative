@@ -17,6 +17,7 @@ export interface ChatRequest {
   prompt: string;
   activeFile: string | undefined;
   files: string[];
+  folder: string;
   fileMap?: { [key: string]: string };
 }
 

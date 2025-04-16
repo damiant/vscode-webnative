@@ -65,6 +65,7 @@ export async function chat(queueFunction: QueueFunction, project: Project) {
       const request: ChatRequest = {
         prompt,
         activeFile,
+        folder: project.projectFolder(),
         files,
       };
       await ai(request, project);
@@ -109,7 +110,7 @@ export async function chatModel(queueFunction: QueueFunction, project: Project) 
     return { label: labelFor(model), description: `(${price})`, picked: model.id == currentModel };
   });
   const result = await window.showQuickPick(items, {
-    placeHolder: 'Select an AI Model',
+    placeHolder: 'Select an AI Model' + (currentModel ? ` (current model is ${currentModel})` : ''),
     canPickMany: false,
   });
   if (!result) return;
