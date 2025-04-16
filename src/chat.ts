@@ -3,7 +3,7 @@ import { Project } from './project';
 import { QueueFunction } from './tip';
 import { ai } from './ai-chat';
 import { getSetting, setSetting, WorkspaceSetting } from './workspace-state';
-import { basename } from 'path';
+import { basename, join } from 'path';
 import { existsSync } from 'fs';
 import { describeProject } from './ai-project-info';
 import { getAllFilenames } from './ai-tool-read-folder';
@@ -48,8 +48,18 @@ export async function chat(queueFunction: QueueFunction, project: Project) {
       }
       files = files.filter((file) => file !== activeFile);
       if (files.length === 0) {
-        const otherFiles = getAllFilenames(project.projectFolder(), ['node_modules', 'dist', 'www']);
-        files.push(...otherFiles);
+        const srcFolder = join(project.projectFolder(), 'src');
+        const srcFiles = getAllFilenames(srcFolder, ['node_modules', 'dist', 'www']);
+        if (existsSync(join(project.projectFolder(), 'index.html'))) {
+          files.push(join(project.projectFolder(), 'index.html'));
+        }
+
+        if (srcFiles.length == 0) {
+          const otherFiles = getAllFilenames(project.projectFolder(), ['node_modules', 'dist', 'www']);
+          files.push(...otherFiles);
+        } else {
+          files.push(...srcFiles);
+        }
       }
 
       const request: ChatRequest = {

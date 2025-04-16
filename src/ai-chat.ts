@@ -21,7 +21,7 @@ export async function ai(request: ChatRequest, project: Project) {
     useTools: false, // Tools works for some models. Note: tools repeat requests with OpenRouter
     stream: false, // OpenAI SDK jacks up calls for streaming through OpenRouter
   };
-  let model = getSetting(WorkspaceSetting.aiModel);
+  const model = getSetting(WorkspaceSetting.aiModel);
   if (model === '' || !model) {
     writeError(`No AI model selected. Select one in settings.`);
     return;
@@ -31,13 +31,13 @@ export async function ai(request: ChatRequest, project: Project) {
   const result: ChatResult = { filesChanged: {}, filesCreated: {}, comments: [], buildFailed: false };
   const path = project.projectFolder();
   let prompt = request.prompt;
-  if (request.activeFile) {
-    if (!options.useTools) {
-      prompt = `${prompt}\n${inputFiles(request)}`;
-    } else {
-      prompt = `Modify this file ${request.activeFile}: ${prompt}`;
-    }
+
+  if (!options.useTools) {
+    prompt = `${prompt}\n${inputFiles(request)}`;
+  } else {
+    prompt = `Modify this file ${request.activeFile}: ${prompt}`;
   }
+
   if (request.files.length > 0 && options.useTools) {
     //prompt += `\nThese files can be used to fulfill the request: ${request.files.join(', ')}`;
   }
@@ -247,39 +247,47 @@ async function askQuestions(firstPrompt: string, prompts: string[]): Promise<str
 }
 
 function performChanges(input: string, request: ChatRequest, result: ChatResult): boolean {
-  const lines = input.split('\n');
-  let currentFilename = undefined;
-  let contents = '';
-  let changed = false;
-  for (const line of lines) {
-    if (line.startsWith('@ChangeFile')) {
-      currentFilename = getFilenameFrom(line, request);
-      if (contents !== '') {
-        result.comments.push(contents);
-      }
-      write(`${contents}`);
-      contents = '';
-    } else if (line.startsWith('@WriteFile')) {
-      writeWN(`Updated ${currentFilename}`);
-      if (existsSync(currentFilename)) {
-        const previousContents = readFileSync(currentFilename, 'utf-8');
-        result.filesChanged[currentFilename] = previousContents;
+  try {
+    const lines = input.split('\n');
+    let currentFilename = undefined;
+    let contents = '';
+    let changed = false;
+    for (const line of lines) {
+      if (line.startsWith('@ChangeFile')) {
+        currentFilename = getFilenameFrom(line, request);
+        if (contents !== '') {
+          result.comments.push(contents);
+        }
+        write(`${contents}`);
+        contents = '';
+      } else if (line.startsWith('@WriteFile')) {
+        writeWN(`Updated ${currentFilename}`);
+        if (existsSync(currentFilename)) {
+          const previousContents = readFileSync(currentFilename, 'utf-8');
+          result.filesChanged[currentFilename] = previousContents;
+        } else {
+          result.filesCreated[currentFilename] = contents;
+        }
+        writeFileSync(currentFilename, contents, 'utf-8');
+        changed = true;
+        contents = '';
       } else {
-        result.filesCreated[currentFilename] = contents;
-      }
-      writeFileSync(currentFilename, contents, 'utf-8');
-      changed = true;
-      contents = '';
-    } else {
-      if (!line.startsWith('```')) {
-        contents += line + '\n';
+        if (!line.startsWith('```')) {
+          contents += line + '\n';
+        }
       }
     }
+    if (contents !== '') {
+      result.comments.push(contents);
+    }
+    return changed;
+  } catch (error) {
+    writeError(`Error: ${error}`);
+    result.comments.push(
+      'Unable to perform your request likely due to not having enough context of what files you want changed.',
+    );
+    return false;
   }
-  if (contents !== '') {
-    result.comments.push(contents);
-  }
-  return changed;
 }
 
 function revert(result: ChatResult): void {
@@ -347,7 +355,7 @@ async function buildProject(
 ): Promise<boolean> {
   const cmd = await build(project, {});
   try {
-    let data = await getRunOutput(cmd, project.projectFolder(), undefined, true, false, true);
+    const data = await getRunOutput(cmd, project.projectFolder(), undefined, true, false, true);
     result.buildFailed = false;
     return false;
   } catch (error) {

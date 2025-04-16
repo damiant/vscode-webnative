@@ -14,14 +14,19 @@ export function apiKey() {
 }
 
 export function inputFiles(request: ChatRequest): string {
-  const extension = extname(request.activeFile);
-  const filenameOnly = basename(request.activeFile).slice(0, -extension.length);
-  const folder = dirname(request.activeFile);
-  const filename = request.activeFile.substring(0, request.activeFile.length - extension.length);
-  const relatedFiles = filesBeginningWith(folder, filenameOnly);
+  let relatedFiles = [];
+  if (request.activeFile) {
+    const extension = extname(request.activeFile);
+    const filenameOnly = basename(request.activeFile).slice(0, -extension.length);
+    const folder = dirname(request.activeFile);
+    const filename = request.activeFile.substring(0, request.activeFile.length - extension.length);
+    relatedFiles = filesBeginningWith(folder, filenameOnly);
+  } else {
+    relatedFiles = request.files; // Use all the other files
+  }
   let result = '';
   request.fileMap = {};
-  for (let file of relatedFiles) {
+  for (const file of relatedFiles) {
     result += '\n```' + nameFor(extname(file)) + ' [root]/' + basename(file);
     result += `\n${readFileSync(file, 'utf8')}`;
     result += '\n```';
