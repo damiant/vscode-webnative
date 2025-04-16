@@ -21,6 +21,7 @@ export function inputFiles(request: ChatRequest): string {
     const folder = dirname(request.activeFile);
     const filename = request.activeFile.substring(0, request.activeFile.length - extension.length);
     relatedFiles = filesBeginningWith(folder, filenameOnly);
+    relatedFiles.push(...request.files);
   } else {
     relatedFiles = request.files; // Use all the other files
   }

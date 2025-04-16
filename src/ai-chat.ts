@@ -185,7 +185,11 @@ export async function ai(request: ChatRequest, project: Project) {
   const more = 'Info';
   const revertChanges = 'Revert';
   const accept = changedFiles ? 'Accept' : 'Ok';
-  const message = result.comments.length > 0 ? result.comments.join(' ') : `Completed: ${request.prompt}`;
+  let comments = result.comments.join(' ').trim();
+  if (result.buildFailed) {
+    comments += ` Unfortunately, the AI failed to create a project that built without errors.`;
+  }
+  const message = result.comments.length > 0 ? comments : `Completed: ${request.prompt}`;
   const res = await window.showInformationMessage(message, accept, revertChanges, more);
   if (res == revertChanges) {
     revert(result);
