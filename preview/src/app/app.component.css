@@ -104,6 +104,11 @@
   animation: rotation 1s linear infinite;
 }
 
+.wide {
+  width: 50%;
+  min-width: 250px;
+}
+
 @keyframes rotation {
   0% {
     transform: rotate(0deg);

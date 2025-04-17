@@ -6,3 +6,5 @@ npm-debug.log
 Thumbs.db
 .vs/
 *.vsix
+visual-events/*.js
+visual-events/*.map

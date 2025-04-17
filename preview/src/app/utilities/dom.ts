@@ -10,3 +10,7 @@ export function checked(id: string): boolean {
 export function setChecked(id: string, checked: boolean): void {
   document.getElementById(id)?.setAttribute('current-checked', checked ? 'true' : 'false');
 }
+
+export function e(name: string): any {
+  return document.getElementById(name);
+}

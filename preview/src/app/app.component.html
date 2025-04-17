@@ -33,6 +33,8 @@
   <vscode-button appearance="icon" aria-label="New Window" (click)="set('add')">
     <img class="icon" [src]="assetsUri + '/add.svg'" />
   </vscode-button>
+  <vscode-text-field id="currentUrl" [value]="url" (keydown.enter)="changeUrl()" class="wide" [placeholder]="url">
+  </vscode-text-field>
 </div>
 
 @if (showQr()) {

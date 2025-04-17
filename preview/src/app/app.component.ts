@@ -1,12 +1,9 @@
 import { Component, computed, CUSTOM_ELEMENTS_SCHEMA, HostListener, inject, OnInit, signal } from '@angular/core';
-
-import { MessageType, sendMessage } from './utilities/messages';
-import { Template } from './utilities/template';
-import { getValue } from './utilities/dom';
 import { FormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
 import { vscode } from './utilities/vscode';
 import { Location } from '@angular/common';
+import { e, getValue } from './utilities/dom';
 
 @Component({
   selector: 'app-root',
@@ -19,6 +16,7 @@ export class AppComponent implements OnInit {
   spinner = true;
   location = inject(Location);
   baseUrl = '';
+  url = ''; // Current URL of iFrame
   assetsUri = '';
   hasChat = signal(false);
   mobileClass = signal('');
@@ -49,8 +47,7 @@ export class AppComponent implements OnInit {
   }
 
   reload() {
-    const f: any = document.getElementById('frame');
-    f.src = f.src;
+    e('frame').src = e('frame').src;
   }
 
   @HostListener('window:resize', ['$event'])
@@ -84,6 +81,11 @@ export class AppComponent implements OnInit {
     }, 200);
   }
 
+  changeUrl() {
+    const url = getValue('currentUrl');
+    e('frame').src = url;
+  }
+
   async onMessage(event: any) {
     console.log('editor message', event.data);
     if (event.data.command == 'stopSpinner') {
@@ -91,12 +93,18 @@ export class AppComponent implements OnInit {
       return;
     }
 
+    if (event.data.type == 'pageLoaded') {
+      // ve script says page was loaded
+      this.url = event.data.payload.url;
+    }
+    if (event.data.type == 'pageChanged') {
+      // ve script says page was changed
+      this.url = event.data.payload.url;
+    }
+
     if (event.data.command == 'qr') {
       this.setQR(event.data.item.url);
       return;
-    }
-    function e(name: string): any {
-      return document.getElementById(name);
     }
 
     if (event.data.command !== 'device') return;
@@ -122,8 +130,7 @@ export class AppComponent implements OnInit {
     let devFrameAspectRatio = 'unset';
     let webWidth = '100%';
     let webHeight = '0';
-    let webSrc = 'about:blank';
-    let frameSrc = 'about:blank';
+    let url = 'about:blank';
     let webDisplay = 'none';
     if (device.type == 'ios') {
       newurl += '?ionic:mode=ios';
@@ -134,7 +141,7 @@ export class AppComponent implements OnInit {
       height = '100%';
       devFrameDisplay = 'none';
       webDisplay = 'block';
-      webSrc = newurl;
+      url = newurl;
       webHeight = '100%';
     } else {
       if (device.type == 'mobile') {
@@ -143,13 +150,14 @@ export class AppComponent implements OnInit {
         dHeight = '100%';
         devFrameAspectRatio = '2/3.6';
       }
-      frameSrc = newurl;
+      url = newurl;
 
       webWidth = '0';
       bodyMarginTop = '20px';
     }
-    e('frame').src = frameSrc;
-    e('web').src = webSrc;
+    e('frame').src = url; // Mobile
+    e('web').src = url; // Web
+    this.url = url; // Url bar
     e('web').width = webWidth;
     e('web').height = webHeight;
     e('web').style.display = webDisplay;
