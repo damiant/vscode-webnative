@@ -1,9 +1,19 @@
 import { readdirSync, readFileSync } from 'fs';
-import { ChatRequest, Options } from './ai-tool';
+import { ChatRequest, Options, ProjectContext } from './ai-tool';
 import { writeError } from './logging';
 import { ExtensionSetting, getExtSetting } from './workspace-state';
 import { basename, dirname, extname, join } from 'path';
 import { readFolder } from './ai-tool-read-folder';
+
+export function contextInfo(context: ProjectContext): string {
+  if (context.url) {
+    const u = new URL(context.url);
+    if (u.pathname.length > 1) {
+      return `The page ${u.pathname}`;
+    }
+  }
+  return '';
+}
 
 export function apiKey() {
   const key = getExtSetting(ExtensionSetting.aiKey);

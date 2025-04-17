@@ -7,27 +7,34 @@ import { writeFile, writeFileFunction, writeFileToolName } from './ai-tool-write
 import { readFolder, readFolderFunction, readFolderToolName } from './ai-tool-read-folder';
 import { searchForFile, searchForFileFunction, searchForFileToolName } from './ai-tool-search-for-file';
 import { Call, CallResult, ChatRequest, ChatResult, Options, ToolResult } from './ai-tool';
-import { existsSync, readFileSync, unlinkSync, writeFileSync } from 'fs';
+import { existsSync, unlinkSync, writeFileSync } from 'fs';
 import { describeProject } from './ai-project-info';
 import { Progress, window } from 'vscode';
 import { aiLog, aiWriteLog } from './ai-log';
 import { AIBody, completions, Message, AIResponse } from './ai-openrouter';
-import { inputFiles } from './ai-utils';
+import { contextInfo, inputFiles } from './ai-utils';
 import { build } from './build';
 import { Project } from './project';
 import { performChanges } from './ai-changes';
 
-export async function ai(request: ChatRequest, project: Project, options: Options) {
+export async function ai(request: ChatRequest, project: Project, options: Options): Promise<string | undefined> {
   const model = getSetting(WorkspaceSetting.aiModel);
   if (model === '' || !model) {
     writeError(`No AI model selected. Select one in settings.`);
-    return;
+    return `No AI model selected. Select one in settings.`;
   }
 
   let response: AIResponse;
   const result: ChatResult = { filesChanged: {}, filesCreated: {}, comments: [], buildFailed: false };
   const path = project.projectFolder();
   let prompt = request.prompt;
+
+  if (request.context.url) {
+    const info = contextInfo(request.context);
+    if (info) {
+      prompt = `${prompt}\nAdditional Context: ${info}.`;
+    }
+  }
 
   if (!options.useTools) {
     prompt = `${prompt}\n${inputFiles(request, options)}`;
@@ -198,6 +205,7 @@ export async function ai(request: ChatRequest, project: Project, options: Option
   if (res === more) {
     showOutput();
   }
+  return undefined;
 }
 
 let callHistory: Call[] = [];

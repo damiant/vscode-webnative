@@ -6,9 +6,10 @@ import { basename, join } from 'path';
 import { existsSync } from 'fs';
 import { describeProject } from './ai-project-info';
 import { getAllFilenames } from './ai-tool-read-folder';
-import { ChatRequest, Options } from './ai-tool';
+import { ChatRequest, Options, ProjectContext } from './ai-tool';
+import { contextInfo } from './ai-utils';
 
-export async function chat(queueFunction: QueueFunction, project: Project) {
+export async function chat(queueFunction: QueueFunction, project: Project, context: ProjectContext) {
   const chatting = true;
   let prompt: string | undefined;
   let activeFile = window.activeTextEditor?.document.uri.fsPath;
@@ -17,8 +18,12 @@ export async function chat(queueFunction: QueueFunction, project: Project) {
     if (!existsSync(activeFile)) {
       activeFile = undefined;
     }
+    let info = contextInfo(context);
+    if (info !== '') {
+      info = ` (${info})`;
+    }
     const activeFileName = activeFile ? basename(activeFile) : 'your project';
-    const title = `How would you like to modify ${activeFileName}?`;
+    const title = `How would you like to modify ${activeFileName}${info})?`;
     if (!prompt) {
       prompt = await window.showInputBox({
         title,
@@ -68,6 +73,7 @@ export async function chat(queueFunction: QueueFunction, project: Project) {
         activeFile,
         folder: project.projectFolder(),
         files,
+        context,
       };
 
       const options: Options = {
@@ -77,7 +83,10 @@ export async function chat(queueFunction: QueueFunction, project: Project) {
         sonnetFix: false, // Claude Sonnet hack for OpenRouter to get tool results in expected format
       };
 
-      await ai(request, project, options);
+      const error = await ai(request, project, options);
+      if (error) {
+        window.showErrorMessage(error, 'OK');
+      }
     }
     prompt = undefined;
   }

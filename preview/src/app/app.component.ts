@@ -43,7 +43,7 @@ export class AppComponent implements OnInit {
   }
 
   chat() {
-    vscode.postMessage({ command: 'chat' });
+    vscode.postMessage({ command: 'chat', url: this.url });
   }
 
   reload() {

@@ -118,7 +118,8 @@ export function viewInEditor(
       return;
     }
     if (message.command == 'chat') {
-      await chat(() => {}, exState.projectRef);
+      const url = message.url; // The URL of the page
+      await chat(() => {}, exState.projectRef, { url });
       return;
     }
     if (message.command == 'qr') {
