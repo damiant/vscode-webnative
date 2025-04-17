@@ -5,11 +5,12 @@ import { ToolResult } from './ai-tool';
 
 export const readFolderToolName = 'read_folder';
 
-export function readFolder(path: string, args: any): ToolResult {
-  const files = getAllFilenames(path, ['node_modules', 'dist', 'www']);
+export function readFolder(path: string): ToolResult {
+  let files = getAllFilenames(path, ['node_modules', 'dist', 'www']);
   write(`> Read folder ${path}`);
+  files = files.map((file) => file.replace(path, '- [root]'));
   return {
-    result: JSON.stringify(files),
+    result: files.join('\n'), // JSON.stringify(files),
     context: `Contents of folder ${path}`,
   };
 }

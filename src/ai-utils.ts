@@ -1,8 +1,9 @@
 import { readdirSync, readFileSync } from 'fs';
-import { ChatRequest } from './ai-tool';
+import { ChatRequest, Options } from './ai-tool';
 import { writeError } from './logging';
 import { ExtensionSetting, getExtSetting } from './workspace-state';
 import { basename, dirname, extname, join } from 'path';
+import { readFolder } from './ai-tool-read-folder';
 
 export function apiKey() {
   const key = getExtSetting(ExtensionSetting.aiKey);
@@ -13,8 +14,12 @@ export function apiKey() {
   return key;
 }
 
-export function inputFiles(request: ChatRequest): string {
+export function inputFiles(request: ChatRequest, options: Options): string {
   let relatedFiles = [];
+  if (!options.provideFiles) {
+    return 'These project files are available to read:\n' + readFolder(request.folder).result;
+    return '';
+  }
   if (request.activeFile) {
     const extension = extname(request.activeFile);
     const filenameOnly = basename(request.activeFile).slice(0, -extension.length);

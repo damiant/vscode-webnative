@@ -7,7 +7,7 @@ export const searchForFileToolName = 'search_for_file';
 
 export function searchForFile(path: string, args: any): ToolResult {
   const files: any[] = readdirSync(path, { recursive: true }).filter((file: string) => {
-    return file.startsWith('node_modules');
+    return !file.startsWith('node_modules');
   });
   const file: string | undefined = files.find((file) => file.includes(args.filename));
   if (!file) {

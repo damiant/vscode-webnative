@@ -34,7 +34,8 @@ import { viewInEditor } from './preview';
 import { autoRunClipboard } from './features/auto-run-clipboard';
 import { findAndRun, fix, fixIssue, runAction, runAgain } from './features/fix-issue';
 import { trackProjectChange } from './features/track-project-changes';
-import { chat, chatModel } from './chat';
+import { chat } from './chat';
+import { chatModel } from './ai-model';
 
 export const extensionName = 'WebNative';
 

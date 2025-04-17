@@ -1,6 +1,6 @@
 import { getSetting, WorkspaceSetting } from './workspace-state';
 import { showOutput, write, writeError, writeWN } from './logging';
-import { delay, getRunOutput, showProgress } from './utilities';
+import { getRunOutput, showProgress } from './utilities';
 import { systemPrompt } from './ai-prompts';
 import { readFileToolName, readFileFunction, readFile } from './ai-tool-read-file';
 import { writeFile, writeFileFunction, writeFileToolName } from './ai-tool-write-file';
@@ -17,11 +17,7 @@ import { build } from './build';
 import { Project } from './project';
 import { performChanges } from './ai-changes';
 
-export async function ai(request: ChatRequest, project: Project) {
-  const options: Options = {
-    useTools: false, // Tools works for some models. Note: tools repeat requests with OpenRouter
-    stream: false, // OpenAI SDK jacks up calls for streaming through OpenRouter
-  };
+export async function ai(request: ChatRequest, project: Project, options: Options) {
   const model = getSetting(WorkspaceSetting.aiModel);
   if (model === '' || !model) {
     writeError(`No AI model selected. Select one in settings.`);
@@ -34,9 +30,15 @@ export async function ai(request: ChatRequest, project: Project) {
   let prompt = request.prompt;
 
   if (!options.useTools) {
-    prompt = `${prompt}\n${inputFiles(request)}`;
+    prompt = `${prompt}\n${inputFiles(request, options)}`;
   } else {
-    prompt = `Modify this file ${request.activeFile}: ${prompt}`;
+    prompt = `${prompt}\n${inputFiles(request, options)}`;
+    //prompt = `Modify this file ${request.activeFile}: ${prompt}`;
+  }
+
+  let sysPrompt = systemPrompt.replace('@project', describeProject());
+  if (options.useTools) {
+    sysPrompt += `\nYou can use external tools to access and find other files in the project.`;
   }
 
   if (request.files.length > 0 && options.useTools) {
@@ -63,7 +65,7 @@ export async function ai(request: ChatRequest, project: Project) {
       const messages: Message[] = [
         {
           role: 'system',
-          content: systemPrompt.replace('@project', describeProject()),
+          content: sysPrompt,
         },
         {
           role: 'user',
@@ -132,12 +134,11 @@ export async function ai(request: ChatRequest, project: Project) {
                 }
                 messages.push({
                   //tool_use_id: id,
-                  role: 'user',
+                  role: 'tool', // 'user',
                   toolCallId: callResult.id,
+                  //tool_call_id: callResult.id,
                   name: callResult.name,
-                  content: JSON.stringify([
-                    { type: 'tool_result', tool_use_id: callResult.id, content: callResult.toolResult.result },
-                  ]),
+                  content: contentForToolResult(callResult, options),
                 });
 
                 toolHasResult = true;
@@ -164,7 +165,7 @@ export async function ai(request: ChatRequest, project: Project) {
               changedFiles = performChanges(content, request, result);
               if (changedFiles || result.buildFailed) {
                 progress.report({ message: 'Building Project....' });
-                const abort = await buildProject(project, request, result, prompts);
+                const abort = await buildProject(project, request, result, options, prompts);
                 if (abort) {
                   progress.report({ message: 'Reverting....' });
                   revert(result);
@@ -225,7 +226,7 @@ function callFunction(
       toolResult = writeFile(path, args);
       break;
     case readFolderToolName:
-      toolResult = readFolder(path, args);
+      toolResult = readFolder(path);
       break;
     case searchForFileToolName:
       toolResult = searchForFile(path, args);
@@ -293,6 +294,7 @@ async function buildProject(
   project: Project,
   request: ChatRequest,
   result: ChatResult,
+  options: Options,
   prompts: string[],
 ): Promise<boolean> {
   const cmd = await build(project, {});
@@ -303,11 +305,19 @@ async function buildProject(
   } catch (error) {
     if (!result.buildFailed) {
       result.buildFailed = true;
-      prompts.push(`The build is failing with these errors that need to be fixed:\n${error}\n${inputFiles(request)}`);
+      prompts.push(
+        `The build is failing with these errors that need to be fixed:\n${error}\n${inputFiles(request, options)}`,
+      );
       return false;
     } else {
       // We tried fixing once. Time to abort and revert
       return true;
     }
   }
+}
+function contentForToolResult(callResult: CallResult, options: Options): string {
+  if (options.sonnetFix) {
+    return JSON.stringify([{ type: 'tool_result', tool_use_id: callResult.id, content: callResult.toolResult.result }]);
+  }
+  return callResult.toolResult.result;
 }

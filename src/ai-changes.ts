@@ -47,12 +47,19 @@ export function performChanges(input: string, request: ChatRequest, result: Chat
   }
 }
 
+function mapped(request: ChatRequest, name: string): string | undefined {
+  try {
+    return request.fileMap[name];
+  } catch {
+    return undefined;
+  }
+}
 function getFilenameFrom(line: string, request: ChatRequest): string {
   const name = line.replace('@ChangeFile', '').trim();
   try {
-    let fullFilename = request.fileMap[name];
+    let fullFilename = mapped(request, name);
     if (!fullFilename) {
-      fullFilename = request.fileMap['[root]/' + name];
+      fullFilename = mapped(request, '[root]/' + name);
     }
     if (!fullFilename) {
       fullFilename = name.replace('[root]', request.folder);
@@ -62,6 +69,7 @@ function getFilenameFrom(line: string, request: ChatRequest): string {
     } else {
       return name;
     }
+    6;
   } catch (error) {
     writeError(`Error getting filename from ${line}`);
     showOutput();

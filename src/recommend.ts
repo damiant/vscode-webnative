@@ -51,7 +51,7 @@ import {
 } from './integrations-builder';
 import { webProjectPackages } from './web-configuration';
 import { checkRecommendedExtensions } from './vscode-recommendation';
-import { chat, chatModel } from './chat';
+import { chat } from './chat';
 
 function hasWebPackages() {
   for (const pkg of webProjectPackages) {

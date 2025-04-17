@@ -9,6 +9,7 @@ Guidelines:
 - Only change what is necessary to achieve the goal.
 - If a change to a file is needed you MUST respond with a line @ChangeFile [root]/<filename> and MUST be followed by the FULL contents of the file with your changes and then with @WriteFile making sure <filename> is accurate.
 - Do not abbreviate any code.
+- Do not change files that have not been read from the project.
 - If the user asks a question do not respond with a change to a file.
 - If you need an image placeholder you can use https://api.webnative.dev/images?query=[name] where [name] is the subject of the image you need.
 `;

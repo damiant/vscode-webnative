@@ -31,4 +31,6 @@ export interface ChatResult {
 export interface Options {
   useTools: boolean;
   stream: boolean;
+  provideFiles: boolean;
+  sonnetFix: boolean;
 }

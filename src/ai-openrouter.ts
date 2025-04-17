@@ -39,6 +39,7 @@ export interface Message {
   tool_calls?: ToolCall[];
   role: string;
   toolCallId?: string; // OpenRouter
+  //tool_call_id?: string; // Open AI's property
   name?: string;
   content: string | ToolResult[];
 }
@@ -103,8 +104,6 @@ interface Choice {
     content?: string;
   };
 }
-
-let client = undefined;
 
 export async function completions(body: AIBody): Promise<AIResponse> {
   const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
