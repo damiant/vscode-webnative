@@ -29,7 +29,7 @@ export async function ai(request: ChatRequest, project: Project, options: Option
   const path = project.projectFolder();
   let prompt = request.prompt;
 
-  if (request.context.url) {
+  if (request.context?.url) {
     const info = contextInfo(request.context);
     if (info) {
       prompt = `${prompt}\nAdditional Context: ${info}.`;

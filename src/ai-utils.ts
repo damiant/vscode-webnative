@@ -6,7 +6,7 @@ import { basename, dirname, extname, join } from 'path';
 import { readFolder } from './ai-tool-read-folder';
 
 export function contextInfo(context: ProjectContext): string {
-  if (context.url) {
+  if (context?.url) {
     const u = new URL(context.url);
     if (u.pathname.length > 1) {
       return `The page ${u.pathname}`;

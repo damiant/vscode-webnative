@@ -878,5 +878,7 @@ export function tStart(name: string) {
 export function tEnd(name: string) {
   const endTime = process.hrtime(times[name]);
   const executionTime = (endTime[0] * 1e9 + endTime[1]) / 1e6; // Convert to milliseconds
-  console.log(`${name} took ${Math.trunc(executionTime)} milliseconds to run.`);
+  if (executionTime > 100) {
+    console.log(`${name} took ${Math.trunc(executionTime)} milliseconds to run.`);
+  }
 }
