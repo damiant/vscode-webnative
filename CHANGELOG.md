@@ -1,5 +1,10 @@
 ## Changelog
 
+### Version 2.0.35
+
+- Fix for running commands in monorepos
+- Fix to show output for scripts that are run
+
 ### Version 2.0.33
 
 - Support projects using bun.lock rather than bun.lockb

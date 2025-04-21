@@ -3,6 +3,7 @@ import { runInTerminal } from '../terminal';
 import { exState } from '../wn-tree-provider';
 import { extractBetween } from '../utilities';
 import { chat } from '../integrations-builder';
+import { MonoRepoType } from '../monorepo';
 
 export function autoRunClipboard() {
   window.onDidChangeWindowState(async (e) => {
@@ -14,7 +15,7 @@ export function autoRunClipboard() {
 
       // Builder command will be like:
       // npx @builder.io/dev-tools@latest code --url "xxx" --spaceId
-      if (autoRun && looksLikeCommand) {
+      if (autoRun && looksLikeCommand && exState?.projectRef?.repoType == MonoRepoType.none) {
         exState.lastAutoRun = txt;
 
         if (txt.includes('--url') && txt.includes('npx @builder.io/dev-tools')) {
