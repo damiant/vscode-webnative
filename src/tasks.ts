@@ -2,8 +2,8 @@ import { ProgressLocation, window, CancellationToken } from 'vscode';
 import { InternalCommand } from './command-name';
 import { Context } from './context-variables';
 import { exState } from './wn-tree-provider';
-import { clearOutput, write, writeWN } from './logging';
-import { RunStatus, Tip } from './tip';
+import { clearOutput, showOutput, write, writeWN } from './logging';
+import { RunStatus, Tip, TipType } from './tip';
 import { channelShow, replaceAll, stopPublishing } from './utilities';
 
 interface RunningAction {
@@ -106,6 +106,9 @@ export function markActionAsRunning(tip: Tip) {
 export function markOperationAsRunning(tip: Tip) {
   runningOperations.push({ tip, workspace: exState.workspace });
   lastOperation = tip;
+  if (tip.type == TipType.Run && tip.tooltip?.startsWith(`Runs '`)) {
+    showOutput();
+  }
 }
 
 function delay(ms: number) {
