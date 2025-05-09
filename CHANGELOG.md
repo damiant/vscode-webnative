@@ -1,5 +1,9 @@
 ## Changelog
 
+### Version 2.0.36
+
+- Fix for QR code showing for web based projects
+
 ### Version 2.0.35
 
 - Fix for running commands in monorepos

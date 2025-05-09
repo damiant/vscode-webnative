@@ -56,10 +56,12 @@ const devices: Array<device> = [
 ];
 
 let lastUrl = '';
+let lastExternalUrl = undefined;
 const id = `w${Math.random()}`;
 
 export function viewInEditor(
   url: string,
+  externalUrl: string,
   active?: boolean,
   existingPanel?: boolean,
   stopSpinner?: boolean,
@@ -76,6 +78,9 @@ export function viewInEditor(
   const onDiskPath = Uri.file(join(exState.context.extensionPath, 'resources', 'qrious.min.js'));
   const qrSrc = panel.webview.asWebviewUri(onDiskPath);
   lastUrl = url;
+  if (externalUrl) {
+    lastExternalUrl = externalUrl;
+  }
   const extensionUri = exState.context.extensionUri;
   panel.webview.html = url ? getWebviewContent(panel.webview, extensionUri, qrSrc.toString()) : '';
   panel.iconPath = iconFor('globe');
@@ -122,13 +127,13 @@ export function viewInEditor(
       return;
     }
     if (message.command == 'qr') {
-      const item = nexusURL(lastUrl);
+      const item = nexusURL(lastUrl, lastExternalUrl);
       panel.webview.postMessage({ command: MessageType.qr, item });
       return;
     }
     if (message.command == 'add') {
       console.log('add');
-      viewInEditor(lastUrl, true, false, true);
+      viewInEditor(lastUrl, lastExternalUrl, true, false, true);
       return;
     }
 
@@ -203,7 +208,7 @@ async function selectMockDevice(): Promise<device> {
   const selected = await window.showQuickPick(picks, { placeHolder: 'Select Emulated Device' });
   if (!selected) return;
   if (selected == newWindow) {
-    viewInEditor(lastUrl, true, false, true);
+    viewInEditor(lastUrl, undefined, true, false, true);
     return;
   }
   if (selected == newBrowser) {
