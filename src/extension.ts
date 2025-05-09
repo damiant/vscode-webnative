@@ -95,7 +95,7 @@ export async function activate(context: ExtensionContext) {
   context.subscriptions.push(statusBarOpenEditor);
   exState.openEditorStatusBar = statusBarOpenEditor;
   commands.registerCommand(CommandName.OpenEditor, async () => {
-    viewInEditor(exState.localUrl ?? 'https://webnative.dev', true, false, true, true);
+    viewInEditor(exState.localUrl ?? 'https://webnative.dev', exState.externalUrl, true, false, true, true);
   });
 
   // Dev Server Running Panel

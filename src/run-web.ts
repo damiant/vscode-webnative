@@ -73,7 +73,7 @@ async function runServe(
 
   if (webConfig.includes(WebConfigSetting.editor) && !isNative) {
     const value: string = workspace.getConfiguration(WorkspaceSection).get('openPreviewLocation');
-    exState.webView = viewInEditor('about:blank', value === 'tab');
+    exState.webView = viewInEditor('about:blank', undefined, value === 'tab');
   }
   let serveFlags = '';
   exState.dontOpenBrowser = dontOpenBrowser;

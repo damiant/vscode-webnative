@@ -22,7 +22,10 @@ export interface NamedURL {
   title: string;
   url: string;
 }
-export function nexusURL(url: string): NamedURL {
+export function nexusURL(url: string, externalUrl: string | undefined): NamedURL {
+  if (externalUrl) {
+    url = externalUrl;
+  }
   const shortUrl = url ? url?.replace('https://', '').replace('http://', '') : undefined;
   return {
     title: shortUrl,
@@ -46,7 +49,7 @@ export function qrWebView(webview: Webview, externalUrl: string, localUrl: strin
       ? getWebviewQR(`<a href="${localUrl}">${localUrl}</a>`, localUrl, '', id)
       : getWebviewInitial();
   } else {
-    const item = nexusURL(externalUrl);
+    const item = nexusURL(externalUrl, undefined);
     title = item.title;
     webview.html = getWebviewQR(item.title, item.url, `${qrSrc}`, id);
   }
@@ -57,7 +60,7 @@ export function qrWebView(webview: Webview, externalUrl: string, localUrl: strin
         troubleshootPlugins();
         break;
       case 'editor':
-        viewInEditor(localUrl, true, false, true, true);
+        viewInEditor(localUrl, externalUrl, true, false, true, true);
         break;
       case 'debug':
         debugBrowser(externalUrl, false);
