@@ -84,8 +84,13 @@ function runOptions(command: string, folder: string, shell?: string): ExecOption
       env.JAVA_HOME = jHome;
     }
   }
-
-  return { cwd: folder, shell: shell ? shell : exState.shell, encoding: 'utf8', env: env, maxBuffer: 10485760 };
+  if (!shell && exState.shell) {
+    shell = exState.shell;
+  }
+  if (!shell && process.env.SHELL) {
+    shell = process.env.SHELL;
+  }
+  return { cwd: folder, shell, encoding: 'utf8', env: env, maxBuffer: 10485760 };
 }
 
 export interface RunResults {
