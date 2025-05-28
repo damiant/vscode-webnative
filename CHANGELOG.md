@@ -1,5 +1,9 @@
 ## Changelog
 
+### Version 2.0.37
+
+- Fix to use the default shell for node if available
+
 ### Version 2.0.36
 
 - Fix for QR code showing for web based projects
