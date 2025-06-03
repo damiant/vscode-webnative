@@ -96,8 +96,8 @@ export async function checkCapacitorRules(project: Project, context: ExtensionCo
   project.recommendReplace(
     'cordova-plugin-advanced-http',
     'cordova-plugin-advanced-http',
-    `Replace with @capacitor/http due to official support`,
-    `The plugin cordova-plugin-advanced-http should be replaced with @capacitor/http. Capacitor now provides the equivalent native http functionality built in.`,
+    `Replace with @capacitor/core due to official support`,
+    `The plugin cordova-plugin-advanced-http should be replaced with @capacitor/core. Capacitor now provides the equivalent native http functionality built in.`,
     '@capacitor/core',
   );
 
