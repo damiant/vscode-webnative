@@ -42,6 +42,7 @@ export async function serve(
       return runServe(project, dontOpenBrowser, isDebugging, isNative);
     case MonoRepoType.nx:
       return nxServe(project);
+    case MonoRepoType.bun:
     case MonoRepoType.npm:
     case MonoRepoType.yarn:
     case MonoRepoType.lerna:

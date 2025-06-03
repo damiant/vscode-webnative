@@ -91,6 +91,7 @@ export class Project {
     switch (this.repoType) {
       case MonoRepoType.none:
         return this.folder;
+      case MonoRepoType.bun:
       case MonoRepoType.npm:
       case MonoRepoType.yarn:
       case MonoRepoType.lerna:
@@ -756,6 +757,14 @@ function getPackageManager(folder: string, monoRepoType: MonoRepoType): PackageM
     if (!existsSync(packageLock)) {
       // Its a yarn monorepo so use yarn as package manager
       return PackageManager.yarn;
+    }
+  }
+  if (monoRepoType == MonoRepoType.bun) {
+    const packageLock = join(folder, 'package-lock.json');
+
+    if (!existsSync(packageLock)) {
+      // Its a bun monorepo so use bun as package manager
+      return PackageManager.bun;
     }
   }
   return PackageManager.npm;

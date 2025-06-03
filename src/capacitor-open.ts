@@ -27,6 +27,7 @@ export async function capacitorOpen(project: Project, platform: CapacitorPlatfor
     case MonoRepoType.pnpm:
     case MonoRepoType.yarn:
     case MonoRepoType.lerna:
+    case MonoRepoType.bun:
     case MonoRepoType.npm:
       return InternalCommand.cwd + (ionicCLI ? ionicCLIOpen(platform, project) : capCLIOpen(platform, project));
     case MonoRepoType.nx:

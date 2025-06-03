@@ -165,6 +165,7 @@ function capBuildCommand(
     case MonoRepoType.pnpm:
     case MonoRepoType.yarn:
     case MonoRepoType.lerna:
+    case MonoRepoType.bun:
     case MonoRepoType.npm:
       return InternalCommand.cwd + capCLIBuild(platform, project, args, settings);
     case MonoRepoType.nx:

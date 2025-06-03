@@ -41,6 +41,7 @@ export enum MonoRepoType {
   npm,
   yarn,
   folder,
+  bun,
 }
 
 export type FrameworkType = 'angular' | 'react' | 'vue' | 'react-vite' | 'vue-vite' | 'angular-standalone' | 'unknown';
@@ -77,6 +78,9 @@ export async function checkForMonoRepo(project: Project, selectedProject: string
     project.repoType = MonoRepoType.npm;
     if (project.packageManager == PackageManager.yarn) {
       project.repoType = MonoRepoType.yarn;
+    }
+    if (project.packageManager == PackageManager.bun) {
+      project.repoType = MonoRepoType.bun;
     }
     exState.projects = projects;
     exState.projectsView.title = 'Workspaces';
@@ -125,6 +129,7 @@ export async function checkForMonoRepo(project: Project, selectedProject: string
 
       project.monoRepo.localPackageJson = [
         MonoRepoType.npm,
+        MonoRepoType.bun,
         MonoRepoType.folder,
         MonoRepoType.yarn,
         MonoRepoType.lerna,
@@ -132,9 +137,12 @@ export async function checkForMonoRepo(project: Project, selectedProject: string
       ].includes(project.repoType);
 
       // Is the node_modules folder kept only at the root of the mono repo
-      project.monoRepo.nodeModulesAtRoot = [MonoRepoType.npm, MonoRepoType.nx, MonoRepoType.yarn].includes(
-        project.repoType,
-      );
+      project.monoRepo.nodeModulesAtRoot = [
+        MonoRepoType.npm,
+        MonoRepoType.bun,
+        MonoRepoType.nx,
+        MonoRepoType.yarn,
+      ].includes(project.repoType);
 
       commands.executeCommand(CommandName.ProjectsRefresh, project.monoRepo.name);
     }
@@ -240,6 +248,7 @@ export function getPackageJSONFilename(rootFolder: string): string {
 export function getLocalFolder(rootFolder: string): string {
   switch (exState.repoType) {
     case MonoRepoType.npm:
+    case MonoRepoType.bun:
     case MonoRepoType.yarn:
     case MonoRepoType.lerna:
     case MonoRepoType.folder:

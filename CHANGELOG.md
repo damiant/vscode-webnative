@@ -1,5 +1,9 @@
 ## Changelog
 
+### Version 2.0.38
+
+- Support for Bun workspaces
+
 ### Version 2.0.37
 
 - Fix to use the default shell for node if available
