@@ -16,7 +16,7 @@ import {
 import { checkMigrationAngularToolkit } from './rules-angular-toolkit';
 import { Project } from './project';
 import { QueueFunction, Tip, TipType } from './tip';
-import { asAppId, getRunOutput, isWindows, showProgress, tStart, tEnd, isMac } from './utilities';
+import { asAppId, getRunOutput, showProgress, tStart, tEnd, isMac } from './utilities';
 import { capacitorAdd } from './capacitor-add';
 import { CapacitorPlatform } from './capacitor-platform';
 import { npmInstall, npx } from './node-commands';
@@ -31,7 +31,6 @@ import { showOutput, write, writeWN } from './logging';
 import { ExtensionContext, window } from 'vscode';
 import { WorkspaceSetting, getSetting, setSetting } from './workspace-state';
 import { angularMigrate, maxAngularVersion } from './rules-angular-migrate';
-import { peerDependencyCleanup } from './peer-dependency-cleanup';
 import { checkPrivacyManifest } from './xcode';
 import { existsSync, readFileSync } from 'fs';
 import { join } from 'path';

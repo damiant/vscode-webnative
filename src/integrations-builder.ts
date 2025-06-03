@@ -10,7 +10,6 @@ import { join } from 'path';
 import { existsSync, writeFileSync } from 'fs';
 import { CancelObject, openUri, run, runWithProgress } from './utilities';
 import { exState } from './wn-tree-provider';
-import { viewInEditor } from './preview';
 
 export function checkBuilderIntegration(): Tip[] {
   const tips: Tip[] = [];

@@ -2,18 +2,17 @@ import { exists, getAllPackageNames, getPackageVersion } from './analyzer';
 import { QueueFunction, Tip, TipType } from './tip';
 import { coerce } from 'semver';
 import { npmInstall, npx } from './node-commands';
-import { exState } from './wn-tree-provider';
 import { runCommands } from './advanced-actions';
 import { Project } from './project';
 import { window } from 'vscode';
-import { delay, openUri, showProgress } from './utilities';
+import { openUri } from './utilities';
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { write } from './logging';
 import { join } from 'path';
 import { peerDependencyCleanup } from './peer-dependency-cleanup';
 
 // Maximum supported Angular version that we'll suggest migrating to
-export const maxAngularVersion = '19';
+export const maxAngularVersion = '20';
 
 export function angularMigrate(project: Project, latestVersion: string): Tip | undefined {
   const current = getPackageVersion('@angular/core');

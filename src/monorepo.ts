@@ -8,7 +8,7 @@ import { Context, VSCommand } from './context-variables';
 import { getPnpmWorkspaces } from './monorepos-pnpm';
 import { PackageManager } from './node-commands';
 import { getLernaWorkspaces } from './monorepos-lerna';
-import { basename, dirname, join } from 'path';
+import { dirname, join } from 'path';
 import { write, writeWarning } from './logging';
 import { NpmDependency, NpmOutdatedDependency } from './npm-model';
 import { ExtensionContext, commands, window, workspace } from 'vscode';

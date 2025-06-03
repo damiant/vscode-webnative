@@ -7,7 +7,7 @@ import { writeError, writeWN } from './logging';
 import { exists, isGreaterOrEqual } from './analyzer';
 import { readFileSync, writeFileSync } from 'fs';
 import { capacitorOpen } from './capacitor-open';
-import { npx, PackageManager } from './node-commands';
+import { npx } from './node-commands';
 import { exec } from 'child_process';
 import { getCapacitorConfigureFilename, writeCapacitorConfig } from './capacitor-config-file';
 import { window } from 'vscode';

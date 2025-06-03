@@ -5,7 +5,7 @@ import { getRunConfigurationArgs } from './build-configuration';
 import { InternalCommand } from './command-name';
 import { exState } from './wn-tree-provider';
 import { certPath } from './live-reload';
-import { FrameworkType, MonoRepoType } from './monorepo';
+import { MonoRepoType } from './monorepo';
 import { npmRun, npx, preflightNPMCheck } from './node-commands';
 import { Project } from './project';
 import { liveReloadSSL } from './live-reload';

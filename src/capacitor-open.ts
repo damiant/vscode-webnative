@@ -4,7 +4,7 @@ import { isGreaterOrEqual } from './analyzer';
 import { CapacitorPlatform } from './capacitor-platform';
 import { InternalCommand } from './command-name';
 import { useIonicCLI } from './capacitor-run';
-import { npx, PackageManager } from './node-commands';
+import { npx } from './node-commands';
 import { existsSync, mkdirSync, writeFileSync } from 'fs';
 import { join } from 'path';
 
