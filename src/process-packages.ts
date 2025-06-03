@@ -14,9 +14,9 @@ import {
 import { join } from 'path';
 import { exState } from './wn-tree-provider';
 import { write, writeError, writeWarning } from './logging';
-import { fixYarnV1Outdated, fixModernYarnList, fixYarnOutdated, MonoRepoType } from './monorepo';
+import { fixYarnV1Outdated, fixModernYarnList, fixYarnOutdated } from './monorepo';
 import { ExtensionContext, window } from 'vscode';
-import { existsSync, lstatSync, readFileSync, readdirSync, writeFileSync } from 'fs';
+import { existsSync, lstatSync, readFileSync, readdirSync } from 'fs';
 import { execSync } from 'child_process';
 import { getVersionsFromPackageLock } from './package-lock';
 import { getStringFrom, setAllStringIn } from './utils-strings';

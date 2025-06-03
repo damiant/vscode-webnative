@@ -7,7 +7,7 @@ import { writeError, writeWN } from './logging';
 import { exists, isGreaterOrEqual } from './analyzer';
 import { readFileSync, writeFileSync } from 'fs';
 import { capacitorOpen } from './capacitor-open';
-import { npx, PackageManager } from './node-commands';
+import { npx } from './node-commands';
 import { exec } from 'child_process';
 import { getCapacitorConfigureFilename, writeCapacitorConfig } from './capacitor-config-file';
 import { window } from 'vscode';
@@ -165,6 +165,7 @@ function capBuildCommand(
     case MonoRepoType.pnpm:
     case MonoRepoType.yarn:
     case MonoRepoType.lerna:
+    case MonoRepoType.bun:
     case MonoRepoType.npm:
       return InternalCommand.cwd + capCLIBuild(platform, project, args, settings);
     case MonoRepoType.nx:

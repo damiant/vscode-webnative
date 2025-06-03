@@ -22,6 +22,7 @@ export async function capacitorSync(project: Project): Promise<string> {
     case MonoRepoType.pnpm:
     case MonoRepoType.lerna:
     case MonoRepoType.yarn:
+    case MonoRepoType.bun:
     case MonoRepoType.npm:
       return InternalCommand.cwd + preop + (ionicCLI ? ionicCLISync(project) : capCLISync(project));
     case MonoRepoType.nx:

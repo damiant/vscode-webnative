@@ -6,7 +6,7 @@ import { CapProjectCache } from './context-variables';
 import { join } from 'path';
 import { getCapacitorConfigureFile, updateCapacitorConfig } from './capacitor-config-file';
 import { showOutput, write, writeError } from './logging';
-import { existsSync, writeFileSync } from 'fs';
+import { existsSync } from 'fs';
 import { ExtensionContext, window } from 'vscode';
 import { AndroidProject } from './native-project-android';
 import { IosProject } from './native-project-ios';

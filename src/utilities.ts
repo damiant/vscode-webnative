@@ -87,9 +87,9 @@ function runOptions(command: string, folder: string, shell?: string): ExecOption
   if (!shell && exState.shell) {
     shell = exState.shell;
   }
-  if (!shell && process.env.SHELL) {
-    shell = process.env.SHELL;
-  }
+  // if (!shell && process.env.SHELL) {
+  //   shell = process.env.SHELL;
+  // }
   return { cwd: folder, shell, encoding: 'utf8', env: env, maxBuffer: 10485760 };
 }
 

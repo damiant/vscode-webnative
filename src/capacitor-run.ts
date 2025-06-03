@@ -46,6 +46,7 @@ export async function capacitorRun(project: Project, platform: CapacitorPlatform
     case MonoRepoType.pnpm:
     case MonoRepoType.yarn:
     case MonoRepoType.lerna:
+    case MonoRepoType.bun:
     case MonoRepoType.npm:
       return preop + (await capRun(platform, project.repoType, rebuilt, noSync, project));
     case MonoRepoType.nx:

@@ -4,15 +4,11 @@ import {
   WebviewView,
   WebviewViewProvider,
   WebviewViewResolveContext,
-  workspace,
 } from 'vscode';
 
 import { commands } from 'vscode';
 import { CommandName } from './command-name';
 import { qrWebView } from './webview-debug';
-import { openUri } from './utilities';
-import { WorkspaceSection } from './workspace-state';
-import { exState } from './wn-tree-provider';
 
 export class DevServerProvider implements WebviewViewProvider {
   registered = false;

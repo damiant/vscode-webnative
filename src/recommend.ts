@@ -33,7 +33,7 @@ import { updateMinorDependencies } from './update-minor';
 import { audit } from './audit';
 import { analyzeSize } from './analyze-size';
 import { ionicExport } from './ionic-export';
-import { addAngularGenerateAction, angularGenerate } from './angular-generate';
+import { addAngularGenerateAction } from './angular-generate';
 import { LoggingSettings } from './log-settings';
 import { writeWN } from './logging';
 import { cancelLastOperation } from './tasks';

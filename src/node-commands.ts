@@ -82,6 +82,7 @@ export function npmInstall(name: string, ...args): string {
         exState.workspace,
         undefined,
       )}`;
+    case MonoRepoType.bun:
     case MonoRepoType.yarn:
     case MonoRepoType.folder:
     case MonoRepoType.lerna:
@@ -334,6 +335,7 @@ export function npmUninstall(name: string): string {
   switch (exState.repoType) {
     case MonoRepoType.npm:
       return `${pm(PMOperation.uninstall, name)} --workspace=${getMonoRepoFolder(exState.workspace, undefined)}`;
+    case MonoRepoType.bun:
     case MonoRepoType.folder:
     case MonoRepoType.yarn:
     case MonoRepoType.lerna:
@@ -348,6 +350,7 @@ export function npmRun(name: string): string {
   switch (exState.repoType) {
     case MonoRepoType.npm:
       return `${pm(PMOperation.run, name)} --workspace=${getMonoRepoFolder(exState.workspace, undefined)}`;
+    case MonoRepoType.bun:
     case MonoRepoType.folder:
     case MonoRepoType.yarn:
     case MonoRepoType.lerna:

@@ -1,4 +1,4 @@
-import { commands, window } from 'vscode';
+import { commands } from 'vscode';
 import { getSetting, setSetting, WorkspaceSetting } from './workspace-state';
 import { Context, VSCommand } from './context-variables';
 

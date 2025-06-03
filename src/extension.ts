@@ -22,7 +22,6 @@ import { advancedActions } from './advanced-actions';
 import { PluginExplorerPanel } from './plugin-explorer';
 import { Features, showTips } from './features';
 import { webDebugSetting } from './web-debug';
-import { showOutput } from './logging';
 import { ImportQuickFixProvider } from './quick-fix';
 import { buildAction, debugOnWeb } from './recommend';
 import { StarterPanel } from './starter';

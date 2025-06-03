@@ -4,7 +4,7 @@ import { QueueFunction, Tip, TipType } from './tip';
 import { Project } from './project';
 import { exists } from './analyzer';
 import { CapacitorPlatform } from './capacitor-platform';
-import { npmInstall, npmUninstall, npx } from './node-commands';
+import { npmUninstall, npx } from './node-commands';
 import { Context } from './context-variables';
 import { extname, join } from 'path';
 import { ProgressLocation, window } from 'vscode';

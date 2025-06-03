@@ -43,6 +43,7 @@ export async function build(project: Project, options: BuildOptions): Promise<st
   switch (project.repoType) {
     case MonoRepoType.none:
       return `${preop}${runBuild(prod, project, args, options.platform, options.sourceMaps)}`;
+    case MonoRepoType.bun:
     case MonoRepoType.npm:
       return `${InternalCommand.cwd}${preop}${runBuild(prod, project, args, options.platform, options.sourceMaps)}`;
     case MonoRepoType.nx:

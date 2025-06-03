@@ -1,6 +1,5 @@
 import { window } from 'vscode';
 import { Project } from './project';
-import { ActionResult } from './command-name';
 import { ignore } from './ignore';
 import { exState } from './wn-tree-provider';
 import { QueueFunction, Tip } from './tip';

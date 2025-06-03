@@ -1,4 +1,4 @@
-import { exists, isGreaterOrEqual } from './analyzer';
+import { exists } from './analyzer';
 import { InternalCommand } from './command-name';
 import { MonoRepoType } from './monorepo';
 

@@ -1,11 +1,9 @@
 import { Project } from './project';
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
+import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
-import { ignore } from './ignore';
 import { npmInstall, npmRun, saveDevArgument } from './node-commands';
 import { writeError, writeWN } from './logging';
-import { ExtensionContext, window } from 'vscode';
-import { Tip } from './tip';
+import { window } from 'vscode';
 
 export async function integratePrettier(project: Project) {
   try {
