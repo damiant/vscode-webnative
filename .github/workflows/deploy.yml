@@ -1,0 +1,65 @@
+name: Deploy VS Code Extension
+description: This workflow builds & deploys the VS Code extension to the Extension Marketplace.
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_type:
+        description: 'Release type (normal or prerelease)'
+        required: true
+        default: normal
+        options:
+          - normal
+          - prerelease
+    branches: ['main']
+    paths:
+      - 'packages/vscode/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+
+      - name: Install dependencies
+        run: |
+          npm install
+          cd plugin-explorer
+          npm install
+          cd ../starter
+          npm install
+          cd ../preview
+          npm install          
+          npm install -g @vscode/vsce
+
+      - name: Lint
+        run: |
+          npm run lint
+
+      - name: Build
+        run: |
+          npm run build
+
+      - name: Create Release Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: webnative.vsix
+          path: ./webnative-*.vsix
+          retention-days: 60
+
+      - name: Publish to VS Marketplace
+        if: ${{ github.ref == 'refs/heads/main' }}
+        run: |
+          if [ "${{ inputs.release_type }}" == "prerelease" ]; then
+            npx vsce package --pre-release
+            npx vsce publish --packagePath ./webnative-*.vsix -p ${{ secrets.VSCE_PAT }}
+          else
+            npx vsce publish patch
+            npx vsce publish --packagePath ./webnative-*.vsix -p ${{ secrets.VSCE_PAT }}
+          fi
