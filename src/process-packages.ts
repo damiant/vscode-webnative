@@ -1,7 +1,7 @@
 import { coerce } from 'semver';
 import { Command, Tip, TipType } from './tip';
 import { Project } from './project';
-import { getRunOutput, stripJSON, tEnd, tStart } from './utilities';
+import { getRunOutput, isWindows, stripJSON, tEnd, tStart } from './utilities';
 import { NpmDependency, NpmOutdatedDependency, NpmPackage, PackageType, PackageVersion } from './npm-model';
 import { listCommand, outdatedCommand } from './node-commands';
 import {
@@ -56,7 +56,8 @@ async function runListPackages(project: Project, folder: string, context: Extens
   }
   const listCmd = listCommand(project);
   try {
-    let data = await getRunOutput(listCmd, folder, undefined, true);
+    const shell = isWindows ? 'powershell.exe' : undefined;
+    let data = await getRunOutput(listCmd, folder, shell, true);
     if (project.isModernYarn()) {
       data = fixModernYarnList(data);
     }
