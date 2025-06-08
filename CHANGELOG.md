@@ -1,5 +1,9 @@
 ## Changelog
 
+### Version 2.0.40
+
+- Package size reduction (removal of typescript-eslint and source maps)
+
 ### Version 2.0.39
 
 - Fix "Cannot read properties of null (reading 'edgesOut')" when non-unicode characters found running npm list
