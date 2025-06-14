@@ -11,7 +11,9 @@ export function checkRecommendedExtensions(folder: string): void {
     const data = readFileSync(recFile, 'utf8');
     const jsonData = JSON.parse(data);
     jsonData.recommendations = jsonData.recommendations.filter((ext: string) => ext !== 'ionic.ionic');
-    jsonData.recommendations.push('Webnative.webnative');
+    if (!data.includes('Webnative.webnative')) {
+      jsonData.recommendations.push('Webnative.webnative');
+    }
     writeFileSync(recFile, JSON.stringify(jsonData, null, 2), 'utf8');
   }
   setSetting(WorkspaceSetting.recCheck, true);
