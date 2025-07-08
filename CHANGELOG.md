@@ -1,5 +1,9 @@
 ## Changelog
 
+### Version 2.0.41
+
+- Handle extensions.json with comments in it
+
 ### Version 2.0.40
 
 - Package size reduction (removal of typescript-eslint and source maps)

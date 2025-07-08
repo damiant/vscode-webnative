@@ -2,7 +2,7 @@
   "name": "webnative",
   "displayName": "WebNative",
   "description": "Create and maintain web and native projects",
-  "version": "2.0.40",
+  "version": "2.0.41",
   "icon": "media/webnative.png",
   "publisher": "WebNative",
   "keywords": [
@@ -35,7 +35,7 @@
     "clean": "find ./node_modules -name '*.md' -delete && find ./node_modules -name '*.ts' -delete && find ./node_modules -iname 'LICENSE' -delete && find ./node_modules -name '*.map' -delete && find ./node_modules -name '*.txt' -delete && find ./out/*.map -delete",
     "build": "npm run compile && npm run build:pe && npm run build:preview && npm run build:is && npm run clean && npm run esbuild && npm run vsix-package && npm run reset",
     "reset": "rm -rf node_modules && npm install",
-    "vsix-package": "vsce package --allow-package-all-secrets",
+    "vsix-package": "vsce package",
     "pre-release": "npm run build && vsce publish --pre-release",
     "vscode:prepublish": "npm run esbuild-base -- --minify",
     "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=out/main.js --external:vscode --external:prettier --format=cjs --platform=node",

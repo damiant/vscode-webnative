@@ -1,6 +1,7 @@
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { getSetting, setSetting, WorkspaceSetting } from './workspace-state';
+import { writeError } from './logging';
 
 export function checkRecommendedExtensions(folder: string): void {
   const recFile = join(folder, '.vscode', 'extensions.json');
@@ -8,11 +9,15 @@ export function checkRecommendedExtensions(folder: string): void {
     return;
   }
   if (existsSync(recFile)) {
-    const data = readFileSync(recFile, 'utf8');
-    const jsonData = JSON.parse(data);
-    jsonData.recommendations = jsonData.recommendations.filter((ext: string) => ext !== 'ionic.ionic');
-    jsonData.recommendations.push('Webnative.webnative');
-    writeFileSync(recFile, JSON.stringify(jsonData, null, 2), 'utf8');
+    try {
+      const data = readFileSync(recFile, 'utf8');
+      const jsonData = JSON.parse(data);
+      jsonData.recommendations = jsonData.recommendations.filter((ext: string) => ext !== 'ionic.ionic');
+      jsonData.recommendations.push('Webnative.webnative');
+      writeFileSync(recFile, JSON.stringify(jsonData, null, 2), 'utf8');
+    } catch {
+      writeError(`extensions.json is not a valid JSON file.`);
+    }
   }
   setSetting(WorkspaceSetting.recCheck, true);
 }
