@@ -1,5 +1,9 @@
 ## Changelog
 
+### Version 2.0.42
+
+- Avoid calling cocoapods if already called
+
 ### Version 2.0.41
 
 - Handle extensions.json with comments in it

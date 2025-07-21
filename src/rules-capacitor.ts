@@ -825,7 +825,9 @@ function atVersionOfCapCLI(): string {
   return version ? `@${version.version}` : '';
 }
 
+let podHasError = false;
 async function getCocoaPodsVersion(project: Project, avoidCache?: boolean): Promise<string> {
+  if (podHasError) return undefined;
   try {
     const cocoaPodsVersion = getSetting(WorkspaceSetting.cocoaPods);
     if (!avoidCache && cocoaPodsVersion) {
@@ -836,6 +838,7 @@ async function getCocoaPodsVersion(project: Project, avoidCache?: boolean): Prom
     setSetting(WorkspaceSetting.cocoaPods, data);
     return data;
   } catch (error) {
+    podHasError = true;
     if (error?.includes('GemNotFoundException')) {
       return 'missing';
     }
