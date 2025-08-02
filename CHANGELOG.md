@@ -1,5 +1,9 @@
 ## Changelog
 
+### Version 2.0.43
+
+- Fix for setting native project version, build, bundle, display name when project is Android only
+
 ### Version 2.0.42
 
 - Avoid calling cocoapods if already called
