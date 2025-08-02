@@ -37,8 +37,8 @@ export async function reviewCapacitorConfig(project: Project, context: Extension
     // Create a single Bundle Id the user can edit
     const bundleId = state.androidBundleId ? state.androidBundleId : state.iosBundleId;
     const tip = new Tip('Bundle Id', bundleId, TipType.None);
-
-    tip.setQueuedAction(setBundleId, bundleId, project, project.folder);
+    const platform = state.iosBundleId ? undefined : NativePlatform.AndroidOnly;
+    tip.setQueuedAction(setBundleId, bundleId, project, project.folder, platform);
     project.add(tip);
   } else {
     // Bundle Ids different
@@ -227,7 +227,7 @@ async function setBundleId(
   queueFunction();
   const iosProject = await getIosProject(prj);
 
-  if (iosProject.exists() && platform != NativePlatform.AndroidOnly) {
+  if (iosProject?.exists() && platform != NativePlatform.AndroidOnly) {
     const appTarget = iosProject.getAppTarget();
     if (appTarget) {
       for (const buildConfig of iosProject.getBuildConfigurations(appTarget.name)) {
@@ -240,7 +240,7 @@ async function setBundleId(
   }
 
   const androidProject = await getAndroidProject(prj);
-  if (androidProject.exists() && platform != NativePlatform.iOSOnly) {
+  if (androidProject?.exists() && platform != NativePlatform.iOSOnly) {
     write(`Set Android Package Name to ${newBundleId}`);
     try {
       // This doesnt really work in Trapeze: https://github.com/ionic-team/trapeze/issues/191
@@ -299,14 +299,14 @@ async function setVersion(queueFunction: QueueFunction, version: string, prj: Pr
   const iosProject = await getIosProject(prj);
   const androidProject = await getAndroidProject(prj);
 
-  if (iosProject.exists() && platform != NativePlatform.AndroidOnly) {
+  if (iosProject && iosProject.exists() && platform != NativePlatform.AndroidOnly) {
     const appTarget = iosProject.getAppTarget();
     for (const buildConfig of iosProject.getBuildConfigurations(appTarget.name)) {
       write(`Set iOS Version for target ${appTarget.name} buildConfig.${buildConfig.name} to ${newVersion}`);
       await iosProject.setVersion(appTarget.name, buildConfig.name, newVersion);
     }
   }
-  if (androidProject.exists() && platform != NativePlatform.iOSOnly) {
+  if (androidProject && androidProject.exists() && platform != NativePlatform.iOSOnly) {
     write(`Set Android Version to ${newVersion}`);
     await androidProject.setVersionName(newVersion);
   }
@@ -342,14 +342,14 @@ async function setBuild(queueFunction: QueueFunction, build: string, prj: Projec
   const iosProject = await getIosProject(prj);
   const androidProject = await getAndroidProject(prj);
 
-  if (iosProject.exists() && platform != NativePlatform.AndroidOnly) {
+  if (iosProject?.exists() && platform != NativePlatform.AndroidOnly) {
     const appTarget = iosProject.getAppTarget();
     for (const buildConfig of iosProject.getBuildConfigurations(appTarget.name)) {
       write(`Set iOS Version for target ${appTarget.name} buildConfig.${buildConfig.name} to ${newBuild}`);
       await iosProject.setBuild(appTarget.name, buildConfig.name, parseInt(newBuild));
     }
   }
-  if (androidProject.exists() && platform != NativePlatform.iOSOnly) {
+  if (androidProject?.exists() && platform != NativePlatform.iOSOnly) {
     write(`Set Android Version to ${newBuild}`);
     await androidProject.setVersionCode(parseInt(newBuild));
   }
@@ -385,14 +385,14 @@ async function setDisplayName(
   const androidProject = await getAndroidProject(prj);
 
   console.log(`Display name changed to ${displayName}`);
-  if (iosProject.exists() != null && platform != NativePlatform.AndroidOnly) {
+  if (iosProject?.exists() != null && platform != NativePlatform.AndroidOnly) {
     const appTarget = iosProject.getAppTarget();
     for (const buildConfig of iosProject.getBuildConfigurations(appTarget.name)) {
       write(`Set iOS Displayname for target ${appTarget.name} buildConfig.${buildConfig.name} to ${displayName}`);
       await iosProject.setDisplayName(appTarget.name, buildConfig.name, displayName);
     }
   }
-  if (androidProject.exists() && platform != NativePlatform.iOSOnly) {
+  if (androidProject?.exists() && platform != NativePlatform.iOSOnly) {
     androidProject.setDisplayName(displayName);
     write(`Set Android Displayname to ${displayName}`);
   }
