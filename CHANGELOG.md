@@ -1,5 +1,10 @@
 ## Changelog
 
+### Version 2.0.44
+
+- Fix for package installation if package manager is undefined
+- Fix to avoid duplicating recommended extensions
+
 ### Version 2.0.43
 
 - Fix for setting native project version, build, bundle, display name when project is Android only

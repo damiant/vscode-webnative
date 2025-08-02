@@ -161,7 +161,7 @@ export async function suggestInstallAll(project: Project) {
   }
   const res = getExtSetting(ExtensionSetting.packageManager);
   let choice = res;
-  if (!res || res == '') {
+  if (!res || res == '' || res == 'undefined') {
     if (getGlobalSetting(GlobalSetting.suggestNPMInstall) == 'no') return;
 
     const isNpm = hasPackageLock(project);
@@ -203,6 +203,7 @@ export async function suggestInstallAll(project: Project) {
   if (choice == 'bun') {
     exState.packageManager = PackageManager.bun;
   }
+  if (choice == 'undefined') return;
   const message = choice == 'Yes' ? 'Installing dependencies...' : 'Installing dependencies with ' + choice + '...';
   showProgress(message, async () => {
     await project.runAtRoot(npmInstallAll());
