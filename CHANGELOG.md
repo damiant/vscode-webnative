@@ -1,5 +1,9 @@
 ## Changelog
 
+### Version 2.0.45
+
+- Fix to point QR Code via webnative.app rather than nexusbrowser.com
+
 ### Version 2.0.44
 
 - Fix for package installation if package manager is undefined

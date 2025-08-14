@@ -29,7 +29,7 @@ export function nexusURL(url: string, externalUrl: string | undefined): NamedURL
   const shortUrl = url ? url?.replace('https://', '').replace('http://', '') : undefined;
   return {
     title: shortUrl,
-    url: exState.projectRef.isCapacitor ? `https://nexusbrowser.com/` + encodeURIComponent(shortUrl) : url,
+    url: exState.projectRef.isCapacitor ? `https://webnative.app/` + encodeURIComponent(shortUrl) : url,
   };
 }
 export function qrWebView(webview: Webview, externalUrl: string, localUrl: string): string | undefined {
@@ -92,7 +92,7 @@ export function qrWebView(webview: Webview, externalUrl: string, localUrl: strin
 export async function troubleshootPlugins() {
   try {
     // Download https://nexusbrowser.com/assets/app-data.json which is the list of plugins included in nexus browser app
-    const data = (await httpRequest('GET', 'nexusbrowser.com', '/assets/app-data.json')) as Plugins;
+    const data = (await httpRequest('GET', 'webnative.app', '/assets/app-data.json')) as Plugins;
     const versions = {};
     // These plugins wont matter if they are not in the Nexus Browser
     const unimportant = ['cordova-plugin-ionic'];
