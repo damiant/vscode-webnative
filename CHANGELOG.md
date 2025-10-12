@@ -1,5 +1,9 @@
 ## Changelog
 
+### Version 2.0.37
+
+- Option to set the Android debugging webroot to use the workspace folder or www folder
+
 ### Version 2.0.46
 
 - Set SigningType to ApkSigner by default when preparing Android builds

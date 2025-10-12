@@ -2,6 +2,7 @@ import { debug, workspace } from 'vscode';
 import { startSourceMapServer } from './source-map-server';
 import { debugSkipFiles } from './utilities';
 import { exState } from './wn-tree-provider';
+import { WorkspaceSection } from './workspace-state';
 
 // The debug provider type for VS Code
 export const AndroidDebugType = 'android-web';
@@ -22,13 +23,15 @@ export function debugAndroid(packageName: string, wwwFolder: string, projectFold
   // Note: options here include sourceMapPathOverrides and resolveSourceMapLocations both dont fix the
   // problem with source maps not being accessible to the debugger
   exState.debugged = true;
+  const value: string = workspace.getConfiguration(WorkspaceSection).get('androidDebugWebRoot');
+  const webRoot = value === 'www' ? wwwFolder : '${workspaceFolder}';
   debug.startDebugging(workspace.workspaceFolders[0], {
     type: AndroidDebugType,
     name: 'Debug Android',
     request: 'attach',
     packageName: packageName,
     platform: 'android',
-    webRoot: wwwFolder, //'${workspaceFolder}',
+    webRoot,
     sourceMaps: true,
 
     skipFiles: debugSkipFiles(),
