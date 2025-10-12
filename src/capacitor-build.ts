@@ -12,7 +12,7 @@ import { exec } from 'child_process';
 import { getCapacitorConfigureFilename, writeCapacitorConfig } from './capacitor-config-file';
 import { window } from 'vscode';
 import { QueueFunction } from './tip';
-import { getStringFrom } from './utils-strings';
+import { getStringFrom, isEmpty } from './utils-strings';
 
 /**
  * Capacitor build command
@@ -141,6 +141,9 @@ async function verifySettings(
     });
     if (!settings.keyPassword) return undefined;
   }
+  if (!settings.signingType) {
+    settings.signingType = 'apksigner';
+  }
 
   return settings;
 }
@@ -150,6 +153,7 @@ export interface KeyStoreSettings {
   keyStorePassword?: string;
   keyAlias?: string;
   keyPassword?: string;
+  signingType?: string;
 }
 
 function capBuildCommand(
@@ -198,6 +202,10 @@ function readKeyStoreSettings(project: Project): KeyStoreSettings {
   try {
     const data = readFileSync(filename, 'utf-8');
     if (data.includes('CapacitorConfig = {')) {
+      result.signingType = getValueFrom(data, 'signingType');
+      if (isEmpty(result.signingType)) {
+        result.signingType = 'apksigner';
+      }
       result.keyStorePath = getValueFrom(data, 'keystorePath');
       result.keyAlias = getValueFrom(data, 'keystoreAlias');
       result.keyPassword = getValueFrom(data, 'keystoreAliasPassword');
@@ -233,9 +241,17 @@ function writeConfig(project: Project, settings: KeyStoreSettings) {
        buildOptions: {
           keystorePath: '',
           keystoreAlias: '',
+          signingType: 'apksigner',
        }
     }
   };`,
+    );
+  }
+  if (!data.includes('signingType')) {
+    data = data.replace(
+      'buildOptions: {',
+      `buildOptions: {
+          signingType: 'apksigner',`,
     );
   }
   writeFileSync(filename, data);
@@ -244,5 +260,6 @@ function writeConfig(project: Project, settings: KeyStoreSettings) {
     { key: 'keystorePassword', value: settings.keyStorePassword },
     { key: 'keystoreAlias', value: settings.keyAlias },
     { key: 'keystoreAliasPassword', value: settings.keyPassword },
+    { key: 'signingType', value: settings.signingType },
   ]);
 }
