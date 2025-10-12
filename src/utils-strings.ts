@@ -66,3 +66,7 @@ export function replaceStringIn(data: string, start: string, end: string, replac
   const idx = foundIdx;
   return data.substring(0, idx) + replacement + data.substring(data.indexOf(end, idx) + end.length);
 }
+
+export function isEmpty(value: string): boolean {
+  return value == undefined || value.trim().length == 0;
+}

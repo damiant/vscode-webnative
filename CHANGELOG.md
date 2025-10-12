@@ -1,5 +1,9 @@
 ## Changelog
 
+### Version 2.0.46
+
+- Set SigningType to ApkSigner by default when preparing Android builds
+
 ### Version 2.0.45
 
 - Fix to point QR Code via webnative.app rather than nexusbrowser.com
