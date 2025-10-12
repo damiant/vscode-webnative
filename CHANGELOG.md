@@ -1,6 +1,6 @@
 ## Changelog
 
-### Version 2.0.37
+### Version 2.0.47
 
 - Option to set the Android debugging webroot to use the workspace folder or www folder
 
