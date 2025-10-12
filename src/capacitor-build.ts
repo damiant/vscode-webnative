@@ -141,6 +141,9 @@ async function verifySettings(
     });
     if (!settings.keyPassword) return undefined;
   }
+  if (!settings.signingType) {
+    settings.signingType = 'apksigner';
+  }
 
   return settings;
 }
@@ -242,6 +245,13 @@ function writeConfig(project: Project, settings: KeyStoreSettings) {
        }
     }
   };`,
+    );
+  }
+  if (!data.includes('signingType')) {
+    data = data.replace(
+      'buildOptions: {',
+      `buildOptions: {
+          signingType: 'apksigner',`,
     );
   }
   writeFileSync(filename, data);
