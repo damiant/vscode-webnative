@@ -1,5 +1,9 @@
 ## Changelog
 
+### Version 2.0.50
+
+- Fix to prevent --project being added for cap run commands
+
 ### Version 2.0.49
 
 - Fix live reload and webnative icons for light mode theme

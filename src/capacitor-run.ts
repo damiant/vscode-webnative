@@ -120,10 +120,11 @@ async function capRun(
     capRunFlags += '--no-sync';
   }
 
-  if (exState.project && exState.project != 'app') {
-    if (capRunFlags.length >= 0) capRunFlags += ' ';
-    capRunFlags += `--project=${exState.project}`;
-  }
+  // cap run doesn't have a --project flag. Removing
+  // if (exState.project && exState.project != 'app') {
+  //   if (capRunFlags.length >= 0) capRunFlags += ' ';
+  //   capRunFlags += `--project=${exState.project}`;
+  // }
 
   if (liveReload) {
     //capRunFlags += getConfigurationArgs();
