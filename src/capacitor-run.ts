@@ -14,6 +14,7 @@ import { ExtensionSetting, getExtSetting, getSetting, WorkspaceSection, Workspac
 import { window, workspace } from 'vscode';
 import { join } from 'path';
 import { serve } from './run-web';
+import { isWindows } from './utilities';
 
 /**
  * Creates the command line to run for Capacitor
@@ -160,11 +161,18 @@ async function capRun(
       : '';
 
   let post = '';
+  const capRunCommand = `${npx(project)} ${ionic}cap run ${platform} --target=${InternalCommand.target} ${capRunFlags}`;
   if (liveReload) {
     const serveCmd = await serve(project, true, false, true);
-    post = ` & ${serveCmd}`;
+    if (isWindows()) {
+      // On Windows, start the dev server in background first, then run cap run
+      return `${pre}start /B ${serveCmd} & ${capRunCommand}`;
+    } else {
+      // On Unix/Mac, run cap run in background, then run dev server
+      post = ` & ${serveCmd}`;
+    }
   }
-  return `${pre}${npx(project)} ${ionic}cap run ${platform} --target=${InternalCommand.target} ${capRunFlags}${post}`;
+  return `${pre}${capRunCommand}${post}`;
 }
 
 async function nxRun(
