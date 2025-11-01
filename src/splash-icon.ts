@@ -9,6 +9,7 @@ import { Context } from './context-variables';
 import { extname, join } from 'path';
 import { ProgressLocation, window } from 'vscode';
 import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
+import { exState } from './wn-tree-provider';
 
 export enum AssetType {
   splash = 'splash.png',
@@ -195,8 +196,15 @@ async function runCapacitorAssets(queueFunction: QueueFunction | undefined, proj
       write(`> ${cmd}`);
       await run(folder, cmd, undefined, [], undefined, undefined);
     }
+    if (!ios && !android && !pwa) {
+      window.showInformationMessage(
+        'No Capacitor platforms found. Please add iOS, Android, or PWA platform to generate assets.',
+        'OK',
+      );
+    }
   });
 
+  exState.channelFocus = true;
   writeWN('Completed created Splash Screen and Icon Assets');
   channelShow();
 }

@@ -318,7 +318,7 @@ export function npx(project: Project, options?: NpxOptions): string {
     case PackageManager.bun:
       return `${InternalCommand.cwd}bunx`;
     case PackageManager.pnpm:
-      return `${InternalCommand.cwd}pnpm exec`;
+      return options?.forceNpx ? `${InternalCommand.cwd}npx` : `${InternalCommand.cwd}pnpx`;
     case PackageManager.yarn:
       if (options?.forceNpx && !project.isModernYarn()) {
         return `${InternalCommand.cwd}npx`;
