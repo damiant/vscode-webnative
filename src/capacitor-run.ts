@@ -16,6 +16,9 @@ import { join } from 'path';
 import { serve } from './run-web';
 import { isWindows } from './utilities';
 
+// Regex to match [@cwd] markers in commands
+const CWD_REGEX = new RegExp(InternalCommand.cwd, 'g');
+
 /**
  * Creates the command line to run for Capacitor
  * @param  {CapacitorPlatform} platform
@@ -168,11 +171,15 @@ async function capRun(
     if (isWindows()) {
       // On Windows, use concurrently to run both commands in parallel
       // Remove [@cwd] markers from individual commands as they'll be handled by the outer command
-      const cleanCapRunCommand = capRunCommand.replace(new RegExp(InternalCommand.cwd, 'g'), '');
-      const cleanServeCmd = serveCmd.replace(new RegExp(InternalCommand.cwd, 'g'), '');
+      const cleanCapRunCommand = capRunCommand.replace(CWD_REGEX, '');
+      const cleanServeCmd = serveCmd.replace(CWD_REGEX, '');
+
+      // Escape double quotes in commands to prevent issues
+      const escapedCapRun = cleanCapRunCommand.replace(/"/g, '\\"');
+      const escapedServe = cleanServeCmd.replace(/"/g, '\\"');
 
       // Use npx to run concurrently from the extension's node_modules
-      return `${pre}npx concurrently "${cleanCapRunCommand}" "${cleanServeCmd}"`;
+      return `${pre}npx concurrently "${escapedCapRun}" "${escapedServe}"`;
     } else {
       // On Unix-like systems, use & to run in background
       return `${capRunCommand} & ${serveCmd}`;
