@@ -205,7 +205,7 @@ async function runCapacitorAssets(queueFunction: QueueFunction | undefined, proj
   });
 
   exState.channelFocus = true;
-  writeWN('Completed created Splash Screen and Icon Assets');
+  writeWN('Completed creating Splash Screen and Icon Assets');
   channelShow();
 }
 
