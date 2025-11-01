@@ -14,6 +14,7 @@ import { ExtensionSetting, getExtSetting, getSetting, WorkspaceSection, Workspac
 import { window, workspace } from 'vscode';
 import { join } from 'path';
 import { serve } from './run-web';
+import { isWindows } from './utilities';
 
 /**
  * Creates the command line to run for Capacitor
@@ -159,12 +160,26 @@ async function capRun(
       ? InternalCommand.cwd
       : '';
 
-  let post = '';
+  const capRunCommand = `${pre}${npx(project)} ${ionic}cap run ${platform} --target=${InternalCommand.target} ${capRunFlags}`;
+
   if (liveReload) {
     const serveCmd = await serve(project, true, false, true);
-    post = ` & ${serveCmd}`;
+
+    if (isWindows()) {
+      // On Windows, use concurrently to run both commands in parallel
+      // Remove [@cwd] markers from individual commands as they'll be handled by the outer command
+      const cleanCapRunCommand = capRunCommand.replace(new RegExp(InternalCommand.cwd, 'g'), '');
+      const cleanServeCmd = serveCmd.replace(new RegExp(InternalCommand.cwd, 'g'), '');
+
+      // Use npx to run concurrently from the extension's node_modules
+      return `${pre}npx concurrently "${cleanCapRunCommand}" "${cleanServeCmd}"`;
+    } else {
+      // On Unix-like systems, use & to run in background
+      return `${capRunCommand} & ${serveCmd}`;
+    }
   }
-  return `${pre}${npx(project)} ${ionic}cap run ${platform} --target=${InternalCommand.target} ${capRunFlags}${post}`;
+
+  return capRunCommand;
 }
 
 async function nxRun(
