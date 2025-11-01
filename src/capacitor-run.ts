@@ -14,6 +14,7 @@ import { ExtensionSetting, getExtSetting, getSetting, WorkspaceSection, Workspac
 import { window, workspace } from 'vscode';
 import { join } from 'path';
 import { serve } from './run-web';
+import { isWindows } from './utilities';
 
 /**
  * Creates the command line to run for Capacitor
@@ -160,11 +161,22 @@ async function capRun(
       : '';
 
   let post = '';
+  const capRunCommand = `${npx(project)} ${ionic}cap run ${platform} --target=${InternalCommand.target} ${capRunFlags}`;
   if (liveReload) {
     const serveCmd = await serve(project, true, false, true);
-    post = ` & ${serveCmd}`;
+    if (isWindows()) {
+      // On Windows, we must use 'start /B' to run the dev server in a background process.
+      // The '&' operator on Windows is sequential (waits for previous command to complete),
+      // so we start the dev server first in background, then run cap run in foreground.
+      // This ensures both processes run in parallel.
+      return `${pre}start /B ${serveCmd} & ${capRunCommand}`;
+    } else {
+      // On Unix/Mac, the '&' operator runs the previous command in background.
+      // So 'cap run & serve' means: run cap run in background, then run serve in foreground.
+      post = ` & ${serveCmd}`;
+    }
   }
-  return `${pre}${npx(project)} ${ionic}cap run ${platform} --target=${InternalCommand.target} ${capRunFlags}${post}`;
+  return `${pre}${capRunCommand}${post}`;
 }
 
 async function nxRun(

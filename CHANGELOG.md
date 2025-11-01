@@ -1,5 +1,9 @@
 ## Changelog
 
+### Version 2.0.52
+
+- Fix live reload on Windows by using start /B for parallel process execution
+
 ### Version 2.0.51
 
 - Fix issue with generating splash screen and icon assets for a pnpm based project
