@@ -1,5 +1,9 @@
 ## Changelog
 
+### Version 2.0.52
+
+- Fix Live Reload on Windows by using concurrently to run commands in parallel
+
 ### Version 2.0.51
 
 - Fix issue with generating splash screen and icon assets for a pnpm based project
