@@ -1,5 +1,9 @@
 ## Changelog
 
+### Version 2.0.51
+
+- Fix issue with generating splash screen and icon assets for a pnpm based project
+
 ### Version 2.0.50
 
 - Fix to prevent --project being added for cap run commands
