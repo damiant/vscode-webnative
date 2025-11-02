@@ -1,5 +1,9 @@
 ## Changelog
 
+### Version 2.0.53
+
+- Fix pnpm project to use pnpm exec rather than pnpx
+
 ### Version 2.0.52
 
 - Fix live reload on Windows by using start /B for parallel process execution
