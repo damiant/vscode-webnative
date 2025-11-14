@@ -121,7 +121,8 @@ export async function activate(context: ExtensionContext) {
     exState.shell = shellOverride;
   }
 
-  trackProjectChange();
+  const trackingDisposables = trackProjectChange();
+  trackingDisposables.forEach((disposable) => context.subscriptions.push(disposable));
 
   // On focusing with extension if clipboard has a command give option to run it
   autoRunClipboard();
