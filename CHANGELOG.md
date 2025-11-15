@@ -1,5 +1,9 @@
 ## Changelog
 
+### Version 2.0.55
+
+- add SPM migration assistant for iOS projects
+
 ### Version 2.0.54
 
 - Refactoring project and cleanup of integrations
