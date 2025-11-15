@@ -40,15 +40,6 @@ import { cancelLastOperation } from './tasks';
 import { CommandName } from './command-name';
 import { CommandTitle } from './command-title';
 import { ExtensionContext, commands } from 'vscode';
-import {
-  builderSettingsRules,
-  builderDevelopInteractive,
-  checkBuilderIntegration,
-  builderDevelopAuth,
-  builderDevelopPrompt,
-  builderOpen,
-  hasBuilder,
-} from './integrations-builder';
 import { webProjectPackages } from './web-configuration';
 import { checkRecommendedExtensions } from './vscode-recommendation';
 
@@ -367,21 +358,6 @@ export async function getRecommendations(project: Project, context: ExtensionCon
   if (!project.isCapacitor && !project.isCordova) {
     // The project is not using Cordova or Capacitor
     webProject(project);
-  }
-
-  // Builder
-  const bTask = builderDevelopAuth();
-  if (hasBuilder()) {
-    project.setGroup(`Builder`, `These tasks are available for Builder.io`, TipType.Builder, true, undefined, true);
-
-    project.tips(bTask);
-    project.tips(checkBuilderIntegration());
-    project.add(builderDevelopInteractive());
-    project.add(builderDevelopPrompt(project));
-    project.add(builderSettingsRules(project));
-    project.add(builderOpen());
-  } else {
-    project.tips(bTask);
   }
 
   // Package Upgrade Features
