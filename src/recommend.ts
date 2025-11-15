@@ -4,6 +4,7 @@ import { build, BuildOptions } from './build';
 import { serve } from './run-web';
 import { Project } from './project';
 import { addSplashAndIconFeatures } from './splash-icon';
+import { addAIFeature } from './rules-ai';
 import { QueueFunction, RunPoint, RunStatus, Tip, TipFeature, TipType } from './tip';
 import { capacitorMigrationChecks as checkCapacitorMigrationRules } from './rules-capacitor-migration';
 import { reviewPackages } from './process-packages';
@@ -369,20 +370,23 @@ export async function getRecommendations(project: Project, context: ExtensionCon
     webProject(project);
   }
 
-  // Builder
-  // const bTask = builderDevelopAuth();
-  // if (hasBuilder()) {
-  //   project.setGroup(`Builder`, `These tasks are available for Builder.io`, TipType.Builder, true, undefined, true);
+  // AI Feature
+  addAIFeature(project);
 
-  //   project.tips(bTask);
-  //   project.tips(checkBuilderIntegration());
-  //   project.add(builderDevelopInteractive());
-  //   project.add(builderDevelopPrompt(project));
-  //   project.add(builderSettingsRules(project));
-  //   project.add(builderOpen());
-  // } else {
-  //   project.tips(bTask);
-  // }
+  // Builder
+  const bTask = builderDevelopAuth();
+  if (hasBuilder()) {
+    project.setGroup(`Builder`, `These tasks are available for Builder.io`, TipType.Builder, true, undefined, true);
+
+    project.tips(bTask);
+    project.tips(checkBuilderIntegration());
+    project.add(builderDevelopInteractive());
+    project.add(builderDevelopPrompt(project));
+    project.add(builderSettingsRules(project));
+    project.add(builderOpen());
+  } else {
+    project.tips(bTask);
+  }
 
   // Package Upgrade Features
   reviewPackages(packages, project);

@@ -527,6 +527,8 @@ export function getSpawnOutput(
   shell?: string,
   hideErrors?: boolean,
   ignoreErrors?: boolean,
+  onStdout?: (data: string) => void,
+  onStderr?: (data: string) => void,
 ): Promise<string> {
   const a = command.split(' ');
   const args = a.slice(1);
@@ -537,11 +539,18 @@ export function getSpawnOutput(
     let error = '';
     tStart(command);
     childProcess.stdout.on('data', (data) => {
-      output += data.toString();
+      const stdout = data.toString();
+      output += stdout;
+      if (onStdout) {
+        onStdout(stdout);
+      }
     });
 
     childProcess.stderr.on('data', (data) => {
       error += data.toString();
+      if (onStderr) {
+        onStderr(data);
+      }
     });
 
     childProcess.on('close', (code) => {
@@ -568,11 +577,88 @@ export async function getRunOutput(
   shell?: string,
   hideErrors?: boolean,
   ignoreErrors?: boolean,
+  onStdout?: (data: string) => void,
+  onStderr?: (data: string) => void,
 ): Promise<string> {
+  if (onStdout || onStderr) {
+    return getExecStream(command, folder, shell, hideErrors, ignoreErrors, onStdout, onStderr);
+  }
   return getExecOutput(command, folder, shell, hideErrors, ignoreErrors);
 
   // Problems with spawn with some commands (eg windows, npx ng generate)
   //return getSpawnOutput(command, folder, shell, hideErrors, ignoreErrors);
+}
+
+export function getExecStream(
+  command: string,
+  folder: string,
+  shell?: string,
+  hideErrors?: boolean,
+  ignoreErrors?: boolean,
+  onStdout?: (data: string) => void,
+  onStderr?: (data: string) => void,
+): Promise<string> {
+  return new Promise((resolve, reject) => {
+    if (command.includes(InternalCommand.cwd)) {
+      command = replaceAll(command, InternalCommand.cwd, '');
+      // Change the work directory for monorepos as folder is the root folder
+      folder = getMonoRepoFolder(exState.workspace, folder);
+    }
+    command = qualifyCommand(command, folder);
+    tStart(command);
+    const childProcess = exec(command, runOptions(command, folder, shell));
+
+    let output = '';
+    let error = '';
+
+    if (childProcess.stdout) {
+      childProcess.stdout.on('data', (data) => {
+        const stdout = data.toString();
+        output += stdout;
+        if (onStdout) {
+          onStdout(stdout);
+        }
+      });
+    }
+
+    if (childProcess.stderr) {
+      childProcess.stderr.on('data', (data) => {
+        const stderr = data.toString();
+        error += stderr;
+        if (onStderr) {
+          onStderr(stderr);
+        }
+      });
+    }
+
+    childProcess.on('close', (code) => {
+      tEnd(command);
+      if (code !== 0) {
+        if (!hideErrors) {
+          writeError(error);
+        }
+        if (ignoreErrors) {
+          resolve(output);
+        } else {
+          reject(`${error}`);
+        }
+      } else {
+        resolve(output);
+      }
+    });
+
+    childProcess.on('error', (err) => {
+      tEnd(command);
+      if (!hideErrors) {
+        writeError(err.message);
+      }
+      if (ignoreErrors) {
+        resolve(output);
+      } else {
+        reject(err.message);
+      }
+    });
+  });
 }
 
 export async function getExecOutput(

@@ -1,0 +1,7 @@
+model_provider="openrouter"
+model="anthropic/claude-haiku-4.5"
+
+[model_providers.openrouter]
+name="openrouter"
+base_url="https://openrouter.ai/api/v1"
+env_key="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"
