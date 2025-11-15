@@ -8,7 +8,7 @@ import { inspectProject, Project } from './project';
 import { doDoes, getRunOutput, plural, pluralize, run, showProgress } from './utilities';
 import { capacitorSync } from './capacitor-sync';
 import { ActionResult } from './command-name';
-import { exState } from './wn-tree-provider';
+import { exState } from './tree-provider';
 import { PackageManager } from './node-commands';
 import { openUri } from './utilities';
 import { capacitorOpen } from './capacitor-open';
@@ -17,7 +17,7 @@ import { checkPeerDependencies, PeerReport } from './peer-dependencies';
 import { removeNodeModules } from './advanced-actions';
 import { window } from 'vscode';
 import { QueueFunction } from './tip';
-import { getStringFrom, setAllStringIn } from './utils-strings';
+import { getStringFrom, setAllStringIn } from './utilities-strings';
 
 export interface CapacitorMigrationOptions {
   coreVersion: string;

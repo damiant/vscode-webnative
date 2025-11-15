@@ -1,4 +1,4 @@
-import { exState } from './wn-tree-provider';
+import { exState } from './tree-provider';
 import { satisfies, gt } from 'semver';
 import { write, writeError, writeWarning } from './logging';
 import { PackageManager, npmInstall } from './node-commands';

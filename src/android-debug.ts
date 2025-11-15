@@ -1,7 +1,7 @@
 import { debug, workspace } from 'vscode';
 import { startSourceMapServer } from './source-map-server';
 import { debugSkipFiles } from './utilities';
-import { exState } from './wn-tree-provider';
+import { exState } from './tree-provider';
 import { WorkspaceSection } from './workspace-state';
 
 // The debug provider type for VS Code

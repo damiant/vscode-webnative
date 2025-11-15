@@ -1,6 +1,6 @@
 import { window, commands } from 'vscode';
 import { CommandName, InternalCommand } from './command-name';
-import { exState } from './wn-tree-provider';
+import { exState } from './tree-provider';
 import { getMonoRepoFolder, MonoRepoType } from './monorepo';
 import { Project } from './project';
 import { getRunOutput, showProgress } from './utilities';

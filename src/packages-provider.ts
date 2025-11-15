@@ -1,6 +1,6 @@
 import { Event, EventEmitter, ExtensionContext, TreeDataProvider, TreeItem, TreeItemCollapsibleState } from 'vscode';
 import { CommandName } from './command-name';
-import { exState } from './wn-tree-provider';
+import { exState } from './tree-provider';
 import { Recommendation } from './recommendation';
 
 export class PackagesProvider implements TreeDataProvider<Recommendation> {

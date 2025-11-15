@@ -4,7 +4,7 @@ import { CapacitorPlatform } from './capacitor-platform';
 import { InternalCommand } from './command-name';
 import { writeError, writeWN } from './logging';
 import { build } from './build';
-import { exState } from './wn-tree-provider';
+import { exState } from './tree-provider';
 import { certPath, liveReloadSSL } from './live-reload';
 import { MonoRepoType } from './monorepo';
 import { npx, preflightNPMCheck } from './node-commands';
@@ -13,7 +13,7 @@ import { gradleToJson } from './gradle-to-json';
 import { ExtensionSetting, getExtSetting, getSetting, WorkspaceSection, WorkspaceSetting } from './workspace-state';
 import { window, workspace } from 'vscode';
 import { join } from 'path';
-import { serve } from './run-web';
+import { serve } from './web-run';
 import { isWindows } from './utilities';
 
 /**

@@ -14,7 +14,7 @@ import { Project } from './project';
 import { Tip, TipType } from './tip';
 import { getRunOutput } from './utilities';
 import { ionicExport } from './ionic-export';
-import { exState } from './wn-tree-provider';
+import { exState } from './tree-provider';
 
 /**
  * Check rules for Cordova projects

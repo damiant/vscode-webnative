@@ -1,7 +1,7 @@
 import { ProgressLocation, window } from 'vscode';
 import { CommandName } from './command-name';
 import { handleError } from './error-handler';
-import { exState } from './wn-tree-provider';
+import { exState } from './tree-provider';
 
 import { Tip } from './tip';
 import { getRunOutput, replaceAll } from './utilities';

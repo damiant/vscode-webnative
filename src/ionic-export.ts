@@ -9,7 +9,7 @@ import { ExtensionContext, window } from 'vscode';
 import { QueueFunction } from './tip';
 import { getNpmInfo } from './npm-info';
 import { write, writeError } from './logging';
-import { getStringFrom } from './utils-strings';
+import { getStringFrom } from './utilities-strings';
 
 export async function ionicExport(
   queueFunction: QueueFunction,

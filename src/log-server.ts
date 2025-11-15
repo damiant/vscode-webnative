@@ -1,4 +1,4 @@
-import { exState } from './wn-tree-provider';
+import { exState } from './tree-provider';
 import { injectScript, removeScript } from './log-server-scripts';
 import { extname, join } from 'path';
 import { readFile } from 'fs';

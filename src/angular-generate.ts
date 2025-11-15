@@ -7,10 +7,10 @@ import { existsSync } from 'fs';
 import { exists, isGreaterOrEqual, isLessOrEqual } from './analyzer';
 import { window } from 'vscode';
 import { QueueFunction, Tip, TipType } from './tip';
-import { exState } from './wn-tree-provider';
+import { exState } from './tree-provider';
 import { npx } from './node-commands';
 import { checkAngularJson } from './rules-angular-json';
-import { getStringFrom } from './utils-strings';
+import { getStringFrom } from './utilities-strings';
 
 export async function addAngularGenerateAction(project: Project) {
   // if (!project.isCapacitor) return;

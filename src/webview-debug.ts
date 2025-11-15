@@ -1,7 +1,7 @@
 import { Uri, Webview, commands, window } from 'vscode';
 import { Context, VSCommand } from './context-variables';
 import { CommandName } from './command-name';
-import { exState } from './wn-tree-provider';
+import { exState } from './tree-provider';
 import { join } from 'path';
 import { debugBrowser, viewInEditor } from './preview';
 import { httpRequest, openUri } from './utilities';

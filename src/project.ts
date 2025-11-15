@@ -2,7 +2,7 @@ import { Recommendation } from './recommendation';
 import { Tip, TipType } from './tip';
 import { load, exists } from './analyzer';
 import { isRunning } from './tasks';
-import { exState } from './wn-tree-provider';
+import { exState } from './tree-provider';
 import { Context, VSCommand } from './context-variables';
 import { getRecommendations } from './recommend';
 import { getIgnored } from './ignore';

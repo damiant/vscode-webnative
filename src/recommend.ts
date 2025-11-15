@@ -1,7 +1,7 @@
 import { deprecatedPackages, exists, isGreaterOrEqual } from './analyzer';
 import { reviewCapacitorConfig } from './capacitor-configure';
 import { build, BuildOptions } from './build';
-import { serve } from './run-web';
+import { serve } from './web-run';
 import { Project } from './project';
 import { addSplashAndIconFeatures } from './splash-icon';
 import { QueueFunction, RunPoint, RunStatus, Tip, TipFeature, TipType } from './tip';
@@ -18,7 +18,7 @@ import { capacitorOpen } from './capacitor-open';
 import { CapacitorPlatform } from './capacitor-platform';
 import { addScripts } from './scripts';
 import { Context } from './context-variables';
-import { exState } from './wn-tree-provider';
+import { exState } from './tree-provider';
 import { getAndroidWebViewList } from './android-debug-list';
 import { getDebugBrowserName } from './preview';
 import { checkIonicNativePackages } from './rules-ionic-native';
@@ -40,15 +40,6 @@ import { cancelLastOperation } from './tasks';
 import { CommandName } from './command-name';
 import { CommandTitle } from './command-title';
 import { ExtensionContext, commands } from 'vscode';
-import {
-  builderSettingsRules,
-  builderDevelopInteractive,
-  checkBuilderIntegration,
-  builderDevelopAuth,
-  builderDevelopPrompt,
-  builderOpen,
-  hasBuilder,
-} from './integrations-builder';
 import { webProjectPackages } from './web-configuration';
 import { checkRecommendedExtensions } from './vscode-recommendation';
 
@@ -367,21 +358,6 @@ export async function getRecommendations(project: Project, context: ExtensionCon
   if (!project.isCapacitor && !project.isCordova) {
     // The project is not using Cordova or Capacitor
     webProject(project);
-  }
-
-  // Builder
-  const bTask = builderDevelopAuth();
-  if (hasBuilder()) {
-    project.setGroup(`Builder`, `These tasks are available for Builder.io`, TipType.Builder, true, undefined, true);
-
-    project.tips(bTask);
-    project.tips(checkBuilderIntegration());
-    project.add(builderDevelopInteractive());
-    project.add(builderDevelopPrompt(project));
-    project.add(builderSettingsRules(project));
-    project.add(builderOpen());
-  } else {
-    project.tips(bTask);
   }
 
   // Package Upgrade Features

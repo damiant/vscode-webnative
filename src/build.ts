@@ -1,6 +1,6 @@
 import { Project } from './project';
 import { MonoRepoType } from './monorepo';
-import { exState } from './wn-tree-provider';
+import { exState } from './tree-provider';
 import { InternalCommand } from './command-name';
 import { npmRun, npx, preflightNPMCheck } from './node-commands';
 import { exists } from './analyzer';

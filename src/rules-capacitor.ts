@@ -25,7 +25,7 @@ import { MonoRepoType } from './monorepo';
 import { CapacitorMigrationOptions, migrateCapacitor4, migrateCapacitor } from './capacitor-migrate';
 import { checkAngularJson } from './rules-angular-json';
 import { checkBrowsersList } from './rules-browserslist';
-import { exState } from './wn-tree-provider';
+import { exState } from './tree-provider';
 import { integratePWA } from './capacitor-pwa';
 import { showOutput, write, writeWN } from './logging';
 import { ExtensionContext, window } from 'vscode';

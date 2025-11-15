@@ -1,5 +1,5 @@
 import { Project } from './project';
-import { exState } from './wn-tree-provider';
+import { exState } from './tree-provider';
 import { exists } from './analyzer';
 import { ExtensionContext, window } from 'vscode';
 import { existsSync, readdirSync, readFileSync } from 'fs';

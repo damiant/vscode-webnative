@@ -1,6 +1,6 @@
 import { dirname, join } from 'path';
 import { writeError } from './logging';
-import { exState } from './wn-tree-provider';
+import { exState } from './tree-provider';
 import { MonoRepoProject } from './monorepo';
 import { Project } from './project';
 import { stripJsonComments } from './strip-json-comments';

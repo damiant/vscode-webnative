@@ -1,7 +1,7 @@
 import { existsSync, mkdirSync, readdirSync, readFileSync, renameSync, rmdirSync, writeFileSync } from 'fs';
 import { parse } from 'fast-xml-parser';
 import { join } from 'path';
-import { getStringFrom, setStringIn } from './utils-strings';
+import { getStringFrom, setStringIn } from './utilities-strings';
 
 export class AndroidProject {
   private _projectPath: string;

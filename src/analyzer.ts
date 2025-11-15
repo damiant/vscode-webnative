@@ -16,10 +16,10 @@ import { Command, Tip, TipType } from './tip';
 import { Project } from './project';
 import { getRunOutput } from './utilities';
 import { npmInstall, npmUninstall, PackageManager } from './node-commands';
-import { exState } from './wn-tree-provider';
+import { exState } from './tree-provider';
 import { ExtensionContext, window } from 'vscode';
 import { existsSync, lstatSync, readFileSync, statSync, writeFileSync } from 'fs';
-import { setStringIn } from './utils-strings';
+import { setStringIn } from './utilities-strings';
 
 let packageFile;
 let allDependencies = {};

@@ -11,7 +11,7 @@ import {
   WebView,
   WebViewType,
 } from './android-debug-models';
-import { exState } from './wn-tree-provider';
+import { exState } from './tree-provider';
 import { workspace } from 'vscode';
 import { existsSync } from 'fs';
 import { join, resolve } from 'path';

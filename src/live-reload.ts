@@ -1,6 +1,6 @@
 import { Project } from './project';
 import { getRunOutput, openUri } from './utilities';
-import { exState } from './wn-tree-provider';
+import { exState } from './tree-provider';
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'fs';
 import { writeError, writeWN } from './logging';
 import { basename, extname, join } from 'path';

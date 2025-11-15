@@ -4,7 +4,7 @@ import { confirm, getRunOutput, isWindows, replaceAll } from './utilities';
 import { write, writeError, writeWN } from './logging';
 import { exists, isGreaterOrEqual, isLess } from './analyzer';
 import { fixGlobalScss, readAngularJson, writeAngularJson } from './rules-angular-json';
-import { exState } from './wn-tree-provider';
+import { exState } from './tree-provider';
 import { clearIgnored } from './ignore';
 import { CommandName, InternalCommand } from './command-name';
 import { ProgressLocation, QuickPickItem, QuickPickItemKind, commands, window } from 'vscode';

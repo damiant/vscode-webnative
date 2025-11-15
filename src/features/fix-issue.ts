@@ -10,7 +10,7 @@ import {
   waitForOtherActions,
 } from '../tasks';
 import { Command, Tip, TipFeature } from '../tip';
-import { exState, ExTreeProvider } from '../wn-tree-provider';
+import { exState, ExTreeProvider } from '../tree-provider';
 import { CancelObject, estimateRunTime, openUri, run } from '../utilities';
 import { showOutput, write, writeError, writeWN } from '../logging';
 import { ActionResult, CommandName, InternalCommand } from '../command-name';
@@ -18,7 +18,7 @@ import { CapacitorPlatform } from '../capacitor-platform';
 import { kill } from '../process-list';
 import { ignore } from '../ignore';
 import { Context } from '../context-variables';
-import { selectExternalIPAddress } from '../run-web';
+import { selectExternalIPAddress } from '../web-run';
 import { selectDevice } from '../capacitor-device';
 import { Recommendation } from '../recommendation';
 import { CommandTitle } from '../command-title';

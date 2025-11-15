@@ -1,4 +1,4 @@
-import { CapacitorProjectState } from './cap-project';
+import { CapacitorProjectState } from './capacitor-project';
 import { Project } from './project';
 import { QueueFunction, Tip, TipType } from './tip';
 import { channelShow } from './utilities';
@@ -10,7 +10,7 @@ import { existsSync } from 'fs';
 import { ExtensionContext, window } from 'vscode';
 import { AndroidProject } from './native-project-android';
 import { IosProject } from './native-project-ios';
-import { getStringFrom, setStringIn } from './utils-strings';
+import { getStringFrom, setStringIn } from './utilities-strings';
 
 enum NativePlatform {
   iOSOnly,

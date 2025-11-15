@@ -13,7 +13,7 @@ import { readAngularJson } from './rules-angular-json';
 import { runCommands } from './advanced-actions';
 import { window } from 'vscode';
 import { ignore } from './ignore';
-import { exState } from './wn-tree-provider';
+import { exState } from './tree-provider';
 
 /**
  * Web projects are not using Capacitor or Cordova

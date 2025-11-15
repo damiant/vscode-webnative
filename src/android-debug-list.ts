@@ -3,7 +3,7 @@ import { debugAndroid } from './android-debug';
 import { findDevices, findWebViews } from './android-debug-bridge';
 import { Device, WebView } from './android-debug-models';
 import { CommandName } from './command-name';
-import { exState } from './wn-tree-provider';
+import { exState } from './tree-provider';
 import { Recommendation } from './recommendation';
 import { QueueFunction, Tip, TipType } from './tip';
 
