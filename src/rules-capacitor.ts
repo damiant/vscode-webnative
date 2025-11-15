@@ -34,6 +34,7 @@ import { angularMigrate, maxAngularVersion } from './rules-angular-migrate';
 import { checkPrivacyManifest } from './xcode';
 import { existsSync, readFileSync } from 'fs';
 import { join } from 'path';
+import { runSPMMigration } from './capacitor-spm-migration';
 
 /**
  * Check rules for Capacitor projects
@@ -472,6 +473,18 @@ export async function capacitorRecommendations(project: Project, forMigration: b
           .showProgressDialog()
           .canIgnore(),
       );
+    }
+
+    // SPM Migration Feature (iOS only with CocoaPods)
+    if (project.hasCapacitorProject(CapacitorPlatform.ios)) {
+      const podfilePath = join(project.projectFolder(), 'ios', 'App', 'Podfile');
+      if (existsSync(podfilePath)) {
+        tips.push(
+          new Tip('SPM Migration', '', TipType.Apple)
+            .setQueuedAction(runSPMMigration, project)
+            .setTooltip('Run the Swift Package Manager migration assistant for iOS projects'),
+        );
+      }
     }
   }
 
