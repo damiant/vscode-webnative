@@ -2,6 +2,7 @@ import { window } from 'vscode';
 import { Project } from './project';
 import { QueueFunction } from './tip';
 import { runInTerminal } from './terminal';
+import { openUri } from './utilities';
 
 /**
  * Run the SPM Migration Assistant for iOS projects
@@ -13,7 +14,13 @@ export async function runSPMMigration(queueFunction: QueueFunction, project: Pro
     'This will help migrate from CocoaPods to Swift Package Manager. Begin the SPM migration tool?',
     'Yes',
     'No',
+    'More Information',
   );
+
+  if (result === 'More Information') {
+    openUri('https://capacitorjs.com/docs/ios/spm');
+    return;
+  }
 
   if (result !== 'Yes') {
     return;
