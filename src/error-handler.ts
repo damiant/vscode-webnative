@@ -10,6 +10,7 @@ import { existsSync, lstatSync } from 'fs';
 import { join } from 'path';
 import { uncolor } from './uncolor';
 import { getStringFrom } from './utilities-strings';
+import { hideOutput } from './logging';
 
 interface ErrorLine {
   uri: string;
@@ -414,6 +415,7 @@ async function handleErrorLine(number: number, errors: Array<ErrorLine>, folder:
   const nextButton = number + 1 == errors.length ? undefined : 'Next';
   const prevButton = number == 0 ? undefined : 'Previous';
   const title = errors.length > 1 ? `Error ${number + 1} of ${errors.length}: ` : '';
+
   window.showErrorMessage(`${title}${errors[number].error}`, prevButton, nextButton, 'Ok').then((result) => {
     if (result == 'Next') {
       handleErrorLine(number + 1, errors, folder);
@@ -422,6 +424,13 @@ async function handleErrorLine(number: number, errors: Array<ErrorLine>, folder:
     if (result == 'Previous') {
       handleErrorLine(number - 1, errors, folder);
       return;
+    }
+
+    // TODO: Add "Fix this error" which will send to LLM
+    if ((result as any) == 'Fix this error') {
+      const prompt = `Fix the error on line ${errors[number].line} at position ${errors[number].position} of ${errors[number].uri}: ${errors[number].error}`;
+      hideOutput();
+      // TODO: Send prompt to LLM
     }
   });
   let uri = errors[number].uri;
