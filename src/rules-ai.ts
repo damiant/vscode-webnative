@@ -26,7 +26,6 @@ async function runOpenAICodex(queueFunction: QueueFunction, project: Project): P
   queueFunction();
   showOutput();
   // Use --no flag to prevent npx from downloading if not found locally
-  const apiKey = `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`;
   const cmd = `export CODEX_HOME="${project.folder}" && export OPENROUTER_API_KEY=${apiKey} && ${npx(project)} --no @openai/codex --provider openrouter exec --json "What does this project do?"`;
 
   await run(cmd, project);
