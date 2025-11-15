@@ -1,7 +1,7 @@
 import { deprecatedPackages, exists, isGreaterOrEqual } from './analyzer';
 import { reviewCapacitorConfig } from './capacitor-configure';
 import { build, BuildOptions } from './build';
-import { serve } from './run-web';
+import { serve } from './web-run';
 import { Project } from './project';
 import { addSplashAndIconFeatures } from './splash-icon';
 import { QueueFunction, RunPoint, RunStatus, Tip, TipFeature, TipType } from './tip';
@@ -18,7 +18,7 @@ import { capacitorOpen } from './capacitor-open';
 import { CapacitorPlatform } from './capacitor-platform';
 import { addScripts } from './scripts';
 import { Context } from './context-variables';
-import { exState } from './wn-tree-provider';
+import { exState } from './tree-provider';
 import { getAndroidWebViewList } from './android-debug-list';
 import { getDebugBrowserName } from './preview';
 import { checkIonicNativePackages } from './rules-ionic-native';

@@ -2,7 +2,7 @@ import { Project } from './project';
 import { QueueFunction, Tip, TipType } from './tip';
 import { writeError } from './logging';
 import { openUri } from './utilities';
-import { exState } from './wn-tree-provider';
+import { exState } from './tree-provider';
 import { ignore } from './ignore';
 import { browsersList, exists } from './analyzer';
 import { existsSync, readFileSync, rmSync, writeFileSync } from 'fs';

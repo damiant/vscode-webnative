@@ -1,13 +1,13 @@
 import { exists } from './analyzer';
 import { CommandName } from './command-name';
-import { exState } from './wn-tree-provider';
-import { getNpmWorkspaceProjects } from './monorepos-npm';
-import { getNXProjects } from './monorepos-nx';
+import { exState } from './tree-provider';
+import { getNpmWorkspaceProjects } from './monorepo-npm';
+import { getNXProjects } from './monorepo-nx';
 import { Project } from './project';
 import { Context, VSCommand } from './context-variables';
-import { getPnpmWorkspaces } from './monorepos-pnpm';
+import { getPnpmWorkspaces } from './monorepo-pnpm';
 import { PackageManager } from './node-commands';
-import { getLernaWorkspaces } from './monorepos-lerna';
+import { getLernaWorkspaces } from './monorepo-lerna';
 import { dirname, join } from 'path';
 import { write, writeWarning } from './logging';
 import { NpmDependency, NpmOutdatedDependency } from './npm-model';

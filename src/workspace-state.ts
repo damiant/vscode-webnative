@@ -1,5 +1,5 @@
 import { workspace } from 'vscode';
-import { exState } from './wn-tree-provider';
+import { exState } from './tree-provider';
 
 export const WorkspaceSection = 'webnative';
 

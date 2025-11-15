@@ -1,5 +1,5 @@
 import { TextDocument, window, workspace } from 'vscode';
-import { exState } from '../wn-tree-provider';
+import { exState } from '../tree-provider';
 import { autoFixOtherImports } from '../imports-icons';
 
 export function trackProjectChange() {

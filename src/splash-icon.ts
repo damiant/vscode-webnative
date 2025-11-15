@@ -9,7 +9,7 @@ import { Context } from './context-variables';
 import { extname, join } from 'path';
 import { ProgressLocation, window } from 'vscode';
 import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
-import { exState } from './wn-tree-provider';
+import { exState } from './tree-provider';
 
 export enum AssetType {
   splash = 'splash.png',

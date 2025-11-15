@@ -3,7 +3,7 @@ import { networkInterfaces } from 'os';
 
 import { getRunConfigurationArgs } from './build-configuration';
 import { InternalCommand } from './command-name';
-import { exState } from './wn-tree-provider';
+import { exState } from './tree-provider';
 import { certPath } from './live-reload';
 import { MonoRepoType } from './monorepo';
 import { npmRun, npx, preflightNPMCheck } from './node-commands';

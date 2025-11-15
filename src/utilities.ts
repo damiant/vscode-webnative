@@ -1,7 +1,7 @@
 import { RunPoint, TipFeature } from './tip';
 import { debugBrowser, viewInEditor } from './preview';
 import { handleError } from './error-handler';
-import { exState, ExTreeProvider } from './wn-tree-provider';
+import { exState, ExTreeProvider } from './tree-provider';
 import { getMonoRepoFolder, getPackageJSONFilename } from './monorepo';
 import { InternalCommand } from './command-name';
 import { exists } from './analyzer';
@@ -19,7 +19,7 @@ import { qrView } from './webview-debug';
 import { CancellationToken, ProgressLocation, Uri, commands, window, workspace } from 'vscode';
 import { uncolor } from './uncolor';
 import { kill } from 'process';
-import { getStringFrom, replaceAllStringIn } from './utils-strings';
+import { getStringFrom, replaceAllStringIn } from './utilities-strings';
 
 export interface CancelObject {
   proc: ChildProcess;

@@ -9,7 +9,7 @@ import {
   warnMinVersion,
 } from './analyzer';
 import { npmInstallAll, suggestInstallAll } from './node-commands';
-import { exState } from './wn-tree-provider';
+import { exState } from './tree-provider';
 import { existsSync } from 'fs';
 
 /**

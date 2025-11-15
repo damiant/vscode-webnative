@@ -6,7 +6,7 @@ import { window } from 'vscode';
 import { openUri, showProgress } from './utilities';
 import { npx } from './node-commands';
 import { ActionResult } from './command-name';
-import { exState } from './wn-tree-provider';
+import { exState } from './tree-provider';
 
 export interface CapacitorPluginMigrationOptions {
   changesLink: string;

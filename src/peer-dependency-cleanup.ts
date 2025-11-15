@@ -1,6 +1,6 @@
 import { window } from 'vscode';
 import { getAllPackageNames, getPackageVersion } from './analyzer';
-import { exState } from './wn-tree-provider';
+import { exState } from './tree-provider';
 import { write } from './logging';
 import { DependencyVersion, PeerReport, checkPeerDependencies } from './peer-dependencies';
 import { Project, inspectProject } from './project';

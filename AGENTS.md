@@ -1,0 +1,1 @@
+- After each change to code run `npm run build:all` and correct any errors found

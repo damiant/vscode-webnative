@@ -1,7 +1,7 @@
 import { Project } from './project';
 import { QueueFunction, Tip, TipType } from './tip';
 import { writeError, writeWN } from './logging';
-import { exState } from './wn-tree-provider';
+import { exState } from './tree-provider';
 import { isGreaterOrEqual } from './analyzer';
 import { getCapacitorConfigWebDir, getCapacitorConfigureFilename, writeCapacitorConfig } from './capacitor-config-file';
 import { join, sep } from 'path';

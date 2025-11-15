@@ -1,7 +1,7 @@
 import { window } from 'vscode';
 import { Project } from './project';
 import { ignore } from './ignore';
-import { exState } from './wn-tree-provider';
+import { exState } from './tree-provider';
 import { QueueFunction, Tip } from './tip';
 import { runCommands } from './advanced-actions';
 import { npx } from './node-commands';

@@ -2,16 +2,14 @@ import { CommandName } from './command-name';
 import { openUri, showMessage } from './utilities';
 import { ionicInit } from './ionic-init';
 import { Context } from './context-variables';
-import { exState } from './wn-tree-provider';
+import { exState } from './tree-provider';
 import { Project } from './project';
 import { getLastOperation } from './tasks';
 import { Disposable, Position, Selection, TextDocument, Uri, commands, window, workspace } from 'vscode';
 import { existsSync, lstatSync } from 'fs';
 import { join } from 'path';
-import { chat, hasBuilder } from './integrations-builder';
-import { hideOutput } from './logging';
 import { uncolor } from './uncolor';
-import { getStringFrom } from './utils-strings';
+import { getStringFrom } from './utilities-strings';
 
 interface ErrorLine {
   uri: string;
@@ -415,10 +413,8 @@ async function handleErrorLine(number: number, errors: Array<ErrorLine>, folder:
   if (!errors[number]) return;
   const nextButton = number + 1 == errors.length ? undefined : 'Next';
   const prevButton = number == 0 ? undefined : 'Previous';
-  const fixTitle = 'Fix with Builder';
-  const fixButton = hasBuilder() ? fixTitle : undefined;
   const title = errors.length > 1 ? `Error ${number + 1} of ${errors.length}: ` : '';
-  window.showErrorMessage(`${title}${errors[number].error}`, fixButton, prevButton, nextButton, 'Ok').then((result) => {
+  window.showErrorMessage(`${title}${errors[number].error}`, prevButton, nextButton, 'Ok').then((result) => {
     if (result == 'Next') {
       handleErrorLine(number + 1, errors, folder);
       return;
@@ -426,11 +422,6 @@ async function handleErrorLine(number: number, errors: Array<ErrorLine>, folder:
     if (result == 'Previous') {
       handleErrorLine(number - 1, errors, folder);
       return;
-    }
-    if (result == fixTitle) {
-      const prompt = `Fix the error on line ${errors[number].line} at position ${errors[number].position} of ${errors[number].uri}: ${errors[number].error}`;
-      hideOutput();
-      chat(exState.projectRef.projectFolder(), undefined, undefined, prompt);
     }
   });
   let uri = errors[number].uri;

@@ -12,7 +12,7 @@ import { exec } from 'child_process';
 import { getCapacitorConfigureFilename, writeCapacitorConfig } from './capacitor-config-file';
 import { window } from 'vscode';
 import { QueueFunction } from './tip';
-import { getStringFrom, isEmpty } from './utils-strings';
+import { getStringFrom, isEmpty } from './utilities-strings';
 
 /**
  * Capacitor build command

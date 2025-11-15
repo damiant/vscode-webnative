@@ -1,7 +1,7 @@
 'use strict';
 
 import { Context, VSCommand } from './context-variables';
-import { exState, ExTreeProvider } from './wn-tree-provider';
+import { exState, ExTreeProvider } from './tree-provider';
 import { clearRefreshCache } from './process-packages';
 import { Recommendation } from './recommendation';
 import { installPackage, reviewProject } from './project';
@@ -15,7 +15,7 @@ import { setWebConfig, WebConfigSetting } from './web-configuration';
 import { getLocalFolder } from './monorepo';
 import { androidDebugUnforward } from './android-debug-bridge';
 import { AndroidDebugProvider } from './android-debug-provider';
-import { DevServerProvider } from './devserver-provider';
+import { DevServerProvider } from './dev-server-provider';
 import { AndroidDebugType } from './android-debug';
 import { CapacitorPlatform } from './capacitor-platform';
 import { advancedActions } from './advanced-actions';

@@ -7,7 +7,7 @@ import { PackageManager, npmInstall, npmUninstall } from './node-commands';
 import { run } from './utilities';
 import { ProjectSummary, inspectProject } from './project';
 import { PackageInfo } from './package-info';
-import { ExTreeProvider, exState } from './wn-tree-provider';
+import { ExTreeProvider, exState } from './tree-provider';
 import { clearOutput, write } from './logging';
 import { findCompatibleVersion2 } from './peer-dependencies';
 import { getPackageVersion } from './analyzer';
