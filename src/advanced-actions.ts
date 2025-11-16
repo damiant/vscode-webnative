@@ -202,13 +202,19 @@ function showIgnoredRecommendations(): void {
   commands.executeCommand(CommandName.Refresh);
 }
 
-export async function runCommands(commands: Array<string>, title: string, project: Project): Promise<void> {
+export async function runCommands(
+  commands: Array<string>,
+  title: string,
+  project: Project,
+  onStdout?: (data: string) => void,
+  onStderr?: (data: string) => void,
+): Promise<void> {
   try {
     if (title.includes(')')) {
       title = title.substring(title.indexOf(')') + 1);
     }
     await window.withProgress({ location: ProgressLocation.Notification, title, cancellable: false }, async () => {
-      await run(commands, project.folder);
+      await run(commands, project.folder, onStdout, onStderr);
     });
 
     writeWN(`Completed ${title}`);
@@ -217,11 +223,16 @@ export async function runCommands(commands: Array<string>, title: string, projec
   }
 }
 
-async function run(commands: Array<string>, folder: string): Promise<void> {
+async function run(
+  commands: Array<string>,
+  folder: string,
+  onStdout?: (data: string) => void,
+  onStderr?: (data: string) => void,
+): Promise<void> {
   for (const command of commands) {
     writeWN(replaceAll(command, InternalCommand.cwd, ''));
     try {
-      write(await getRunOutput(command, folder));
+      write(await getRunOutput(command, folder, undefined, undefined, undefined, onStdout, onStderr));
     } catch (err) {
       //writeError(err);
       break;
