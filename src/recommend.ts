@@ -4,6 +4,7 @@ import { build, BuildOptions } from './build';
 import { serve } from './web-run';
 import { Project } from './project';
 import { addSplashAndIconFeatures } from './splash-icon';
+import { addAIFeature } from './rules-ai';
 import { QueueFunction, RunPoint, RunStatus, Tip, TipFeature, TipType } from './tip';
 import { capacitorMigrationChecks as checkCapacitorMigrationRules } from './rules-capacitor-migration';
 import { reviewPackages } from './process-packages';
@@ -359,6 +360,9 @@ export async function getRecommendations(project: Project, context: ExtensionCon
     // The project is not using Cordova or Capacitor
     webProject(project);
   }
+
+  // AI Feature
+  addAIFeature(project);
 
   // Package Upgrade Features
   reviewPackages(packages, project);
