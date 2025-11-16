@@ -1,5 +1,7 @@
 # Roadmap
 
+- Add link to github if (git config --get remote.origin.url returns a url)
+
 ## Starters
 
 - Create starters for flowbite
