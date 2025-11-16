@@ -3,6 +3,7 @@
 ### Version 2.0.55
 
 - add SPM migration assistant for iOS projects
+- Support for bun dev server projects
 
 ### Version 2.0.54
 
