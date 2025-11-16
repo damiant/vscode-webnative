@@ -311,6 +311,7 @@ export async function run(
               '➜ Local:', // Nuxt with Vite
               '- Local:', // Vue
               'Listening on ', // Tanstack start
+              'Server running at', // Bun dev
               '┃ Local', // Astro
             ]);
             if (url) {

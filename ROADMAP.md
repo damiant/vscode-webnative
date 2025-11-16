@@ -1,5 +1,16 @@
 # Roadmap
 
+- Add link to github if (git config --get remote.origin.url returns a url)
+
+## Starters
+
+- Create starters for flowbite
+- Create starters for shadcn
+- Create agents.md in starters
+- Create mcp servers in starters
+
+## Other
+
 - Fix bundle analysis for React Vite apps
 - Show Statistics, Security Audit, Check Minor for Web Projects
 

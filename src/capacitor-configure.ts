@@ -146,8 +146,8 @@ async function getCapacitorProjectState(prj: Project, context: ExtensionContext)
     }
   }
 
-  const androidProject = await getAndroidProject(prj);
-  const iosProject = await getIosProject(prj);
+  // Parse both iOS and Android projects in parallel for faster inspection
+  const [androidProject, iosProject] = await Promise.all([getAndroidProject(prj), getIosProject(prj)]);
   let hasNativeProject = false;
   if (iosProject && iosProject.exists()) {
     const appTarget = iosProject.getAppTarget();
