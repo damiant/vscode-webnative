@@ -680,6 +680,12 @@
           "scope": "application",
           "default": "",
           "description": "Array of glob patterns to skip during debugging. Eg: [\"!**/node_modules/**\",\"<node_internals>/**\"]"
+        },
+        "webnative.disableClipboardCommandDetection": {
+          "type": "boolean",
+          "scope": "application",
+          "default": false,
+          "description": "Disable command detection and auto-run from clipboard. If true, clipboard commands will not be auto-detected or run."
         }
       }
     }

@@ -124,7 +124,12 @@ export async function activate(context: ExtensionContext) {
   trackProjectChange();
 
   // On focusing with extension if clipboard has a command give option to run it
-  autoRunClipboard();
+  const disableClipboardDetection = workspace
+    .getConfiguration('webnative')
+    .get<boolean>('disableClipboardCommandDetection', false);
+  if (!disableClipboardDetection) {
+    autoRunClipboard();
+  }
 
   commands.registerCommand(CommandName.Refresh, () => {
     clearRefreshCache(context);
