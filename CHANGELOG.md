@@ -1,5 +1,10 @@
 ## Changelog
 
+### Version 2.0.56
+
+- Added setting `webnative.disableClipboardCommandDetection` to disable command detection and auto-run from clipboard
+- Clipboard command detection now respects this setting in extension activation
+
 ### Version 2.0.55
 
 - add SPM migration assistant for iOS projects
