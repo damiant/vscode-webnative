@@ -1,0 +1,70 @@
+name: Deploy VS Code Extension
+description: This workflow builds & deploys the VS Code extension to the Extension Marketplace.
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_type:
+        description: 'Release type (normal or prerelease)'
+        required: true
+        default: normal
+        options:
+          - normal
+          - prerelease
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/vscode
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+
+      - name: Set patch version to run_number
+        run: |
+          RUN_NUMBER=${{ github.run_number }}
+          VERSION=$(jq -r '.version' package.json)
+          MAJOR=$(echo $VERSION | cut -d. -f1)
+          MINOR=$(echo $VERSION | cut -d. -f2)
+          NEW_VERSION="${MAJOR}.${MINOR}.${RUN_NUMBER}"
+          jq --arg version "$NEW_VERSION" '.version = $version' package.json > tmp.json && mv tmp.json package.json
+
+      - name: Install dependencies
+        run: |
+          npm install
+          npm install -g @vscode/vsce
+
+      - name: Build
+        run: |
+          npm run build
+
+      - name: Create Release Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: builder.vsix
+          path: ./packages/vscode/builder-*.vsix
+          retention-days: 60
+      - name: Publish to open-vsx.org (For Windsurf, VSCodium etc)
+        run: |
+          RUN_NUMBER=${{ github.run_number }}
+          VERSION=$(jq -r '.version' package.json)
+          MAJOR=$(echo $VERSION | cut -d. -f1)
+          MINOR=$(echo $VERSION | cut -d. -f2)
+          NEW_VERSION="${MAJOR}.${MINOR}.${RUN_NUMBER}"
+          npx ovsx publish ./builder-${NEW_VERSION}.vsix  -p ${{ secrets.OPEN_VSX_TOKEN }}
+      - name: Publish to VS Marketplace
+        run: |
+          if [ "${{ inputs.release_type }}" == "prerelease" ]; then
+            npx vsce package --pre-release
+            npx vsce publish --packagePath ./builder-*.vsix -p ${{ secrets.VSCE_PAT }}
+          else
+            npx vsce package
+            npx vsce publish --packagePath ./builder-*.vsix -p ${{ secrets.VSCE_PAT }}
+          fi

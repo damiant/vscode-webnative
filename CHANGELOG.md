@@ -32,8 +32,6 @@
 
 ### Version 2.0.49
 
-- Fix live reload and webnative icons for light mode theme
-
 ### Version 2.0.47
 
 - Option to set the Android debugging webroot to use the workspace folder or www folder
