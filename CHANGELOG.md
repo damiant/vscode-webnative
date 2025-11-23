@@ -1,5 +1,9 @@
 ## Changelog
 
+### Version 2.0.57
+
+- Add Support for Angular 21
+
 ### Version 2.0.56
 
 - Added setting `webnative.disableClipboardCommandDetection` to disable command detection and auto-run from clipboard

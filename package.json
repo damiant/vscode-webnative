@@ -2,7 +2,7 @@
   "name": "webnative",
   "displayName": "WebNative",
   "description": "Create and maintain web and native projects",
-  "version": "2.0.56",
+  "version": "2.0.57",
   "icon": "media/webnative.png",
   "publisher": "WebNative",
   "keywords": [
@@ -702,12 +702,12 @@
     "@typescript-eslint/eslint-plugin": "8.26.1",
     "@typescript-eslint/parser": "8.26.1",
     "@webnativellc/eslint-config": "0.4.0",
-    "esbuild": "0.25.5",
+    "esbuild": "0.27.0",
     "eslint": "9.28.0",
     "eslint-plugin-unused-imports": "^4.1.4",
     "husky": "^7.0.0",
-    "typescript-eslint": "8.33.1",
     "typescript": "5.8.3",
+    "typescript-eslint": "8.33.1",
     "vitest": "3.2.1"
   },
   "dependencies": {
