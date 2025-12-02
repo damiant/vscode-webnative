@@ -18,8 +18,7 @@
     "importHelpers": true,
     "skipLibCheck": true,
     "target": "es2022",
-    "module": "es2020",
-    "lib": ["es2018", "dom"]
+    "module": "es2020"
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,
