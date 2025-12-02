@@ -1,4 +1,4 @@
-import { enableProdMode } from '@angular/core';
+import { enableProdMode, provideZoneChangeDetection } from '@angular/core';
 import {
   provideVSCodeDesignSystem,
   vsCodeButton,
@@ -36,4 +36,4 @@ provideVSCodeDesignSystem().register(
   vsCodeProgressRing(),
 );
 
-bootstrapApplication(AppComponent).catch((err) => console.error(err));
+bootstrapApplication(AppComponent, { providers: [provideZoneChangeDetection()] }).catch((err) => console.error(err));

@@ -1,5 +1,9 @@
 ## Changelog
 
+### Version 2.0.58
+
+- Update dependencies
+
 ### Version 2.0.57
 
 - Add Support for Angular 21
