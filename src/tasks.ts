@@ -5,6 +5,8 @@ import { exState } from './tree-provider';
 import { clearOutput, showOutput, write, writeWN } from './logging';
 import { RunStatus, Tip, TipType } from './tip';
 import { channelShow, replaceAll, stopPublishing } from './utilities';
+import { writeEvent } from './telemetry';
+import { machine } from 'os';
 
 interface RunningAction {
   tip: Tip;
@@ -70,6 +72,14 @@ export async function cancelIfRunning(tip: Tip): Promise<boolean> {
 }
 
 export function finishCommand(tip: Tip) {
+  writeEvent(tip.description ?? tip.title, {
+    command: tip.vsCommand,
+    project: exState.projectRef?.name,
+    type: exState.projectRef?.type,
+    repoType: exState.projectRef?.repoType,
+    frameworkType: exState.projectRef?.frameworkType,
+    os: machine(),
+  });
   runningOperations = runningOperations.filter((op: RunningAction) => {
     return !same(op, { tip, workspace: exState.workspace });
   });
