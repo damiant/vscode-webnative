@@ -1,0 +1,3 @@
+- Always run `npm run build` and be sure that all errors are resolved.
+- Run `npm run lint` after a code change and resolve any issues by running `npm run format`
+- Always run `npm run test` and verify there are no errors.

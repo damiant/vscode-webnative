@@ -1,31 +1,81 @@
 # WebNative MCP Server
 
-Bringing the WebNative feature set to AI.
+Model Context Protocol (MCP) server that provides project analysis and recommendations for Capacitor, Ionic, and Cordova projects. This server exposes the same functionality as the WebNative VS Code extension through MCP tools.
 
-## Development
+## Features
 
-To get started, clone the repository and install the dependencies.
+### Analysis Tools
+
+The MCP server provides four main analysis tools:
+
+1. **`analyze_project`** - Comprehensive project analysis including framework detection, package manager, monorepo support, and platform detection
+2. **`get_recommendations`** - Actionable recommendations for version checks, plugin compatibility, deprecated packages, and migrations
+3. **`check_plugin_compatibility`** - Plugin compatibility checker with replacement suggestions
+4. **`validate_versions`** - Version validation returning only errors and warnings
+
+## Installation
 
 ```bash
 npm install
-npm run dev
+npm run build
 ```
 
-### Start the server
+## Usage
 
-If you simply want to start the server, you can use the `start` script.
+### As an MCP Server
+
+Add to your MCP client configuration (e.g., Claude Desktop):
+
+```json
+{
+  "mcpServers": {
+    "webnative": {
+      "command": "node",
+      "args": ["/path/to/vscode-webnative/mcp-server/dist/server.js"]
+    }
+  }
+}
+```
+
+### Example: Analyze a Project
+
+```json
+{
+  "name": "analyze_project",
+  "arguments": {
+    "projectPath": "/path/to/your/capacitor/project"
+  }
+}
+```
+
+Returns comprehensive project information including framework type, package manager, platforms, and monorepo configuration.
+
+### Example: Get Recommendations
+
+```json
+{
+  "name": "get_recommendations",
+  "arguments": {
+    "projectPath": "/path/to/your/capacitor/project"
+  }
+}
+```
+
+Returns array of actionable recommendations with errors, warnings, and suggestions for improvements.
+
+## Development
+
+### Build
 
 ```bash
-npm run start
+npm run build
 ```
 
-However, you can also interact with the server using the `dev` script.
+### Watch Mode
 
 ```bash
 npm run dev
 ```
-
-This will start the server and allow you to interact with it using CLI.
 
 ### Testing
 
@@ -37,17 +87,16 @@ npm run test
 
 ```bash
 npm run lint
-```
-
-This uses [Prettier](https://prettier.io/), [ESLint](https://eslint.org/) and [TypeScript ESLint](https://typescript-eslint.io/) to lint the code.
-
-### Formatting
-
-Use `npm run format` to format the code.
-
-```bash
 npm run format
 ```
+
+## Architecture
+
+- **`src/shared/`** - Core infrastructure (analyzer, project model, monorepo detection)
+- **`src/rules/`** - Rules engine (Capacitor checks, plugin compatibility)
+- **`src/tools/`** - MCP tool implementations
+
+See full documentation in the [detailed README](./DETAILED.md).
 
 ### GitHub Actions
 

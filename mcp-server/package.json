@@ -24,7 +24,9 @@
   "license": "MIT",
   "description": "MCP Server for WebNative",
   "dependencies": {
+    "@types/semver": "^7.7.1",
     "fastmcp": "^3.25.3",
+    "semver": "^7.7.3",
     "zod": "^3.24.4"
   },
   "release": {
