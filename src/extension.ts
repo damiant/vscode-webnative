@@ -25,7 +25,7 @@ import { webDebugSetting } from './web-debug';
 import { ImportQuickFixProvider } from './quick-fix';
 import { buildAction, debugOnWeb } from './recommend';
 import { StarterPanel } from './starter';
-import { window, commands, ExtensionContext, workspace, debug, languages, StatusBarAlignment } from 'vscode';
+import { window, commands, ExtensionContext, workspace, debug, languages, StatusBarAlignment, lm } from 'vscode';
 import { existsSync } from 'fs';
 import { CommandTitle } from './command-title';
 import { setSetting, WorkspaceSection, WorkspaceSetting } from './workspace-state';
@@ -33,6 +33,7 @@ import { viewInEditor } from './preview';
 import { autoRunClipboard } from './features/auto-run-clipboard';
 import { findAndRun, fix, fixIssue, runAction, runAgain } from './features/fix-issue';
 import { trackProjectChange } from './features/track-project-changes';
+import { webNativeMCPServerProvider } from './mcp-server';
 
 export const extensionName = 'WebNative';
 
@@ -42,9 +43,9 @@ export async function activate(context: ExtensionContext) {
       ? workspace.workspaceFolders[0].uri.fsPath
       : undefined;
 
-  // Ionic Tree View
-  const ionicProvider = new ExTreeProvider(rootPath, context);
-  const view = window.createTreeView('wn-tree', { treeDataProvider: ionicProvider });
+  // Tree View
+  const treeProvider = new ExTreeProvider(rootPath, context);
+  const view = window.createTreeView('wn-tree', { treeDataProvider: treeProvider });
 
   // Quick Fixes
   context.subscriptions.push(
@@ -110,11 +111,6 @@ export async function activate(context: ExtensionContext) {
   exState.projectsView = projectsView;
   exState.context = context;
 
-  // if (rootPath == undefined) {
-  //     // Show the start new project panel
-  //     IonicStartPanel.init(context.extensionUri, this.workspaceRoot, context);
-  // }
-
   exState.shell = context.workspaceState.get(Context.shell);
   const shellOverride: string = workspace.getConfiguration(WorkspaceSection).get('shellPath');
   if (shellOverride && shellOverride.length > 0) {
@@ -133,62 +129,62 @@ export async function activate(context: ExtensionContext) {
 
   commands.registerCommand(CommandName.Refresh, () => {
     clearRefreshCache(context);
-    ionicProvider.refresh();
+    treeProvider.refresh();
   });
 
   commands.registerCommand(CommandName.Add, async () => {
     if (Features.pluginExplorer) {
-      PluginExplorerPanel.init(context.extensionUri, rootPath, context, ionicProvider);
+      PluginExplorerPanel.init(context.extensionUri, rootPath, context, treeProvider);
     } else {
       await installPackage(context.extensionPath, rootPath);
-      if (ionicProvider) {
-        ionicProvider.refresh();
+      if (treeProvider) {
+        treeProvider.refresh();
       }
     }
   });
 
   commands.registerCommand(CommandName.Stop, async (recommendation: Recommendation) => {
     recommendation.tip.data = Context.stop;
-    await fixIssue(undefined, context.extensionPath, ionicProvider, recommendation.tip);
+    await fixIssue(undefined, context.extensionPath, treeProvider, recommendation.tip);
     recommendation.setContext(undefined);
   });
 
   commands.registerCommand(CommandName.OpenInXCode, async () => {
-    await findAndRun(ionicProvider, rootPath, CommandTitle.OpenInXCode);
+    await findAndRun(treeProvider, rootPath, CommandTitle.OpenInXCode);
   });
   commands.registerCommand(CommandName.OpenInAndroidStudio, async () => {
-    await findAndRun(ionicProvider, rootPath, CommandTitle.OpenInAndroidStudio);
+    await findAndRun(treeProvider, rootPath, CommandTitle.OpenInAndroidStudio);
   });
   commands.registerCommand(CommandName.RunForIOS, async () => {
-    await findAndRun(ionicProvider, rootPath, CommandTitle.RunForIOS);
+    await findAndRun(treeProvider, rootPath, CommandTitle.RunForIOS);
   });
   commands.registerCommand(CommandName.RunForAndroid, async () => {
-    await findAndRun(ionicProvider, rootPath, CommandTitle.RunForAndroid);
+    await findAndRun(treeProvider, rootPath, CommandTitle.RunForAndroid);
   });
   commands.registerCommand(CommandName.RunForWeb, async () => {
-    await findAndRun(ionicProvider, rootPath, CommandTitle.RunForWeb);
+    await findAndRun(treeProvider, rootPath, CommandTitle.RunForWeb);
   });
   commands.registerCommand(CommandName.ShowLogs, async () => {
     exState.channelFocus = true;
     channelShow();
   });
   commands.registerCommand(CommandName.Sync, async () => {
-    await findAndRun(ionicProvider, rootPath, CommandTitle.Sync);
+    await findAndRun(treeProvider, rootPath, CommandTitle.Sync);
   });
 
   commands.registerCommand(CommandName.Upgrade, async (recommendation: Recommendation) => {
     await packageUpgrade(recommendation.tip.data, getLocalFolder(rootPath));
-    ionicProvider.refresh();
+    treeProvider.refresh();
   });
 
   commands.registerCommand(CommandName.RefreshDebug, async () => {
     exState.refreshDebugDevices = true;
-    ionicProvider.refresh();
+    treeProvider.refresh();
   });
 
   commands.registerCommand(CommandName.SelectAction, async (r: Recommendation) => {
     await advancedActions(r.getData());
-    ionicProvider.refresh();
+    treeProvider.refresh();
   });
 
   commands.registerCommand(CommandName.LiveReload, async () => {
@@ -232,7 +228,7 @@ export async function activate(context: ExtensionContext) {
       r.tip.addActionArg(`--configuration=${config}`);
     }
     exState.buildConfiguration = config;
-    runAction(r.tip, ionicProvider, rootPath);
+    runAction(r.tip, treeProvider, rootPath);
   });
   commands.registerCommand(CommandName.RunConfig, async (r: Recommendation) => {
     const config = await runConfiguration(context.extensionPath, context, r.tip.actionArg(0));
@@ -241,7 +237,7 @@ export async function activate(context: ExtensionContext) {
       r.tip.addActionArg(`--configuration=${config}`);
     }
     exState.runConfiguration = config;
-    runAction(r.tip, ionicProvider, rootPath);
+    runAction(r.tip, treeProvider, rootPath);
   });
 
   commands.registerCommand(CommandName.NewProject, async () => {
@@ -250,7 +246,7 @@ export async function activate(context: ExtensionContext) {
 
   commands.registerCommand(CommandName.PluginExplorer, async () => {
     await reviewProject(rootPath, context, context.workspaceState.get('SelectedProject'));
-    PluginExplorerPanel.init(context.extensionUri, rootPath, context, ionicProvider);
+    PluginExplorerPanel.init(context.extensionUri, rootPath, context, treeProvider);
   });
 
   commands.registerCommand(CommandName.Open, async (recommendation: Recommendation) => {
@@ -260,12 +256,12 @@ export async function activate(context: ExtensionContext) {
   });
 
   commands.registerCommand(CommandName.RunIOS, async (recommendation: Recommendation) => {
-    runAgain(ionicProvider, rootPath);
+    runAgain(treeProvider, rootPath);
   });
 
   commands.registerCommand(CommandName.Rebuild, async (recommendation: Recommendation) => {
     await recommendation.tip.executeAction();
-    ionicProvider.refresh();
+    treeProvider.refresh();
   });
 
   commands.registerCommand(CommandName.Function, async (recommendation: Recommendation) => {
@@ -274,11 +270,11 @@ export async function activate(context: ExtensionContext) {
 
   commands.registerCommand(CommandName.WebDebugConfig, async (recommendation: Recommendation) => {
     await webDebugSetting();
-    ionicProvider.refresh();
+    treeProvider.refresh();
   });
 
   commands.registerCommand(CommandName.Fix, async (tip: Tip) => {
-    await fix(tip, rootPath, ionicProvider, context);
+    await fix(tip, rootPath, treeProvider, context);
   });
 
   // The project list panel needs refreshing
@@ -289,26 +285,26 @@ export async function activate(context: ExtensionContext) {
   // User selected a project from the list (monorepo)
   commands.registerCommand(CommandName.ProjectSelect, async (project: string) => {
     context.workspaceState.update('SelectedProject', project);
-    ionicProvider.selectProject(project);
+    treeProvider.selectProject(project);
   });
 
   commands.registerCommand(CommandName.Idea, async (t: Tip | Recommendation) => {
     if (!t) return;
     // If the user clicks the light bulb it is a Tip, if they click the item it is a recommendation
     const tip: Tip = (t as Recommendation).tip ? (t as Recommendation).tip : (t as Tip);
-    await fix(tip, rootPath, ionicProvider, context);
+    await fix(tip, rootPath, treeProvider, context);
   });
 
   commands.registerCommand(CommandName.Run, async (r: Recommendation) => {
-    runAction(r.tip, ionicProvider, rootPath);
+    runAction(r.tip, treeProvider, rootPath);
   });
 
   commands.registerCommand(CommandName.Debug, async () => {
-    runAction(debugOnWeb(exState.projectRef, 'Web'), ionicProvider, rootPath);
+    runAction(debugOnWeb(exState.projectRef, 'Web'), treeProvider, rootPath);
   });
 
   commands.registerCommand(CommandName.Build, async () => {
-    runAction(buildAction(exState.projectRef), ionicProvider, rootPath);
+    runAction(buildAction(exState.projectRef), treeProvider, rootPath);
   });
 
   commands.registerCommand(CommandName.SelectDevice, async (r: Recommendation) => {
@@ -319,15 +315,21 @@ export async function activate(context: ExtensionContext) {
       exState.selectedIOSDevice = undefined;
       exState.selectedIOSDeviceName = undefined;
     }
-    runAction(r.tip, ionicProvider, rootPath, CommandName.SelectDevice);
+    runAction(r.tip, treeProvider, rootPath, CommandName.SelectDevice);
   });
 
   commands.registerCommand(CommandName.Link, async (tip: Tip) => {
     await openUri(tip.url);
   });
 
+  // Android Debugging
   context.subscriptions.push(debug.registerDebugConfigurationProvider(AndroidDebugType, new AndroidDebugProvider()));
   context.subscriptions.push(debug.onDidTerminateDebugSession(androidDebugUnforward));
+
+  // MCP server
+  context.subscriptions.push(
+    lm.registerMcpServerDefinitionProvider('webNative', new webNativeMCPServerProvider(context)),
+  );
 
   if (!exState.runWeb) {
     const summary = await reviewProject(rootPath, context, context.workspaceState.get('SelectedProject'));
