@@ -20,7 +20,11 @@ export const listDevicesSchema = z.object({
 });
 
 export const runOnDeviceSchema = z.object({
-  deviceId: z.string().optional().describe('Specific device ID to run on (leave empty to prompt)'),
+  deviceId: z
+    .string()
+    .describe(
+      'Specific device ID to run on. REQUIRED - you must first call list_devices to get available device IDs, then specify the device ID here.',
+    ),
   liveReload: z.boolean().optional().describe('Enable live reload during development'),
   platform: z.enum(['ios', 'android']).describe('Platform to run on'),
   projectPath: z.string().describe('Path to the project folder'),
@@ -90,11 +94,22 @@ export async function runOnDevice(args: z.infer<typeof runOnDeviceSchema>) {
     const project = new Project(args.projectPath);
     await project.load();
 
+    // Validate that deviceId is provided
+    if (!args.deviceId) {
+      return JSON.stringify(
+        {
+          error: 'Device ID is required',
+          message: `You must first call list_devices to get available ${args.platform} devices, then specify the deviceId parameter.`,
+          success: false,
+        },
+        null,
+        2,
+      );
+    }
+
     let command = `${npxCommand(project)} cap run ${args.platform}`;
 
-    if (args.deviceId) {
-      command += ` --target="${args.deviceId}"`;
-    }
+    command += ` --target="${args.deviceId}"`;
 
     if (args.liveReload) {
       command += ' --live-reload';

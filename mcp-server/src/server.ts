@@ -258,7 +258,7 @@ server.addTool({
     title: 'Run On Device',
   },
   description:
-    'Build and run the app on a connected iOS or Android device or simulator. Optionally enable live reload for development.',
+    'Build and run the app on a connected iOS or Android device or simulator. IMPORTANT: You must first call list_devices to get available devices, then specify the deviceId parameter. Optionally enable live reload for development.',
   execute: async (args) => {
     return await runOnDevice(args);
   },
