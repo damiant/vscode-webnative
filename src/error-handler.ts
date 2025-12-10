@@ -449,7 +449,10 @@ async function handleErrorLine(number: number, errors: Array<ErrorLine>, folder:
       }
 
       if (result == fixThisError) {
-        const prompt = `Fix the error on line ${errors[number].line + 1} at position ${errors[number].position + 1}: ${errors[number].error}`;
+        let prompt = `Fix the error on line ${errors[number].line + 1} at position ${errors[number].position + 1}: ${errors[number].error}`;
+        if (errors[number].line == 0 && errors[number].position == 0) {
+          prompt = `${errors[number].uri}: Fix the following error: ${errors[number].error}`;
+        }
         hideOutput();
 
         // Start inline chat with the error context
