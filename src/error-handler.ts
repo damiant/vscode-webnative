@@ -414,25 +414,9 @@ async function handleErrorLine(number: number, errors: Array<ErrorLine>, folder:
   if (!errors[number]) return;
   const nextButton = number + 1 == errors.length ? undefined : 'Next';
   const prevButton = number == 0 ? undefined : 'Previous';
+  const fixThisError = 'Fix this error';
   const title = errors.length > 1 ? `Error ${number + 1} of ${errors.length}: ` : '';
 
-  window.showErrorMessage(`${title}${errors[number].error}`, prevButton, nextButton, 'Ok').then((result) => {
-    if (result == 'Next') {
-      handleErrorLine(number + 1, errors, folder);
-      return;
-    }
-    if (result == 'Previous') {
-      handleErrorLine(number - 1, errors, folder);
-      return;
-    }
-
-    // TODO: Add "Fix this error" which will send to LLM
-    if ((result as any) == 'Fix this error') {
-      const prompt = `Fix the error on line ${errors[number].line} at position ${errors[number].position} of ${errors[number].uri}: ${errors[number].error}`;
-      hideOutput();
-      // TODO: Send prompt to LLM
-    }
-  });
   let uri = errors[number].uri;
   if (!existsSync(uri)) {
     // Might be a relative path
@@ -441,14 +425,40 @@ async function handleErrorLine(number: number, errors: Array<ErrorLine>, folder:
     }
   }
   currentErrorFilename = uri;
+
+  // Open the file first so inline chat can access it
   if (existsSync(uri) && !lstatSync(uri).isDirectory()) {
     await openUri(uri);
     const myPos = new Position(errors[number].line, errors[number].position);
     window.activeTextEditor.selection = new Selection(myPos, myPos);
-    commands.executeCommand('revealLine', { lineNumber: myPos.line, at: 'bottom' });
+    await commands.executeCommand('revealLine', { lineNumber: myPos.line, at: 'bottom' });
   } else {
     console.warn(`${uri} not found`);
   }
+
+  window
+    .showErrorMessage(`${title}${errors[number].error}`, prevButton, nextButton, fixThisError, 'Close')
+    .then(async (result) => {
+      if (result == 'Next') {
+        handleErrorLine(number + 1, errors, folder);
+        return;
+      }
+      if (result == 'Previous') {
+        handleErrorLine(number - 1, errors, folder);
+        return;
+      }
+
+      if (result == fixThisError) {
+        const prompt = `Fix the error on line ${errors[number].line + 1} at position ${errors[number].position + 1}: ${errors[number].error}`;
+        hideOutput();
+
+        // Start inline chat with the error context
+        await commands.executeCommand('inlineChat.start', {
+          message: prompt,
+          autoSend: true,
+        });
+      }
+    });
 }
 
 // Extract error message from a line error line:
