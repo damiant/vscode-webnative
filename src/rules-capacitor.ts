@@ -334,7 +334,7 @@ export async function checkCapacitorRules(project: Project, context: ExtensionCo
     androidStudioReason: '(It comes with Gradle 8.14.3)',
     minJavaVersion: 21,
     migrateInfo:
-      'Capacitor 8 requires NodeJS 22+, sets a deployment target of iOS 15 and Android 16 (SDK 36), and uses SPM by default for new iOS projects.',
+      'Capacitor 8 requires NodeJS 22+, xCode 26+, sets a deployment target of iOS 15 and Android 16 (SDK 36), and uses SPM by default for new iOS projects.',
     minPlugins: [
       { dep: '@ionic-enterprise/identity-vault', version: '5.10.1' },
       { dep: '@ionic-enterprise/google-pay', version: '2.0.0' },
@@ -387,21 +387,6 @@ export async function checkCapacitorRules(project: Project, context: ExtensionCo
         '5.1.0',
         'as the current version is missing important security fixes.',
         'https://ionic.io/docs/identity-vault',
-      ),
-    );
-  }
-
-  if (isLessOrEqual('@ionic/angular-toolkit', '8.1.0') && isGreaterOrEqual('@angular/core', '15.0.0')) {
-    project.tip(
-      checkMinVersion('@ionic/angular-toolkit', '8.1.0', 'as the current version is missing Angular 15 support.'),
-    );
-  }
-  if (isLessOrEqual('@ionic/angular-toolkit', '11.0.1') && isGreaterOrEqual('@angular/core', '17.0.0')) {
-    project.tip(
-      checkMinVersion(
-        '@ionic/angular-toolkit',
-        '11.0.1',
-        'as the current version is missing Angular 17 standalone component support.',
       ),
     );
   }

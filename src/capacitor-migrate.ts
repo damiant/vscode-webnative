@@ -1,4 +1,4 @@
-import { existsSync, lstatSync, readdirSync, readFileSync, writeFileSync } from 'fs';
+import { existsSync, lstatSync, readdirSync, readFileSync, writeFileSync, rmSync } from 'fs';
 import { join } from 'path';
 
 import { exists, isLess, isVersionGreaterOrEqual } from './analyzer';
@@ -169,6 +169,21 @@ export async function migrateCapacitor(
         await project.run2(logCmd(removeNodeModules()));
         await project.run2(logCmd(npmUpdate()));
         writeWN('Completed install. You should sync and test your project.');
+      } else if (result.includes(`Updating iOS native dependencies with pod install - failed!`)) {
+        const retry = await window.showWarningMessage(
+          'The pod install failed. Do you want to delete Podfile.lock and try to install again?',
+          'Yes',
+          'No',
+        );
+        if (retry === 'Yes') {
+          writeWN('Removing Podfile.lock and running pod install for iOS....');
+          const podfileLock = join(project.projectFolder(), 'ios', 'App', 'Podfile.lock');
+          if (existsSync(podfileLock)) {
+            rmSync(podfileLock);
+          }
+          await project.run2(await capacitorSync(project), true);
+          writeWN('Completed pod install retry.');
+        }
       }
       // await project.run2(cmd2);
     } finally {
