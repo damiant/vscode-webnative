@@ -248,9 +248,14 @@ function getStyles(): string {
 
         .feature-card {
             padding: 1.5rem;
-            background-color: var(--vscode-editor-inactiveSelectionBackground);
+            background-color: var(--vscode-editor-background);
             border: 1px solid var(--vscode-panel-border);
             border-radius: 4px;
+            transition: background-color 0.2s ease;
+        }
+
+        .feature-card:hover {
+            background-color: var(--vscode-list-hoverBackground);
         }
 
         .feature-card h3 {

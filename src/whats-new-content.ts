@@ -33,6 +33,11 @@ export function getWhatsNewContent(): string {
                 <h3>Swift Package Manager Migration</h3>
                 <p>Migrate iOS projects from CocoaPods to Swift Package Manager (SPM) with one click.</p>
             </div>
+            
+            <div class="feature-card" onclick="document.getElementById('ai-assistance-section').scrollIntoView({behavior: 'smooth'})" style="cursor: pointer;">
+                <h3>AI Assistance</h3>
+                <p>Let AI automatically fix build errors in your web and native projects.</p>
+            </div>
         </div>
 
         <div class="section" id="capacitor-8-section">
@@ -173,6 +178,43 @@ export function getWhatsNewContent(): string {
                 </button>
             </div>
         </div>
+
+        <div class="section" id="ai-assistance-section">
+            <h2>AI Assistance for Build Errors</h2>
+            
+            <h3>Intelligent Error Resolution</h3>
+            
+            <p>WebNative now includes AI-powered assistance to help you quickly resolve build errors in your web and native projects. When errors occur during builds, the extension can automatically extract error details and provide intelligent fixes.</p>
+            
+            <h3>How It Works</h3>
+            
+            <ul>
+                <li><strong>Automatic Error Detection:</strong> WebNative monitors your build output for errors in web builds, iOS builds, and Android builds</li>
+                <li><strong>One-Click Fix:</strong> When an error is detected, a "Fix Issue" option appears that leverages your IDE's AI agent (like GitHub Copilot)</li>
+                <li><strong>Context-Aware Solutions:</strong> The AI agent receives the full error context, including stack traces, file paths, and relevant code</li>
+                <li><strong>Multi-Platform Support:</strong> Works with errors from npm/yarn/pnpm builds, Xcode builds, and Gradle/Android Studio builds</li>
+            </ul>
+            
+            <h3>Supported Error Types</h3>
+            
+            <ul>
+                <li><strong>TypeScript/JavaScript Errors:</strong> Type errors, import issues, syntax errors</li>
+                <li><strong>iOS Build Errors:</strong> Swift compilation errors, missing frameworks, provisioning issues</li>
+                <li><strong>Android Build Errors:</strong> Gradle configuration problems, dependency conflicts, SDK version mismatches</li>
+                <li><strong>Plugin Errors:</strong> Capacitor plugin compatibility issues, missing dependencies</li>
+                <li><strong>Configuration Errors:</strong> Invalid capacitor.config.ts, angular.json, or package.json settings</li>
+            </ul>
+            
+            <h3>Getting Started</h3>
+            
+            <ol>
+                <li>Ensure you have an AI agent extension installed (e.g., GitHub Copilot)</li>
+                <li>Run a build command through WebNative (Build, Run, or Sync)</li>
+                <li>If an error occurs, look for the "Fix Issue" option in the error notification or output panel</li>
+                <li>Click "Fix Issue" to let the AI agent analyze and suggest fixes</li>
+                <li>Review and apply the AI's suggested solution</li>
+            </ol>
+        </div>
         
         
 
@@ -189,6 +231,18 @@ export function getWhatsNewContent(): string {
             <button class="button button-secondary" data-url="https://github.com/damiant/vscode-webnative/issues/new">
                 Report an Issue
             </button>
+        </div>
+
+        <hr>
+
+        <div class="section">
+            <h2>Suggest a Feature</h2>
+            <p>We are actively looking for feature requests for things that you find difficult with web and native development. Suggest a feature today!</p>
+            <div style="margin-top: 1rem;">
+                <button class="button" data-url="https://github.com/damiant/vscode-webnative/issues/new">
+                    Suggest a Feature
+                </button>
+            </div>
         </div>
 
         <hr>
