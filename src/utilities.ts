@@ -298,7 +298,8 @@ export async function run(
         if (output) {
           output.output += data;
         }
-        const logLines = data.split('\r\n');
+        // Split on both Unix (\n) and Windows (\r\n) line endings
+        const logLines = data.split(/\r?\n/);
         logs = logs.concat(logLines);
         if (findLocalUrl) {
           if (data.includes('http')) {

@@ -96,10 +96,17 @@ export async function handleError(error: string, logs: Array<string>, folder: st
 export function extractErrors(errorText: string, logs: Array<string>, folder: string): Array<ErrorLine> {
   const errors: Array<ErrorLine> = [];
 
+  // If logs array is empty but errorText is provided, use errorText as the log source
+  // This handles cases where output was redirected (e.g., npx cap build ios > errors.txt)
+  if (logs.length === 0 && errorText) {
+    logs = errorText.split('\n');
+  }
+
   // Check if this is a Swift build error (xArchive build failure)
   const isSwiftBuild = logs.some((log) => log.includes('Building xArchive'));
   if (isSwiftBuild) {
-    return extractSwiftBuildErrors(logs);
+    const swiftErrors = extractSwiftBuildErrors(logs);
+    return swiftErrors;
   }
 
   if (logs.length > 0) {
@@ -402,19 +409,33 @@ function extractJavaError(line1: string, line2: string): ErrorLine {
 // Parse a Swift compiler error like:
 // /Users/damiantarnawsky/Code/dust3/dust/ios/App/App/AppDelegate.swift:8:1: error: Expected 'func' keyword in instance method declaration
 // eee
+// OR
+// /Users/damiantarnawsky/Code/dust3/dust/ios/App/App/AppDelegate.swift:8:1: error: Expected 'func' keyword... (in target 'App' from project 'App')
+// eee
 function extractSwiftError(line1: string, line2: string): ErrorLine {
   try {
-    const args = line1.split(' error: ');
-    let errorMessage = args[1].trim();
+    // Remove trailing target info like " (in target 'App' from project 'App')"
+    const cleanLine = line1.replace(/\s*\(in target.*\)$/, '');
 
-    // Remove potential trailing context like " (in target 'App' from project 'App')"
-    errorMessage = errorMessage.replace(/\s*\(in target.*\)$/, '');
+    // Find the error position (case-insensitive): " error: " or " Error: "
+    const errorMatch = cleanLine.match(/:\s+(?:error|Error):\s+/i);
+    if (!errorMatch) {
+      console.log(`[extractSwiftError] Could not find error marker in: ${cleanLine.substring(0, 80)}`);
+      return;
+    }
 
-    // Parse file path and position: /path/file.swift:8:1
-    const pathParts = args[0].split(':');
-    const filename = pathParts[0].trim();
-    const linenumber = parseInt(pathParts[1]) - 1; // Convert to 0-based
-    const position = parseInt(pathParts[2]) - 1; // Convert to 0-based
+    const args = cleanLine.split(':');
+    // Path is everything up to the first number (line number)
+    const filename = args[0].trim();
+    const linenumber = parseInt(args[1]) - 1; // Convert to 0-based
+    const position = parseInt(args[2]) - 1; // Convert to 0-based
+
+    // Get error message - everything after the first " error: " or " Error: "
+    const errorIndex = cleanLine.toLowerCase().indexOf(': error:');
+    const errorMessage =
+      errorIndex >= 0
+        ? cleanLine.substring(errorIndex + ': error:'.length).trim()
+        : cleanLine.substring(cleanLine.indexOf(':') + 1).trim();
 
     return {
       uri: filename,
@@ -422,7 +443,8 @@ function extractSwiftError(line1: string, line2: string): ErrorLine {
       position: position,
       error: errorMessage + (line2.trim() ? ' ' + line2.trim() : ''),
     };
-  } catch {
+  } catch (e) {
+    console.log(`[extractSwiftError] Parse error: ${e}`);
     return;
   }
 }
@@ -600,22 +622,38 @@ function extractSyntaxError(msg: string): ErrorLine {
 function extractSwiftBuildErrors(logs: Array<string>): Array<ErrorLine> {
   const errors: Array<ErrorLine> = [];
   let swiftLine: string | undefined = undefined;
+  let skipLines = 0;
+
+  console.log(`[extractSwiftBuildErrors] Processing ${logs.length} log lines`);
 
   for (const log of logs) {
-    // Look for Swift compiler errors: /path/file.swift:8:1: error: message
-    if (log.includes('.swift:') && log.includes(': error:')) {
+    // Skip context lines after we've already processed an error
+    if (skipLines > 0) {
+      skipLines--;
+      continue;
+    }
+
+    // Look for Swift compiler errors: /path/file.swift:8:1: error: message or Error: message
+    // Case-insensitive check for error pattern
+    if (log.includes('.swift:') && (log.toLowerCase().includes(': error:') || log.toLowerCase().includes(': error '))) {
+      console.log(`[extractSwiftBuildErrors] Found Swift error line: ${log.substring(0, 100)}`);
       swiftLine = log;
     } else {
       // If we have a pending Swift error line, the next non-empty line is the context
-      if (swiftLine && log.trim().length > 0) {
+      if (swiftLine && log.trim().length > 0 && !log.trim().startsWith('(')) {
+        console.log(`[extractSwiftBuildErrors] Context line: ${log.substring(0, 50)}`);
         const extracted = extractSwiftError(swiftLine, log);
         if (extracted) {
+          console.log(`[extractSwiftBuildErrors] Extracted error at ${extracted.uri}:${extracted.line}`);
           errors.push(extracted);
+          // Skip the next 2 lines (usually "^" and "func" or other compiler hints)
+          skipLines = 2;
         }
         swiftLine = undefined;
       }
     }
   }
 
+  console.log(`[extractSwiftBuildErrors] Total errors extracted: ${errors.length}`);
   return errors;
 }
