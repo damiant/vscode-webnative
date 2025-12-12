@@ -37,7 +37,7 @@ test('extractSwiftError parses AppDelegate.swift error correctly', () => {
 
   expect(appDelegateError).toBeDefined();
   expect(appDelegateError.uri).toBe('/Users/damiantarnawsky/Code/dust3/dust/ios/App/App/AppDelegate.swift');
-  expect(appDelegateError.line).toBe(7); // 8:1 becomes 7:0 (0-indexed)
+  expect(appDelegateError.line).toBe(7); // 8:1 (1-indexed) becomes 7:0 (0-indexed): this is the correct 0-indexed conversion from 1-indexed source coordinates
   expect(appDelegateError.position).toBe(0);
   expect(appDelegateError.error).toBe("expected 'func' keyword in instance method declaration eee");
 });
