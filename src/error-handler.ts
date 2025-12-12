@@ -509,7 +509,7 @@ async function handleErrorLine(number: number, errors: Array<ErrorLine>, folder:
 
       if (result == fixThisError) {
         let prompt = `Fix the error on line ${errors[number].line + 1} at position ${errors[number].position + 1}: ${errors[number].error}`;
-        if (errors[number].line == 0 && errors[number].position == 0) {
+        if (isZeroOrInvalid(errors[number].line) && isZeroOrInvalid(errors[number].position == 0)) {
           prompt = `${errors[number].uri}: Fix the following error: ${errors[number].error}`;
         }
         hideOutput();
@@ -521,6 +521,12 @@ async function handleErrorLine(number: number, errors: Array<ErrorLine>, folder:
         });
       }
     });
+}
+
+function isZeroOrInvalid(value: any): boolean {
+  if (value === 0) return true;
+  if (isNaN(value)) return true;
+  return typeof value != 'number';
 }
 
 // Extract error message from a line error line:

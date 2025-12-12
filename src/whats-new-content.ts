@@ -70,7 +70,7 @@ export function getWhatsNewContent(): string {
             
             <h4>Using the Extension</h4>
             <p>The easiest way to migrate is using the extension. An option <b>Migrate to Capacitor 8</b> will appear for Capacitor 7 projects.</p>
-            <p>You can also use the Capacitor CLI directly with <code>npm i -D @capacitor/cli@latest</code> then <code>npx cap migrate</code><p>
+            <p>You can also use the Capacitor CLI directly with <code>npm i -D @capacitor/cli@latest</code> then <code>npx cap migrate</code></p>
 
             <h4>Additional Resources</h4>
             <ul>
@@ -215,13 +215,11 @@ export function getWhatsNewContent(): string {
                 <li>Review and apply the AI's suggested solution</li>
             </ol>
         </div>
-        
-        
-
-        <h2>Resources</h2>
-        <p>Learn more about WebNative and get help:</p>
-        
-        <div>
+        <div class="section">
+            <h2>Resources</h2>
+            <p>Learn more about WebNative and get help:</p>
+            
+            <div>
             <button class="button" data-url="https://github.com/ionic-team/vscode-webnative">
                 View on GitHub
             </button>
@@ -231,6 +229,7 @@ export function getWhatsNewContent(): string {
             <button class="button button-secondary" data-url="https://github.com/damiant/vscode-webnative/issues/new">
                 Report an Issue
             </button>
+            </div>
         </div>
 
         <hr>
