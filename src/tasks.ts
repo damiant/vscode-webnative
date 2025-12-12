@@ -5,8 +5,7 @@ import { exState } from './tree-provider';
 import { clearOutput, showOutput, write, writeWN } from './logging';
 import { RunStatus, Tip, TipType } from './tip';
 import { channelShow, replaceAll, stopPublishing } from './utilities';
-import { writeEvent } from './telemetry';
-import { machine } from 'os';
+import { writeEvent, incrementUserProperty, updateUserProperties } from './telemetry';
 
 interface RunningAction {
   tip: Tip;
@@ -72,14 +71,29 @@ export async function cancelIfRunning(tip: Tip): Promise<boolean> {
 }
 
 export function finishCommand(tip: Tip) {
-  writeEvent(tip.description ?? tip.title, {
+  const eventName = tip.description ?? tip.title;
+
+  // Track the event with detailed properties
+  writeEvent(eventName, {
     command: tip.vsCommand,
     project: exState.projectRef?.name,
     type: exState.projectRef?.type,
     repoType: exState.projectRef?.repoType,
     frameworkType: exState.projectRef?.frameworkType,
-    os: machine(),
   });
+
+  // Increment user property for this action
+  incrementUserProperty(`action_${eventName.replace(/\s+/g, '_').toLowerCase()}_count`);
+
+  // Update user's last active project type
+  if (exState.projectRef) {
+    updateUserProperties({
+      last_project_type: exState.projectRef.type,
+      last_framework: exState.projectRef.frameworkType,
+      last_repo_type: exState.projectRef.repoType,
+    });
+  }
+
   runningOperations = runningOperations.filter((op: RunningAction) => {
     return !same(op, { tip, workspace: exState.workspace });
   });

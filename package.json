@@ -2,7 +2,8 @@
   "name": "webnative",
   "displayName": "WebNative",
   "description": "Create and maintain web and native projects",
-  "version": "2.0.59",
+  "version": "2.1.0",
+  "whatsNewRevision": 1,
   "icon": "media/webnative.png",
   "publisher": "WebNative",
   "keywords": [
@@ -392,6 +393,10 @@
           "light": "resources/light/more.svg",
           "dark": "resources/dark/more.svg"
         }
+      },
+      {
+        "command": "webnative.whatsNew",
+        "title": "WebNative: What's New"
       }
     ],
     "menus": {

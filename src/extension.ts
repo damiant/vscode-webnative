@@ -33,6 +33,8 @@ import { viewInEditor } from './preview';
 import { autoRunClipboard } from './features/auto-run-clipboard';
 import { findAndRun, fix, fixIssue, runAction, runAgain } from './features/fix-issue';
 import { trackProjectChange } from './features/track-project-changes';
+import { initializeTelemetry } from './telemetry';
+import { checkAndShowWhatsNew, showWhatsNew } from './whats-new';
 
 export const extensionName = 'WebNative';
 
@@ -109,6 +111,9 @@ export async function activate(context: ExtensionContext) {
   exState.view = view;
   exState.projectsView = projectsView;
   exState.context = context;
+
+  // Initialize anonymous telemetry
+  initializeTelemetry();
 
   // if (rootPath == undefined) {
   //     // Show the start new project panel
@@ -326,6 +331,10 @@ export async function activate(context: ExtensionContext) {
     await openUri(tip.url);
   });
 
+  commands.registerCommand(CommandName.WhatsNew, async () => {
+    await showWhatsNew(context, true);
+  });
+
   context.subscriptions.push(debug.registerDebugConfigurationProvider(AndroidDebugType, new AndroidDebugProvider()));
   context.subscriptions.push(debug.onDidTerminateDebugSession(androidDebugUnforward));
 
@@ -335,6 +344,9 @@ export async function activate(context: ExtensionContext) {
       showTips();
     }
   }
+
+  // Check and show What's New page if needed
+  await checkAndShowWhatsNew(context);
 
   // Ensures the Dev Server is Showing
   //qrView(undefined, undefined);

@@ -48,6 +48,7 @@ export enum CommandName {
   OpenInAndroidStudio = 'webnative.openAndroidStudio',
   ViewDevServer = 'webnative.viewDevServer', // View the dev server window
   HideDevServer = 'webnative.hideDevServer', // Hide the dev server window
+  WhatsNew = 'webnative.whatsNew', // Show What's New page
 }
 
 export enum InternalCommand {

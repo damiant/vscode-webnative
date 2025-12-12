@@ -7,3 +7,6 @@ Thumbs.db
 .vs/
 *.vsix
 .config/
+vitest.config.js
+vitest.config.js.map
+tests/errors.txt

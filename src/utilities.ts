@@ -8,7 +8,7 @@ import { exists } from './analyzer';
 import { ionicInit } from './ionic-init';
 import { request } from 'https';
 import { ExtensionSetting, getExtSetting, getSetting, WorkspaceSection, WorkspaceSetting } from './workspace-state';
-import { showOutput, write, writeAppend, writeError, writeWN } from './logging';
+import { showOutput, write, writeError, writeWN } from './logging';
 import { getWebConfiguration, WebConfigSetting } from './web-configuration';
 import { Publisher } from './discovery';
 import { join } from 'path';
@@ -298,7 +298,8 @@ export async function run(
         if (output) {
           output.output += data;
         }
-        const logLines = data.split('\r\n');
+        // Split on both Unix (\n) and Windows (\r\n) line endings
+        const logLines = data.split(/\r?\n/);
         logs = logs.concat(logLines);
         if (findLocalUrl) {
           if (data.includes('http')) {
@@ -379,11 +380,7 @@ export async function run(
           } else if (logLine && !suppressInfo) {
             const uncolored = uncolor(logLine);
             if (passesFilter(uncolored, logFilters, false)) {
-              if (uncolored.includes('\r')) {
-                write(uncolored);
-              } else {
-                writeAppend(uncolored);
-              }
+              write(uncolored);
             }
           }
         }
@@ -583,15 +580,23 @@ export async function getExecOutput(
   hideErrors?: boolean,
   ignoreErrors?: boolean,
 ): Promise<string> {
-  return new Promise((resolve, reject) => {
-    let out = '';
-    if (command.includes(InternalCommand.cwd)) {
-      command = replaceAll(command, InternalCommand.cwd, '');
-      // Change the work directory for monorepos as folder is the root folder
-      folder = getMonoRepoFolder(exState.workspace, folder);
+  let out = '';
+  if (command.includes(InternalCommand.cwd)) {
+    command = replaceAll(command, InternalCommand.cwd, '');
+    // Change the work directory for monorepos as folder is the root folder
+    folder = getMonoRepoFolder(exState.workspace, folder);
+  }
+  command = qualifyCommand(command, folder);
+  tStart(command);
+
+  // Resolve shell if not provided: use exState.shell or guess from environment
+  if (!shell) {
+    if (exState.shell) {
+      shell = exState.shell;
     }
-    command = qualifyCommand(command, folder);
-    tStart(command);
+  }
+
+  return new Promise((resolve, reject) => {
     exec(command, runOptions(command, folder, shell), (error: ExecException, stdout: string, stdError: string) => {
       if (stdout) {
         out += stdout;
@@ -649,11 +654,17 @@ export async function runWithProgress(
     },
     async (progress, token: CancellationToken) => {
       const cancelObject: CancelObject = { proc: undefined, cancelled: false };
-      run(folder, command, cancelObject, [], [], progress, undefined, output, false).then((success) => {
-        writeWN(`Command ${command} completed.`);
-        done = true;
-        result = success;
-      });
+      run(folder, command, cancelObject, [], [], progress, undefined, output, false)
+        .then((success) => {
+          writeWN(`Command ${command} completed.`);
+          done = true;
+          result = success;
+        })
+        .catch((error) => {
+          writeWN(`Command ${command} failed: ${error}`);
+          done = true;
+          result = false;
+        });
       while (!cancelObject.cancelled && !done) {
         await delay(500);
 

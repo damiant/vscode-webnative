@@ -93,8 +93,21 @@ export async function handleError(error: string, logs: Array<string>, folder: st
   }
 }
 
-function extractErrors(errorText: string, logs: Array<string>, folder: string): Array<ErrorLine> {
+export function extractErrors(errorText: string, logs: Array<string>, folder: string): Array<ErrorLine> {
   const errors: Array<ErrorLine> = [];
+
+  // If logs array is empty but errorText is provided, use errorText as the log source
+  // This handles cases where output was redirected (e.g., npx cap build ios > errors.txt)
+  if (logs.length === 0 && errorText) {
+    logs = errorText.split('\n');
+  }
+
+  // Check if this is a Swift build error (xArchive build failure)
+  const isSwiftBuild = logs.some((log) => log.includes('Building xArchive'));
+  if (isSwiftBuild) {
+    const swiftErrors = extractSwiftBuildErrors(logs);
+    return swiftErrors;
+  }
 
   if (logs.length > 0) {
     // Look for code lines
@@ -115,6 +128,9 @@ function extractErrors(errorText: string, logs: Array<string>, folder: string): 
       }
       if (!error && errorText.startsWith('✘ [ERROR]')) {
         error = extractESBuildStyleError(errorText);
+      }
+      if (logs[0].startsWith('[error] Command line invocation:')) {
+        logs.shift();
       }
       if (error) {
         errors.push(error);
@@ -244,11 +260,26 @@ function extractESBuildStyleError(errorText: string): ErrorLine {
   try {
     const lines = errorText.split('\n');
     let error = lines[0].replace('✘ [ERROR] ', '').trim();
-    if (lines[1].length > 1) error += ' ' + lines[1].trim();
-    const args = lines[3].split(':');
+    if (lines[1] && lines[1].length > 1) error += ' ' + lines[1].trim();
+
+    // Find the line that contains the file path (should have format: "    path/to/file.ts:line:col:")
+    let fileLineIndex = -1;
+    for (let i = 2; i < lines.length && i < 10; i++) {
+      const trimmed = lines[i].trim();
+      if (trimmed && trimmed.match(/^[^\s]+\.(ts|tsx|js|jsx|vue):\d+:\d+:?$/)) {
+        fileLineIndex = i;
+        break;
+      }
+    }
+
+    if (fileLineIndex === -1) {
+      return; // Couldn't find file reference
+    }
+
+    const args = lines[fileLineIndex].trim().split(':');
     const linenumber = parseInt(args[1]) - 1;
     const position = parseInt(args[2]) - 1;
-    const filename = args[0].trim();
+    const filename = args[0];
     return { line: linenumber, position: position, uri: filename, error };
   } catch {
     return; // Parse error
@@ -390,6 +421,49 @@ function extractJavaError(line1: string, line2: string): ErrorLine {
   }
 }
 
+// Parse a Swift compiler error like:
+// /Users/damiantarnawsky/Code/dust3/dust/ios/App/App/AppDelegate.swift:8:1: error: Expected 'func' keyword in instance method declaration
+// eee
+// OR
+// /Users/damiantarnawsky/Code/dust3/dust/ios/App/App/AppDelegate.swift:8:1: error: Expected 'func' keyword... (in target 'App' from project 'App')
+// eee
+function extractSwiftError(line1: string, line2: string): ErrorLine {
+  try {
+    // Remove trailing target info like " (in target 'App' from project 'App')"
+    const cleanLine = line1.replace(/\s*\(in target.*\)$/, '');
+
+    // Find the error position (case-insensitive): " error: " or " Error: "
+    const errorMatch = cleanLine.match(/:\s+(?:error|Error):\s+/i);
+    if (!errorMatch) {
+      console.log(`[extractSwiftError] Could not find error marker in: ${cleanLine.substring(0, 80)}`);
+      return;
+    }
+
+    const args = cleanLine.split(':');
+    // Path is everything up to the first number (line number)
+    const filename = args[0].trim();
+    const linenumber = parseInt(args[1]) - 1; // Convert to 0-based
+    const position = parseInt(args[2]) - 1; // Convert to 0-based
+
+    // Get error message - everything after the first " error: " or " Error: "
+    const errorIndex = cleanLine.toLowerCase().indexOf(': error:');
+    const errorMessage =
+      errorIndex >= 0
+        ? cleanLine.substring(errorIndex + ': error:'.length).trim()
+        : cleanLine.substring(cleanLine.indexOf(':') + 1).trim();
+
+    return {
+      uri: filename,
+      line: linenumber,
+      position: position,
+      error: errorMessage + (line2.trim() ? ' ' + line2.trim() : ''),
+    };
+  } catch (e) {
+    console.log(`[extractSwiftError] Parse error: ${e}`);
+    return;
+  }
+}
+
 // Parse an error like this one for the line, position and error message
 // Error: Expected AppComponent({ __ngContext__: [ null, TView({ type: 0, bluepr ... to be falsy.
 // 	    at UserContext.<anonymous> (src/app/app.component.spec.ts:20:17)
@@ -414,25 +488,9 @@ async function handleErrorLine(number: number, errors: Array<ErrorLine>, folder:
   if (!errors[number]) return;
   const nextButton = number + 1 == errors.length ? undefined : 'Next';
   const prevButton = number == 0 ? undefined : 'Previous';
+  const fixThisError = errors[number].uri ? 'Fix this error' : undefined;
   const title = errors.length > 1 ? `Error ${number + 1} of ${errors.length}: ` : '';
 
-  window.showErrorMessage(`${title}${errors[number].error}`, prevButton, nextButton, 'Ok').then((result) => {
-    if (result == 'Next') {
-      handleErrorLine(number + 1, errors, folder);
-      return;
-    }
-    if (result == 'Previous') {
-      handleErrorLine(number - 1, errors, folder);
-      return;
-    }
-
-    // TODO: Add "Fix this error" which will send to LLM
-    if ((result as any) == 'Fix this error') {
-      const prompt = `Fix the error on line ${errors[number].line} at position ${errors[number].position} of ${errors[number].uri}: ${errors[number].error}`;
-      hideOutput();
-      // TODO: Send prompt to LLM
-    }
-  });
   let uri = errors[number].uri;
   if (!existsSync(uri)) {
     // Might be a relative path
@@ -441,14 +499,49 @@ async function handleErrorLine(number: number, errors: Array<ErrorLine>, folder:
     }
   }
   currentErrorFilename = uri;
+
+  // Open the file first so inline chat can access it
   if (existsSync(uri) && !lstatSync(uri).isDirectory()) {
     await openUri(uri);
     const myPos = new Position(errors[number].line, errors[number].position);
     window.activeTextEditor.selection = new Selection(myPos, myPos);
-    commands.executeCommand('revealLine', { lineNumber: myPos.line, at: 'bottom' });
+    await commands.executeCommand('revealLine', { lineNumber: myPos.line, at: 'bottom' });
   } else {
     console.warn(`${uri} not found`);
   }
+
+  window
+    .showErrorMessage(`${title}${errors[number].error}`, prevButton, nextButton, fixThisError, 'Close')
+    .then(async (result) => {
+      if (result === 'Next') {
+        handleErrorLine(number + 1, errors, folder);
+        return;
+      }
+      if (result === 'Previous') {
+        handleErrorLine(number - 1, errors, folder);
+        return;
+      }
+
+      if (result === fixThisError) {
+        let prompt = `Fix the error on line ${errors[number].line + 1} at position ${errors[number].position + 1}: ${errors[number].error}`;
+        if (isZeroOrInvalid(errors[number].line) && isZeroOrInvalid(errors[number].position == 0)) {
+          prompt = `${errors[number].uri}: Fix the following error: ${errors[number].error}`;
+        }
+        hideOutput();
+
+        // Start inline chat with the error context
+        await commands.executeCommand('inlineChat.start', {
+          message: prompt,
+          autoSend: true,
+        });
+      }
+    });
+}
+
+function isZeroOrInvalid(value: any): boolean {
+  if (value === 0) return true;
+  if (isNaN(value)) return true;
+  return typeof value != 'number';
 }
 
 // Extract error message from a line error line:
@@ -544,4 +637,44 @@ function extractSyntaxError(msg: string): ErrorLine {
   } catch {
     return;
   }
+}
+
+// Extract errors from Swift/Xcode build logs
+function extractSwiftBuildErrors(logs: Array<string>): Array<ErrorLine> {
+  const errors: Array<ErrorLine> = [];
+  let swiftLine: string | undefined = undefined;
+  let skipLines = 0;
+
+  console.log(`[extractSwiftBuildErrors] Processing ${logs.length} log lines`);
+
+  for (const log of logs) {
+    // Skip context lines after we've already processed an error
+    if (skipLines > 0) {
+      skipLines--;
+      continue;
+    }
+
+    // Look for Swift compiler errors: /path/file.swift:8:1: error: message or Error: message
+    // Case-insensitive check for error pattern
+    if (log.includes('.swift:') && (log.toLowerCase().includes(': error:') || log.toLowerCase().includes(': error '))) {
+      console.log(`[extractSwiftBuildErrors] Found Swift error line: ${log.substring(0, 100)}`);
+      swiftLine = log;
+    } else {
+      // If we have a pending Swift error line, the next non-empty line is the context
+      if (swiftLine && log.trim().length > 0 && !log.trim().startsWith('(')) {
+        console.log(`[extractSwiftBuildErrors] Context line: ${log.substring(0, 50)}`);
+        const extracted = extractSwiftError(swiftLine, log);
+        if (extracted) {
+          console.log(`[extractSwiftBuildErrors] Extracted error at ${extracted.uri}:${extracted.line}`);
+          errors.push(extracted);
+          // Skip the next 2 lines (usually "^" and "func" or other compiler hints)
+          skipLines = 2;
+        }
+        swiftLine = undefined;
+      }
+    }
+  }
+
+  console.log(`[extractSwiftBuildErrors] Total errors extracted: ${errors.length}`);
+  return errors;
 }

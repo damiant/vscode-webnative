@@ -1,5 +1,10 @@
 ## Changelog
 
+### Version 2.1.0
+
+- Support for Capacitor 8 migration
+- Fix errors with Copilot
+
 ### Version 2.0.58
 
 - Update dependencies
