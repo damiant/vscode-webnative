@@ -82,8 +82,6 @@ export function writeEvent(event: string, props?: { [key: string]: any }) {
     initializeTelemetry();
   }
 
-  const localeInfo = getLocaleInfo();
-
   // ip: 1 tells Mixpanel to use the request IP for geolocation
   // Mixpanel will automatically resolve $city, $region, and $country_code from IP
   mp.track(event, {
