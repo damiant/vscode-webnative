@@ -260,11 +260,26 @@ function extractESBuildStyleError(errorText: string): ErrorLine {
   try {
     const lines = errorText.split('\n');
     let error = lines[0].replace('✘ [ERROR] ', '').trim();
-    if (lines[1].length > 1) error += ' ' + lines[1].trim();
-    const args = lines[3].split(':');
+    if (lines[1] && lines[1].length > 1) error += ' ' + lines[1].trim();
+
+    // Find the line that contains the file path (should have format: "    path/to/file.ts:line:col:")
+    let fileLineIndex = -1;
+    for (let i = 2; i < lines.length && i < 10; i++) {
+      const trimmed = lines[i].trim();
+      if (trimmed && trimmed.match(/^[^\s]+\.(ts|tsx|js|jsx|vue):\d+:\d+:?$/)) {
+        fileLineIndex = i;
+        break;
+      }
+    }
+
+    if (fileLineIndex === -1) {
+      return; // Couldn't find file reference
+    }
+
+    const args = lines[fileLineIndex].trim().split(':');
     const linenumber = parseInt(args[1]) - 1;
     const position = parseInt(args[2]) - 1;
-    const filename = args[0].trim();
+    const filename = args[0];
     return { line: linenumber, position: position, uri: filename, error };
   } catch {
     return; // Parse error
@@ -473,7 +488,7 @@ async function handleErrorLine(number: number, errors: Array<ErrorLine>, folder:
   if (!errors[number]) return;
   const nextButton = number + 1 == errors.length ? undefined : 'Next';
   const prevButton = number == 0 ? undefined : 'Previous';
-  const fixThisError = 'Fix this error';
+  const fixThisError = errors[number].uri ? 'Fix this error' : undefined;
   const title = errors.length > 1 ? `Error ${number + 1} of ${errors.length}: ` : '';
 
   let uri = errors[number].uri;
