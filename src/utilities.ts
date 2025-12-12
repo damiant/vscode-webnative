@@ -649,11 +649,17 @@ export async function runWithProgress(
     },
     async (progress, token: CancellationToken) => {
       const cancelObject: CancelObject = { proc: undefined, cancelled: false };
-      run(folder, command, cancelObject, [], [], progress, undefined, output, false).then((success) => {
-        writeWN(`Command ${command} completed.`);
-        done = true;
-        result = success;
-      });
+      run(folder, command, cancelObject, [], [], progress, undefined, output, false)
+        .then((success) => {
+          writeWN(`Command ${command} completed.`);
+          done = true;
+          result = success;
+        })
+        .catch((error) => {
+          writeWN(`Command ${command} failed: ${error}`);
+          done = true;
+          result = false;
+        });
       while (!cancelObject.cancelled && !done) {
         await delay(500);
 

@@ -9,5 +9,14 @@
     "sourceMap": true,
     "rootDir": "src"
   },
-  "exclude": ["node_modules", "log-client", ".vscode-test", "plugin-explorer", "starter", "preview", "tests"]
+  "exclude": [
+    "node_modules",
+    "log-client",
+    ".vscode-test",
+    "plugin-explorer",
+    "starter",
+    "preview",
+    "tests",
+    "vitest.config.ts"
+  ]
 }

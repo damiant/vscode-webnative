@@ -13,7 +13,7 @@ test('IOS project exists', () => {
 
 test('IOS project parses', async () => {
   const project = new IosProject(exampleIoSProject());
-  expect(await project.parse()).toBeUndefined();
+  expect(await project.parse()).toBe(true);
 });
 
 test('Ios project has a target', async () => {

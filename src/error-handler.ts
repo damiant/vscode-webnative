@@ -93,8 +93,14 @@ export async function handleError(error: string, logs: Array<string>, folder: st
   }
 }
 
-function extractErrors(errorText: string, logs: Array<string>, folder: string): Array<ErrorLine> {
+export function extractErrors(errorText: string, logs: Array<string>, folder: string): Array<ErrorLine> {
   const errors: Array<ErrorLine> = [];
+
+  // Check if this is a Swift build error (xArchive build failure)
+  const isSwiftBuild = logs.some((log) => log.includes('Building xArchive'));
+  if (isSwiftBuild) {
+    return extractSwiftBuildErrors(logs);
+  }
 
   if (logs.length > 0) {
     // Look for code lines
@@ -115,6 +121,9 @@ function extractErrors(errorText: string, logs: Array<string>, folder: string): 
       }
       if (!error && errorText.startsWith('✘ [ERROR]')) {
         error = extractESBuildStyleError(errorText);
+      }
+      if (logs[0].startsWith('[error] Command line invocation:')) {
+        logs.shift();
       }
       if (error) {
         errors.push(error);
@@ -390,6 +399,34 @@ function extractJavaError(line1: string, line2: string): ErrorLine {
   }
 }
 
+// Parse a Swift compiler error like:
+// /Users/damiantarnawsky/Code/dust3/dust/ios/App/App/AppDelegate.swift:8:1: error: Expected 'func' keyword in instance method declaration
+// eee
+function extractSwiftError(line1: string, line2: string): ErrorLine {
+  try {
+    const args = line1.split(' error: ');
+    let errorMessage = args[1].trim();
+
+    // Remove potential trailing context like " (in target 'App' from project 'App')"
+    errorMessage = errorMessage.replace(/\s*\(in target.*\)$/, '');
+
+    // Parse file path and position: /path/file.swift:8:1
+    const pathParts = args[0].split(':');
+    const filename = pathParts[0].trim();
+    const linenumber = parseInt(pathParts[1]) - 1; // Convert to 0-based
+    const position = parseInt(pathParts[2]) - 1; // Convert to 0-based
+
+    return {
+      uri: filename,
+      line: linenumber,
+      position: position,
+      error: errorMessage + (line2.trim() ? ' ' + line2.trim() : ''),
+    };
+  } catch {
+    return;
+  }
+}
+
 // Parse an error like this one for the line, position and error message
 // Error: Expected AppComponent({ __ngContext__: [ null, TView({ type: 0, bluepr ... to be falsy.
 // 	    at UserContext.<anonymous> (src/app/app.component.spec.ts:20:17)
@@ -557,4 +594,28 @@ function extractSyntaxError(msg: string): ErrorLine {
   } catch {
     return;
   }
+}
+
+// Extract errors from Swift/Xcode build logs
+function extractSwiftBuildErrors(logs: Array<string>): Array<ErrorLine> {
+  const errors: Array<ErrorLine> = [];
+  let swiftLine: string | undefined = undefined;
+
+  for (const log of logs) {
+    // Look for Swift compiler errors: /path/file.swift:8:1: error: message
+    if (log.includes('.swift:') && log.includes(': error:')) {
+      swiftLine = log;
+    } else {
+      // If we have a pending Swift error line, the next non-empty line is the context
+      if (swiftLine && log.trim().length > 0) {
+        const extracted = extractSwiftError(swiftLine, log);
+        if (extracted) {
+          errors.push(extracted);
+        }
+        swiftLine = undefined;
+      }
+    }
+  }
+
+  return errors;
 }
