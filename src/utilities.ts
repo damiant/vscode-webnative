@@ -580,15 +580,23 @@ export async function getExecOutput(
   hideErrors?: boolean,
   ignoreErrors?: boolean,
 ): Promise<string> {
-  return new Promise((resolve, reject) => {
-    let out = '';
-    if (command.includes(InternalCommand.cwd)) {
-      command = replaceAll(command, InternalCommand.cwd, '');
-      // Change the work directory for monorepos as folder is the root folder
-      folder = getMonoRepoFolder(exState.workspace, folder);
+  let out = '';
+  if (command.includes(InternalCommand.cwd)) {
+    command = replaceAll(command, InternalCommand.cwd, '');
+    // Change the work directory for monorepos as folder is the root folder
+    folder = getMonoRepoFolder(exState.workspace, folder);
+  }
+  command = qualifyCommand(command, folder);
+  tStart(command);
+
+  // Resolve shell if not provided: use exState.shell or guess from environment
+  if (!shell) {
+    if (exState.shell) {
+      shell = exState.shell;
     }
-    command = qualifyCommand(command, folder);
-    tStart(command);
+  }
+
+  return new Promise((resolve, reject) => {
     exec(command, runOptions(command, folder, shell), (error: ExecException, stdout: string, stdError: string) => {
       if (stdout) {
         out += stdout;
