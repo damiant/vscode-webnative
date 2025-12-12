@@ -59,7 +59,6 @@ export function initializeTelemetry() {
     mp.people.set(anonymousUserId, {
       $distinct_id: anonymousUserId,
       $os: getOSName(),
-      $ip: '1', // Tell Mixpanel to use request IP for geolocation
       locale: localeInfo.locale,
       country_code_from_locale: localeInfo.countryCode,
       vscode_version: env.appName,
