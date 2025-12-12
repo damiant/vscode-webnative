@@ -22,7 +22,7 @@ import { CapacitorPlatform } from './capacitor-platform';
 import { npmInstall, npx } from './node-commands';
 import { InternalCommand } from './command-name';
 import { MonoRepoType } from './monorepo';
-import { CapacitorMigrationOptions, migrateCapacitor4, migrateCapacitor } from './capacitor-migrate';
+import { migrateCapacitor4 } from './capacitor-migrate';
 import { checkAngularJson } from './rules-angular-json';
 import { checkBrowsersList } from './rules-browserslist';
 import { exState } from './tree-provider';
@@ -35,6 +35,10 @@ import { checkPrivacyManifest } from './xcode';
 import { existsSync, readFileSync } from 'fs';
 import { join } from 'path';
 import { runSPMMigration } from './capacitor-spm-migration';
+import { suggestCapacitorMigration4To5 } from './rules-capacitor-migrate-4-to-5';
+import { suggestCapacitorMigration5To6 } from './rules-capacitor-migrate-5-to-6';
+import { suggestCapacitorMigration6To7 } from './rules-capacitor-migrate-6-to-7';
+import { suggestCapacitorMigration7To8 } from './rules-capacitor-migrate-7-to-8';
 
 /**
  * Check rules for Capacitor projects
@@ -217,168 +221,13 @@ export async function checkCapacitorRules(project: Project, context: ExtensionCo
     }
   }
 
-  suggestCapacitorMigration('4.0.0', '5.0.0', TipType.Capacitor, project, {
-    coreVersion: '5',
-    versionTitle: '5',
-    versionFull: '5.0.0',
-    changesLink: 'https://capacitorjs.com/docs/updating/5-0',
-    androidStudioMin: '222.4459.24',
-    androidStudioName: 'Android Studio Flamingo (2022.2.1)',
-    androidStudioReason: '(It comes with Java 17 and Gradle 8)',
-    minJavaVersion: 17,
-    migrateInfo: 'Capacitor 5 sets a deployment target of iOS 13 and Android 13 (SDK 33).',
-    ignorePeerDependencies: ['@capacitor/'],
-    minPlugins: [
-      { dep: '@ionic-enterprise/identity-vault', version: '5.10.1' },
-      { dep: '@ionic-enterprise/google-pay', version: '2.0.0' },
-      { dep: '@ionic-enterprise/apple-pay', version: '2.0.0' },
-      { dep: '@ionic-enterprise/zebra-scanner', version: '2.0.0' },
-    ],
-  });
+  suggestCapacitorMigration4To5(project);
 
-  suggestCapacitorMigration('5.0.0', '6.0.0', TipType.Capacitor, project, {
-    coreVersion: '6.0.0',
-    versionTitle: '6',
-    versionFull: '6.0.0',
-    changesLink: 'https://capacitorjs.com/docs/updating/6-0',
-    androidStudioMin: '231.9392.1',
-    androidStudioName: 'Android Studio Hedgehog (2023.1.1)',
-    androidStudioReason: '(It comes with Gradle 8.2)',
-    minJavaVersion: 17,
-    migrateInfo: 'Capacitor 6 sets a deployment target of iOS 13 and Android 14 (SDK 34).',
-    minPlugins: [
-      { dep: '@ionic-enterprise/identity-vault', version: '5.10.1' },
-      { dep: '@ionic-enterprise/google-pay', version: '2.0.0' },
-      { dep: '@ionic-enterprise/apple-pay', version: '2.0.0' },
-      { dep: '@ionic-enterprise/zebra-scanner', version: '2.0.0' },
-    ],
-    ignorePeerDependencies: [
-      '@capacitor/action-sheet',
-      '@capacitor/app',
-      '@capacitor/app-launcher',
-      '@capacitor/browser',
-      '@capacitor/camera',
-      '@capacitor/clipboard',
-      '@capacitor/device',
-      '@capacitor/dialog',
-      '@capacitor/filesystem',
-      '@capacitor/geolocation',
-      '@capacitor/haptics',
-      '@capacitor/keyboard',
-      '@capacitor/local-notifications',
-      '@capacitor/motion',
-      '@capacitor/network',
-      '@capacitor/preferences',
-      '@capacitor/push-notifications',
-      '@capacitor/screen-reader',
-      '@capacitor/screen-orientation',
-      '@capacitor/share',
-      '@capacitor/splash-screen',
-      '@capacitor/status-bar',
-      '@capacitor/text-zoom',
-      '@capacitor/toast',
-    ],
-  });
+  suggestCapacitorMigration5To6(project);
 
-  suggestCapacitorMigration('6.0.0', '7.0.0', TipType.Capacitor, project, {
-    coreVersion: '7.0.1',
-    versionTitle: '7',
-    versionFull: '7.0.0',
-    changesLink: 'https://capacitorjs.com/docs/updating/7-0',
-    androidStudioMin: '231.9392.1',
-    androidStudioName: 'Android Studio Ladybug (2024.2.1)',
-    androidStudioReason: '(It comes with Gradle 8.7.2)',
-    minJavaVersion: 21,
-    migrateInfo: 'Capacitor 7 sets a deployment target of iOS 14 and Android 15 (SDK 35).',
-    minPlugins: [
-      { dep: '@ionic-enterprise/identity-vault', version: '5.10.1' },
-      { dep: '@ionic-enterprise/google-pay', version: '2.0.0' },
-      { dep: '@ionic-enterprise/apple-pay', version: '2.0.0' },
-      { dep: '@ionic-enterprise/zebra-scanner', version: '2.0.0' },
-    ],
-    ignorePeerDependencies: [
-      '@capacitor/action-sheet',
-      '@capacitor/app',
-      '@capacitor/app-launcher',
-      '@capacitor/browser',
-      '@capacitor/camera',
-      '@capacitor/clipboard',
-      '@capacitor/device',
-      '@capacitor/dialog',
-      '@capacitor/filesystem',
-      '@capacitor/geolocation',
-      '@capacitor/haptics',
-      '@capacitor/keyboard',
-      '@capacitor/local-notifications',
-      '@capacitor/motion',
-      '@capacitor/network',
-      '@capacitor/preferences',
-      '@capacitor/push-notifications',
-      '@capacitor/screen-reader',
-      '@capacitor/screen-orientation',
-      '@capacitor/share',
-      '@capacitor/splash-screen',
-      '@capacitor/status-bar',
-      '@capacitor/text-zoom',
-      '@capacitor/toast',
-    ],
-  });
+  suggestCapacitorMigration6To7(project);
 
-  suggestCapacitorMigration('7.0.0', '8.0.0', TipType.Capacitor, project, {
-    coreVersion: '8.0.0',
-    versionTitle: '8',
-    versionFull: '8.0.0',
-    changesLink: 'https://capacitorjs.com/docs/updating/8-0',
-    androidStudioMin: '242.23339.11',
-    androidStudioName: 'Android Studio Otter (2025.2.1)',
-    androidStudioReason: '(It comes with Gradle 8.14.3)',
-    minJavaVersion: 21,
-    migrateInfo:
-      'Capacitor 8 requires NodeJS 22+, xCode 26+, sets a deployment target of iOS 15 and Android 16 (SDK 36), and uses SPM by default for new iOS projects.',
-    minPlugins: [
-      { dep: '@ionic-enterprise/identity-vault', version: '5.10.1' },
-      { dep: '@ionic-enterprise/google-pay', version: '2.0.0' },
-      { dep: '@ionic-enterprise/apple-pay', version: '2.0.0' },
-      { dep: '@ionic-enterprise/zebra-scanner', version: '2.0.0' },
-    ],
-    ignorePeerDependencies: [
-      '@capacitor/action-sheet',
-      '@capacitor/app',
-      '@capacitor/app-launcher',
-      '@capacitor/background-runner',
-      '@capacitor/barcode-scanner',
-      '@capacitor/browser',
-      '@capacitor/camera',
-      '@capacitor/clipboard',
-      '@capacitor/cookies',
-      '@capacitor/device',
-      '@capacitor/dialog',
-      '@capacitor/file-transfer',
-      '@capacitor/file-viewer',
-      '@capacitor/filesystem',
-      '@capacitor/geolocation',
-      '@capacitor/google-maps',
-      '@capacitor/haptics',
-      '@capacitor/http',
-      '@capacitor/inappbrowser',
-      '@capacitor/keyboard',
-      '@capacitor/local-notifications',
-      '@capacitor/motion',
-      '@capacitor/network',
-      '@capacitor/preferences',
-      '@capacitor/privacy-screen',
-      '@capacitor/push-notifications',
-      '@capacitor/screen-orientation',
-      '@capacitor/screen-reader',
-      '@capacitor/share',
-      '@capacitor/splash-screen',
-      '@capacitor/status-bar',
-      '@capacitor/system-bars',
-      '@capacitor/text-zoom',
-      '@capacitor/toast',
-      '@capacitor/watch',
-    ],
-  });
+  suggestCapacitorMigration7To8(project);
 
   if (!isGreaterOrEqual('@ionic-enterprise/identity-vault', '5.1.0')) {
     project.tip(
@@ -389,24 +238,6 @@ export async function checkCapacitorRules(project: Project, context: ExtensionCo
         'https://ionic.io/docs/identity-vault',
       ),
     );
-  }
-}
-
-function suggestCapacitorMigration(
-  minCapacitorCore: string,
-  maxCapacitorCore: string,
-  type: TipType,
-  project: Project,
-  migrateOptions: CapacitorMigrationOptions,
-) {
-  if (isLess('@capacitor/core', maxCapacitorCore)) {
-    if (exState.hasNodeModules && isGreaterOrEqual('@capacitor/core', minCapacitorCore)) {
-      project.tip(
-        new Tip(`Migrate to Capacitor ${migrateOptions.versionTitle}`, '', type)
-          .setQueuedAction(migrateCapacitor, project, getPackageVersion('@capacitor/core'), migrateOptions)
-          .canIgnore(),
-      );
-    }
   }
 }
 
