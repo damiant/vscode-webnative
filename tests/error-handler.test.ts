@@ -13,7 +13,7 @@ test('extractErrors finds Swift errors in errors.txt', () => {
   // Filter to only Swift errors
   const swiftErrors = errors.filter((err) => err.uri.includes('.swift'));
 
-  // Verify that Swift errors were found (actual implementation finds 8, not 4 as the isolated test did)
+  // Verify that at least 4 Swift errors were found (actual implementation currently finds 8)
   expect(swiftErrors.length).toBeGreaterThanOrEqual(4);
 
   // All errors should be from AppDelegate.swift
