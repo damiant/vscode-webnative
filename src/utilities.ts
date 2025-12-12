@@ -8,7 +8,7 @@ import { exists } from './analyzer';
 import { ionicInit } from './ionic-init';
 import { request } from 'https';
 import { ExtensionSetting, getExtSetting, getSetting, WorkspaceSection, WorkspaceSetting } from './workspace-state';
-import { showOutput, write, writeAppend, writeError, writeWN } from './logging';
+import { showOutput, write, writeError, writeWN } from './logging';
 import { getWebConfiguration, WebConfigSetting } from './web-configuration';
 import { Publisher } from './discovery';
 import { join } from 'path';
@@ -380,11 +380,7 @@ export async function run(
           } else if (logLine && !suppressInfo) {
             const uncolored = uncolor(logLine);
             if (passesFilter(uncolored, logFilters, false)) {
-              if (uncolored.includes('\r')) {
-                write(uncolored);
-              } else {
-                writeAppend(uncolored);
-              }
+              write(uncolored);
             }
           }
         }
