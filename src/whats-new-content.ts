@@ -16,7 +16,7 @@ export function getWhatsNewContent(): string {
         <div class="feature-grid">
             <div class="feature-card" onclick="document.getElementById('capacitor-8-section').scrollIntoView({behavior: 'smooth'})" style="cursor: pointer;">
                 <h3>Capacitor 8!</h3>
-                <p>Upgrade Capacitor 7 projects to Capacitor 8 with the migration assistant.</a></p>
+                <p>Upgrade Capacitor 7 projects to Capacitor 8 with the migration assistant.</p>
             </div>
             
             <div class="feature-card" onclick="document.getElementById('donate-section').scrollIntoView({behavior: 'smooth'})" style="cursor: pointer;">
