@@ -33,6 +33,7 @@ import { viewInEditor } from './preview';
 import { autoRunClipboard } from './features/auto-run-clipboard';
 import { findAndRun, fix, fixIssue, runAction, runAgain } from './features/fix-issue';
 import { trackProjectChange } from './features/track-project-changes';
+import { initializeTelemetry } from './telemetry';
 
 export const extensionName = 'WebNative';
 
@@ -109,6 +110,9 @@ export async function activate(context: ExtensionContext) {
   exState.view = view;
   exState.projectsView = projectsView;
   exState.context = context;
+
+  // Initialize anonymous telemetry
+  initializeTelemetry();
 
   // if (rootPath == undefined) {
   //     // Show the start new project panel
