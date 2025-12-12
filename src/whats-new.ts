@@ -18,7 +18,7 @@ export async function showWhatsNew(context: vscode.ExtensionContext, forceShow =
   const lastShownRevision = context.globalState.get<number>(WHATS_NEW_REVISION_KEY, 0);
 
   // Only show if revision is newer or forceShow is true
-  if (!forceShow && lastShownRevision == currentRevision) {
+  if (!forceShow && lastShownRevision === currentRevision) {
     return;
   }
 
