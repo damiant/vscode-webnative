@@ -513,16 +513,16 @@ async function handleErrorLine(number: number, errors: Array<ErrorLine>, folder:
   window
     .showErrorMessage(`${title}${errors[number].error}`, prevButton, nextButton, fixThisError, 'Close')
     .then(async (result) => {
-      if (result == 'Next') {
+      if (result === 'Next') {
         handleErrorLine(number + 1, errors, folder);
         return;
       }
-      if (result == 'Previous') {
+      if (result === 'Previous') {
         handleErrorLine(number - 1, errors, folder);
         return;
       }
 
-      if (result == fixThisError) {
+      if (result === fixThisError) {
         let prompt = `Fix the error on line ${errors[number].line + 1} at position ${errors[number].position + 1}: ${errors[number].error}`;
         if (isZeroOrInvalid(errors[number].line) && isZeroOrInvalid(errors[number].position == 0)) {
           prompt = `${errors[number].uri}: Fix the following error: ${errors[number].error}`;
