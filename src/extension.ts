@@ -128,6 +128,27 @@ export async function activate(context: ExtensionContext) {
 
   trackProjectChange();
 
+  // Watch for package.json changes and refresh the extension
+  let packageJsonRefreshTimeout: NodeJS.Timeout | undefined;
+  const packageJsonWatcher = workspace.createFileSystemWatcher('**/package.json');
+
+  const debouncedRefresh = () => {
+    if (packageJsonRefreshTimeout) {
+      clearTimeout(packageJsonRefreshTimeout);
+    }
+    packageJsonRefreshTimeout = setTimeout(() => {
+      clearRefreshCache(context);
+      ionicProvider.refresh();
+      packageJsonRefreshTimeout = undefined;
+    }, 1000); // 1 second debounce
+  };
+
+  packageJsonWatcher.onDidChange(debouncedRefresh);
+  packageJsonWatcher.onDidCreate(debouncedRefresh);
+  packageJsonWatcher.onDidDelete(debouncedRefresh);
+
+  context.subscriptions.push(packageJsonWatcher);
+
   // On focusing with extension if clipboard has a command give option to run it
   const disableClipboardDetection = workspace
     .getConfiguration('webnative')
