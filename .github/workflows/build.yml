@@ -8,6 +8,7 @@ on:
     branches: ['main']
   pull_request:
     branches: ['main']
+  workflow_dispatch:
 
 jobs:
   build:
@@ -47,7 +48,7 @@ jobs:
           path: ./webnative-*.vsix
           retention-days: 60
       - name: Publish to open-vsx.org (For Windsurf, VSCodium etc)
-        if: ${{ github.ref == 'refs/heads/main' }}
+        if: ${{ github.event_name == 'workflow_dispatch' }}
         run: |
           VERSION=$(jq -r '.version' package.json)
           MAJOR=$(echo $VERSION | cut -d. -f1)
@@ -55,5 +56,5 @@ jobs:
           NEW_VERSION="$MAJOR.$MINOR.${{ github.run_number }}"
           npx ovsx publish ./webnative-*.vsix -p ${{ secrets.OPEN_VSX_TOKEN }}
       - name: Publish to VS Marketplace
-        if: ${{ github.ref == 'refs/heads/main' }}
+        if: ${{ github.event_name == 'workflow_dispatch' }}
         run: npx vsce publish --packagePath ./webnative-*.vsix -p ${{ secrets.VSCE_PAT }}
