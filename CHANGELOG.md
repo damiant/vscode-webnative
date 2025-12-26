@@ -1,5 +1,9 @@
 ## Changelog
 
+### Version 2.1.1
+
+- Migrate to Angular 21 now updates browserlist for compatibility
+
 ### Version 2.1.0
 
 - Support for Capacitor 8 migration

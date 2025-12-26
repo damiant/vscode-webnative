@@ -10,6 +10,7 @@ import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { write } from './logging';
 import { join } from 'path';
 import { peerDependencyCleanup } from './peer-dependency-cleanup';
+import { updateBrowserslist } from './browserslist';
 
 // Maximum supported Angular version that we'll suggest migrating to
 export const maxAngularVersion = '21';
@@ -92,12 +93,10 @@ async function migrate(queueFunction: QueueFunction, project: Project, next: num
       });
     }
     if (version >= 16) {
-      replaceInFile(join(project.projectFolder(), '.browserslistrc'), {
-        replacements: [
-          { search: `Chrome >=60`, replace: `Chrome >=61` },
-          { search: `ChromeAndroid >=60`, replace: `ChromeAndroid >=61` },
-        ],
-      });
+      updateBrowserslist(project, ['Chrome >=61', 'ChromeAndroid >=60']);
+    }
+    if (version >= 21) {
+      updateBrowserslist(project, ['Chrome >=107', 'Firefox >=106', 'Edge >=107', 'Safari >=16.1', 'iOS >=16.1']);
     }
   }
 }
