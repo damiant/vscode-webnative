@@ -128,6 +128,9 @@ export async function activate(context: ExtensionContext) {
 
   trackProjectChange();
 
+  // Watch for package.json changes and refresh the extension
+  setupPackageJsonWatcher(context, ionicProvider);
+
   // On focusing with extension if clipboard has a command give option to run it
   const disableClipboardDetection = workspace
     .getConfiguration('webnative')
@@ -350,4 +353,38 @@ export async function activate(context: ExtensionContext) {
 
   // Ensures the Dev Server is Showing
   //qrView(undefined, undefined);
+}
+
+/**
+ * Sets up a FileSystemWatcher to monitor package.json changes and automatically refresh the extension.
+ * Implements debouncing to prevent excessive refreshes during rapid file changes.
+ */
+function setupPackageJsonWatcher(context: ExtensionContext, ionicProvider: ExTreeProvider) {
+  let packageJsonRefreshTimeout: NodeJS.Timeout | undefined;
+  const packageJsonWatcher = workspace.createFileSystemWatcher('**/package.json');
+
+  const debouncedRefresh = () => {
+    if (packageJsonRefreshTimeout) {
+      clearTimeout(packageJsonRefreshTimeout);
+    }
+    packageJsonRefreshTimeout = setTimeout(() => {
+      clearRefreshCache(context);
+      ionicProvider.refresh();
+      packageJsonRefreshTimeout = undefined;
+    }, 1000); // 1 second debounce
+  };
+
+  packageJsonWatcher.onDidChange(debouncedRefresh);
+  packageJsonWatcher.onDidCreate(debouncedRefresh);
+  packageJsonWatcher.onDidDelete(debouncedRefresh);
+
+  // Cleanup: Dispose watcher and clear timeout on extension deactivation
+  context.subscriptions.push(packageJsonWatcher);
+  context.subscriptions.push({
+    dispose: () => {
+      if (packageJsonRefreshTimeout) {
+        clearTimeout(packageJsonRefreshTimeout);
+      }
+    },
+  });
 }
