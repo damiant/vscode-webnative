@@ -1,5 +1,9 @@
 ## Changelog
 
+### Version 2.1.2
+
+- When you change package.json outside of the extension the UI will automatically update.
+
 ### Version 2.1.1
 
 - Migrate to Angular 21 now updates browserlist for compatibility
