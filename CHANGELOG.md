@@ -3,6 +3,7 @@
 ### Version 2.1.1
 
 - Migrate to Angular 21 now updates browserlist for compatibility
+- Fix status bar items for running for web / debug (can now click without activating the extension)
 
 ### Version 2.1.0
 
