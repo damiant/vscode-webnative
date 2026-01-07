@@ -19,7 +19,7 @@ import {
 } from './workspace-state';
 import { getWebConfiguration, WebConfigSetting } from './web-configuration';
 import { window, workspace } from 'vscode';
-import { write, writeError } from './logging';
+import { showOutput, write, writeError } from './logging';
 import { createServer } from 'http';
 import { join } from 'path';
 import { viewInEditor } from './preview';
@@ -121,6 +121,8 @@ async function runServe(
   return `${preop}${npx(project)} ${serveCmd(project)}${serveFlags}`;
 }
 
+let serveUnknownMsg = false;
+
 function serveCmd(project: Project): string {
   switch (project.frameworkType) {
     case 'angular':
@@ -134,11 +136,20 @@ function serveCmd(project: Project): string {
     case 'vue':
       return 'vue-cli-service serve';
     default: {
-      const cmd = guessServeCommand(project) + ' -- ';
+      const cmd = guessServeCommand(project);
       if (cmd) {
-        return cmd;
+        return cmd + ' -- ';
       }
-      writeError(`serve command is not know for this project type`);
+      if (!serveUnknownMsg) {
+        window.showErrorMessage(
+          `Unable to determine the command used to serve your web application. Please add a "serve" script to your package.json to define this.`,
+        );
+        serveUnknownMsg = true;
+      }
+      writeError(
+        `Unable to determine the command used to serve your web application (start, dev and serve scripts were not found in package.json). Please add a "serve" script to your package.json to define this.`,
+      );
+      showOutput();
     }
   }
 }
