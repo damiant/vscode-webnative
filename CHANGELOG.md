@@ -1,5 +1,9 @@
 ## Changelog
 
+### Version 2.1.3
+
+- Handle where the serve command cannot be determined.
+
 ### Version 2.1.2
 
 - When you change package.json outside of the extension the UI will automatically update.
