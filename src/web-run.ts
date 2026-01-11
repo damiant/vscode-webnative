@@ -166,6 +166,8 @@ function guessServeCommand(project: Project): string | undefined {
       return npmRun('dev');
     } else if (packageFile.scripts?.start) {
       return npmRun('start');
+    } else if (exists('vite')) {
+      return 'vite';
     }
   }
   return undefined;

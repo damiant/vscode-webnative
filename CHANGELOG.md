@@ -1,5 +1,9 @@
 ## Changelog
 
+### Version 2.1.4
+
+- Handle serve command where vite is used.
+
 ### Version 2.1.3
 
 - Handle where the serve command cannot be determined.
