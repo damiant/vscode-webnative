@@ -27,6 +27,8 @@ export async function showWhatsNew(context: vscode.ExtensionContext, forceShow =
     await context.globalState.update(WHATS_NEW_REVISION_KEY, currentRevision);
   }
 
+  return; // Nothing to show in this update
+
   // Create and show the webview panel
   const panel = vscode.window.createWebviewPanel(
     'webnativeWhatsNew',
