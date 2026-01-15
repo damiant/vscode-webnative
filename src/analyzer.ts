@@ -2,7 +2,7 @@
 
 import { coerce, compare, lt, gte, lte } from 'semver';
 
-import { parse } from 'fast-xml-parser';
+import { XMLParser } from 'fast-xml-parser';
 
 import {
   writeConsistentVersionError,
@@ -32,13 +32,16 @@ function processConfigXML(folder: string) {
   if (existsSync(configXMLFilename)) {
     const xml = readFileSync(configXMLFilename, 'utf8');
     try {
-      const json = parse(xml, {
-        ignoreNameSpace: true,
-        arrayMode: true,
-        parseNodeValue: true,
+      const parser = new XMLParser({
+        removeNSPrefix: true,
+        isArray: (name, jPath, isLeafNode, isAttribute) => {
+          return true;
+        },
+        parseTagValue: true,
         parseAttributeValue: true,
         ignoreAttributes: false,
       });
+      const json = parser.parse(xml);
 
       const widget = json.widget[0];
       if (widget.preference) {
@@ -80,13 +83,16 @@ function processAndroidXML(folder: string) {
     return config;
   }
   const xml = readFileSync(androidXMLFilename, 'utf8');
-  return parse(xml, {
-    ignoreNameSpace: true,
-    arrayMode: true,
-    parseNodeValue: true,
+  const parser = new XMLParser({
+    removeNSPrefix: true,
+    isArray: (name, jPath, isLeafNode, isAttribute) => {
+      return true;
+    },
+    parseTagValue: true,
     parseAttributeValue: true,
     ignoreAttributes: false,
   });
+  return parser.parse(xml);
 }
 
 function getAndroidManifestIntent(name: string) {
