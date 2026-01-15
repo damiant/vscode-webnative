@@ -1,5 +1,9 @@
 ## Changelog
 
+### Version 2.1.5
+
+- Fix for "Cannot read properties of undefined (reading 'replace') at finishCommand"
+
 ### Version 2.1.4
 
 - Handle serve command where vite is used.

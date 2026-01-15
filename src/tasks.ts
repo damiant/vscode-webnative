@@ -74,16 +74,18 @@ export function finishCommand(tip: Tip) {
   const eventName = tip.description ?? tip.title;
 
   // Track the event with detailed properties
-  writeEvent(eventName, {
-    command: tip.vsCommand,
-    project: exState.projectRef?.name,
-    type: exState.projectRef?.type,
-    repoType: exState.projectRef?.repoType,
-    frameworkType: exState.projectRef?.frameworkType,
-  });
+  if (eventName) {
+    writeEvent(eventName, {
+      command: tip.vsCommand,
+      project: exState.projectRef?.name,
+      type: exState.projectRef?.type,
+      repoType: exState.projectRef?.repoType,
+      frameworkType: exState.projectRef?.frameworkType,
+    });
 
-  // Increment user property for this action
-  incrementUserProperty(`action_${eventName.replace(/\s+/g, '_').toLowerCase()}_count`);
+    // Increment user property for this action
+    incrementUserProperty(`action_${eventName.replace(/\s+/g, '_').toLowerCase()}_count`);
+  }
 
   // Update user's last active project type
   if (exState.projectRef) {
