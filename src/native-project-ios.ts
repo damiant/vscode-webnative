@@ -1,6 +1,6 @@
 import { existsSync, writeFileSync } from 'fs';
 import xcode, { XcodeProjectType } from 'xcode';
-import * as plist from 'simple-plist';
+import plist from 'simple-plist';
 import { join } from 'path';
 
 export class IosProject {

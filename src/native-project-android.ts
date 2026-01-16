@@ -1,5 +1,5 @@
 import { existsSync, mkdirSync, readdirSync, readFileSync, renameSync, rmdirSync, writeFileSync } from 'fs';
-import { parse } from 'fast-xml-parser';
+import { XMLParser } from 'fast-xml-parser';
 import { join } from 'path';
 import { getStringFrom, setStringIn } from './utilities-strings';
 
@@ -42,7 +42,8 @@ export class AndroidProject {
 
     try {
       const xmlData = readFileSync(this.stringsXmlPath(), 'utf-8');
-      const parsedXml = parse(xmlData, { ignoreAttributes: false });
+      const parser = new XMLParser({ ignoreAttributes: false });
+      const parsedXml = parser.parse(xmlData);
 
       if (parsedXml.resources && parsedXml.resources.string) {
         const appNameEntry = parsedXml.resources.string.find((s: any) => s['@_name'] === key);

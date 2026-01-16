@@ -2,7 +2,7 @@
 
 import { coerce, compare, lt, gte, lte } from 'semver';
 
-import { parse } from 'fast-xml-parser';
+import { XMLParser, X2jOptions } from 'fast-xml-parser';
 
 import {
   writeConsistentVersionError,
@@ -26,19 +26,26 @@ let allDependencies = {};
 let cordovaConfig;
 let androidManifest;
 
+function createXMLParserConfig(): X2jOptions {
+  return {
+    removeNSPrefix: true,
+    isArray: (name, jPath, isLeafNode, isAttribute) => {
+      return true;
+    },
+    parseTagValue: true,
+    parseAttributeValue: true,
+    ignoreAttributes: false,
+  };
+}
+
 function processConfigXML(folder: string) {
   const configXMLFilename = `${folder}/config.xml`;
   const config = { preferences: {}, androidPreferences: {}, iosPreferences: {}, plugins: {} };
   if (existsSync(configXMLFilename)) {
     const xml = readFileSync(configXMLFilename, 'utf8');
     try {
-      const json = parse(xml, {
-        ignoreNameSpace: true,
-        arrayMode: true,
-        parseNodeValue: true,
-        parseAttributeValue: true,
-        ignoreAttributes: false,
-      });
+      const parser = new XMLParser(createXMLParserConfig());
+      const json = parser.parse(xml);
 
       const widget = json.widget[0];
       if (widget.preference) {
@@ -80,13 +87,8 @@ function processAndroidXML(folder: string) {
     return config;
   }
   const xml = readFileSync(androidXMLFilename, 'utf8');
-  return parse(xml, {
-    ignoreNameSpace: true,
-    arrayMode: true,
-    parseNodeValue: true,
-    parseAttributeValue: true,
-    ignoreAttributes: false,
-  });
+  const parser = new XMLParser(createXMLParserConfig());
+  return parser.parse(xml);
 }
 
 function getAndroidManifestIntent(name: string) {
