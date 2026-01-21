@@ -4,13 +4,12 @@ import { QueueFunction, Tip, TipType } from './tip';
 import { channelShow } from './utilities';
 import { CapProjectCache } from './context-variables';
 import { join } from 'path';
-import { getCapacitorConfigureFile, updateCapacitorConfig } from './capacitor-config-file';
+import { updateCapacitorConfig } from './capacitor-config-file';
 import { showOutput, write, writeError } from './logging';
-import { existsSync } from 'fs';
 import { ExtensionContext, window } from 'vscode';
 import { AndroidProject } from './native-project-android';
 import { IosProject } from './native-project-ios';
-import { getStringFrom, setStringIn } from './utilities-strings';
+import { setStringIn } from './utilities-strings';
 
 enum NativePlatform {
   iOSOnly,
