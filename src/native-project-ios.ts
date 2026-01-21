@@ -1,7 +1,7 @@
 import { existsSync, writeFileSync } from 'fs';
 import xcode, { XcodeProjectType } from 'xcode';
 import { join } from 'path';
-import { readFileSync } from '@webnativellc/simple-plist';
+import { readFileSync, writeFileSync as writePlistFileSync } from '@webnativellc/simple-plist';
 
 export class IosProject {
   private _projectPath: string;
@@ -227,7 +227,7 @@ export class IosProject {
   async setDisplayName(target: string, buildConfig: string, displayName: string): Promise<void> {
     const data: any = readFileSync(this._infoPlistPath);
     data.CFBundleDisplayName = displayName;
-    writeFileSync(this._infoPlistPath, data);
+    writePlistFileSync(this._infoPlistPath, data);
   }
 }
 
