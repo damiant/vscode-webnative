@@ -104,10 +104,6 @@ export function stopPublishing() {
   }
 }
 
-function passesRemoteFilter(msg: string, logFilters: string[]): boolean {
-  return passesFilter(msg, logFilters, true);
-}
-
 export function passesFilter(msg: string, logFilters: string[], isRemote: boolean): boolean {
   for (const filteredLine of filteredLines) {
     if (msg.startsWith(filteredLine)) {
