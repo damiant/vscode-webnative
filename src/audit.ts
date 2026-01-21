@@ -39,7 +39,7 @@ export async function audit(queueFunction: QueueFunction, project: Project): Pro
   return;
 }
 
-export interface SecurityVulnerability {
+interface SecurityVulnerability {
   name: string;
   severity: string;
   url: string;

@@ -26,7 +26,7 @@ export interface MonoRepoProject {
   isNXStandalone?: boolean; // Is this a standalone NX Monorepo
 }
 
-export interface MonoFolder {
+interface MonoFolder {
   name: string;
   packageJson: string;
   path: string;

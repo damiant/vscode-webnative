@@ -148,7 +148,7 @@ async function verifySettings(
   return settings;
 }
 
-export interface KeyStoreSettings {
+interface KeyStoreSettings {
   keyStorePath?: string;
   keyStorePassword?: string;
   keyAlias?: string;

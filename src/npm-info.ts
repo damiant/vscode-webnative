@@ -50,6 +50,6 @@ function rateLimited(a: any): boolean {
   );
 }
 
-export function getNpmToken() {
+function getNpmToken() {
   return process.env.DATA_SCRIPTS_NPM_TOKEN;
 }

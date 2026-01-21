@@ -91,20 +91,6 @@ function processAndroidXML(folder: string) {
   return parser.parse(xml);
 }
 
-function getAndroidManifestIntent(name: string) {
-  function matches(attribute, value, array) {
-    return array.find((element) => element[attribute] == value) != undefined;
-  }
-
-  console.log(androidManifest.manifest[0].application[0].activity[0]);
-  for (const intent of androidManifest.manifest[0].application[0].activity[0]['intent-filter']) {
-    if (matches('@_name', 'android.intent.action.VIEW', intent.action)) {
-      return intent;
-    }
-  }
-  return undefined;
-}
-
 export async function load(fn: string, project: Project, context: ExtensionContext): Promise<any> {
   let packageJsonFilename = fn;
   if (lstatSync(fn).isDirectory()) {
@@ -257,15 +243,7 @@ async function getYarnVersion(packageManager: string, folder: string): Promise<s
   return packageManager;
 }
 
-export function checkAndroidManifest() {
-  error('Not Implemented', 'Not implemented yet');
-  const intent = getAndroidManifestIntent('android.intent.action.VIEW');
-  console.error('WOW');
-  console.log(intent);
-  return true;
-}
-
-export function checkCordovaAndroidPreferenceMinimum(preference, minVersion): Tip {
+export function checkCordovaAndroidPreferenceMinimum(preference: string, minVersion: string): Tip {
   if (!cordovaConfig) {
     return;
   }
@@ -431,12 +409,6 @@ export function reviewPlugin(name: string): Tip {
       TipType.Warning,
       `The plugin ${name} requires testing for Capacitor compatibility.`,
     );
-  }
-}
-
-export function warnIfNotUsing(name: string): Tip {
-  if (!allDependencies[name]) {
-    return new Tip(name, `package is not using ${name}`);
   }
 }
 

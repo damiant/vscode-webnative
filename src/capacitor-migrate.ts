@@ -33,7 +33,7 @@ export interface CapacitorMigrationOptions {
   ignorePeerDependencies: string[]; // Ignore peer dependency conflicts with these plugins
 }
 
-export interface MinPlugin {
+interface MinPlugin {
   dep: string;
   version: string;
 }
@@ -244,7 +244,7 @@ function checkAndroidStudio(minVersion: string): boolean {
   return true;
 }
 
-export interface AndroidStudioInfo {
+interface AndroidStudioInfo {
   buildNumber: string;
   customProperties: any[];
   dataDirectoryName: string;

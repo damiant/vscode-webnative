@@ -1,7 +1,7 @@
 import { existsSync, writeFileSync } from 'fs';
 import xcode, { XcodeProjectType } from 'xcode';
-import plist from 'simple-plist';
 import { join } from 'path';
+import { readFileSync } from '@webnativellc/simple-plist';
 
 export class IosProject {
   private _projectPath: string;
@@ -76,7 +76,7 @@ export class IosProject {
   }
 
   async getDisplayName(): Promise<string> {
-    const data: any = plist.readFileSync(this._infoPlistPath);
+    const data: any = readFileSync(this._infoPlistPath);
     return data.CFBundleDisplayName;
   }
 
@@ -135,7 +135,7 @@ export class IosProject {
   }
 
   getInfoPlist(): any {
-    return plist.readFileSync(this._infoPlistPath);
+    return readFileSync(this._infoPlistPath);
   }
 
   async getBuild(target: string, buildConfig: string): Promise<number> {
@@ -225,9 +225,9 @@ export class IosProject {
   }
 
   async setDisplayName(target: string, buildConfig: string, displayName: string): Promise<void> {
-    const data: any = plist.readFileSync(this._infoPlistPath);
+    const data: any = readFileSync(this._infoPlistPath);
     data.CFBundleDisplayName = displayName;
-    plist.writeFileSync(this._infoPlistPath, data);
+    writeFileSync(this._infoPlistPath, data);
   }
 }
 

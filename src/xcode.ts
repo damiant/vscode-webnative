@@ -1,7 +1,7 @@
 import { join } from 'path';
 import { Project } from './project';
 import { project } from 'xcode';
-import plist from 'simple-plist';
+import plist from '@webnativellc/simple-plist';
 import { existsSync, writeFileSync } from 'fs';
 import { QueueFunction, Tip, TipType } from './tip';
 import { ExtensionContext, window } from 'vscode';
@@ -174,7 +174,7 @@ function XCodeProjFolder(project: Project): string {
   return join(iosFolder(project), 'App.xcodeproj');
 }
 
-export function iosFolder(project: Project): string {
+function iosFolder(project: Project): string {
   return join(project.projectFolder(), 'ios', 'App');
 }
 

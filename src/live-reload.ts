@@ -25,7 +25,7 @@ export async function liveReloadSSL(project: Project): Promise<void> {
   }
 }
 
-export async function setupServerCertificate(project: Project): Promise<void> {
+async function setupServerCertificate(project: Project): Promise<void> {
   if (!hasRootCA()) {
     if (
       (await window.showInformationMessage(

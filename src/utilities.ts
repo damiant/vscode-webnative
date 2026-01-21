@@ -104,7 +104,7 @@ export function stopPublishing() {
   }
 }
 
-export function passesRemoteFilter(msg: string, logFilters: string[]): boolean {
+function passesRemoteFilter(msg: string, logFilters: string[]): boolean {
   return passesFilter(msg, logFilters, true);
 }
 
