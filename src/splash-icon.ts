@@ -11,7 +11,7 @@ import { ProgressLocation, window } from 'vscode';
 import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import { exState } from './tree-provider';
 
-export enum AssetType {
+enum AssetType {
   splash = 'splash.png',
   splashDark = 'splash-dark.png',
   icon = 'icon.png',

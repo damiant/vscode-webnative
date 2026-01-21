@@ -71,7 +71,7 @@ export interface Package {
   versionName: string;
 }
 
-export interface WebViewPage {
+interface WebViewPage {
   url: string;
   title: string;
   webSocketDebuggerUrl: string;

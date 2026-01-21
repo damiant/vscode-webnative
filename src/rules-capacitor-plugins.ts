@@ -8,7 +8,7 @@ import { npx } from './node-commands';
 import { ActionResult } from './command-name';
 import { exState } from './tree-provider';
 
-export interface CapacitorPluginMigrationOptions {
+interface CapacitorPluginMigrationOptions {
   changesLink: string;
   migrateCommand: string;
 }
@@ -34,7 +34,7 @@ export function checkCapacitorPluginMigration(project: Project) {
   }
 }
 
-export async function migrateCapacitorPlugin(
+async function migrateCapacitorPlugin(
   queueFunction: QueueFunction,
   project: Project,
   currentVersion: string,

@@ -4,13 +4,12 @@ import { QueueFunction, Tip, TipType } from './tip';
 import { channelShow } from './utilities';
 import { CapProjectCache } from './context-variables';
 import { join } from 'path';
-import { getCapacitorConfigureFile, updateCapacitorConfig } from './capacitor-config-file';
+import { updateCapacitorConfig } from './capacitor-config-file';
 import { showOutput, write, writeError } from './logging';
-import { existsSync } from 'fs';
 import { ExtensionContext, window } from 'vscode';
 import { AndroidProject } from './native-project-android';
 import { IosProject } from './native-project-ios';
-import { getStringFrom, setStringIn } from './utilities-strings';
+import { setStringIn } from './utilities-strings';
 
 enum NativePlatform {
   iOSOnly,
@@ -100,37 +99,6 @@ export async function reviewCapacitorConfig(project: Project, context: Extension
   }
 
   project.clearSubgroup();
-}
-
-/**
- * Gets the full path using a folder and the webDir property from capacitor.config.ts
- * @param  {string} folder
- * @returns string
- */
-export function getCapacitorConfigWebDir(folder: string): string {
-  let result = 'www';
-  const config = getCapacitorConfigureFile(folder);
-  if (config) {
-    result = getStringFrom(config, `webDir: '`, `'`);
-    if (!result) {
-      result = getStringFrom(config, `webDir: "`, `"`);
-    }
-  }
-
-  if (!result) {
-    // No config file take a best guess
-    if (existsSync(join(folder, 'www'))) {
-      result = 'www';
-    } else if (existsSync(join(folder, 'dist'))) {
-      result = 'dist';
-    } else if (existsSync(join(folder, 'build'))) {
-      result = 'build';
-    }
-  }
-  if (!result) {
-    result = 'www'; // Assume www folder
-  }
-  return join(folder, result);
 }
 
 async function getCapacitorProjectState(prj: Project, context: ExtensionContext): Promise<CapacitorProjectState> {

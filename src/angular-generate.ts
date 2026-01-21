@@ -33,11 +33,7 @@ export async function addAngularGenerateAction(project: Project) {
   project.clearSubgroup();
 }
 
-export async function angularGenerate(
-  queueFunction: QueueFunction,
-  project: Project,
-  angularType: string,
-): Promise<void> {
+async function angularGenerate(queueFunction: QueueFunction, project: Project, angularType: string): Promise<void> {
   let name = await window.showInputBox({
     title: `New Angular ${angularType}`,
     placeHolder: `Enter name for new ${angularType}`,

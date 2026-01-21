@@ -550,11 +550,11 @@ interface FileInfo {
   filename: string;
 }
 
-export interface SizeResults {
+interface SizeResults {
   results: SizeResult[];
 }
 
-export interface SizeResult {
+interface SizeResult {
   bundleName: string;
   totalBytes: number;
   mappedBytes: number;

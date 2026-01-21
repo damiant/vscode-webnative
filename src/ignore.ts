@@ -38,23 +38,3 @@ export function clearIgnored(context: ExtensionContext) {
   const key = 'ignoredRecommendations';
   context.workspaceState.update(key, undefined);
 }
-
-export function excludeIgnoredTips(tips: Array<Tip>, context: ExtensionContext): Array<Tip> {
-  const key = 'ignoredRecommendations';
-  const listJSON: string = context.workspaceState.get(key);
-  let list = [];
-
-  if (listJSON) {
-    try {
-      list = JSON.parse(listJSON);
-      return tips.filter((tip) => {
-        return tip && !list.includes(`${tip.message}+${tip.title}`);
-      });
-    } catch {
-      context.workspaceState.update(key, '[]');
-      return tips;
-    }
-  } else {
-    return tips;
-  }
-}

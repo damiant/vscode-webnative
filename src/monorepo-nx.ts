@@ -6,10 +6,6 @@ import { Project } from './project';
 import { stripJsonComments } from './strip-json-comments';
 import { existsSync, readFileSync, readdirSync } from 'fs';
 
-export interface NXWorkspace {
-  projects: object;
-}
-
 let nxProjectFolder: string = undefined;
 /**
  * NX creates a workspace.json file containing the list of projects
