@@ -1,7 +1,7 @@
 import { join } from 'path';
 import { Project } from './project';
 import { project } from 'xcode';
-import * as plist from 'simple-plist';
+import plist from 'simple-plist';
 import { existsSync, writeFileSync } from 'fs';
 import { QueueFunction, Tip, TipType } from './tip';
 import { ExtensionContext, window } from 'vscode';
