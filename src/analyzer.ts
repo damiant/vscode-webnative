@@ -243,7 +243,7 @@ async function getYarnVersion(packageManager: string, folder: string): Promise<s
   return packageManager;
 }
 
-export function checkCordovaAndroidPreferenceMinimum(preference: string, minVersion: string): Tip {
+export function checkCordovaAndroidPreferenceMinimum(preference: string, minVersion: string): Tip | undefined {
   if (!cordovaConfig) {
     return;
   }
