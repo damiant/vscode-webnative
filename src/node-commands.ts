@@ -16,7 +16,7 @@ export enum PackageManager {
   bun,
 }
 
-export enum PMOperation {
+enum PMOperation {
   install,
   installAll,
   uninstall,

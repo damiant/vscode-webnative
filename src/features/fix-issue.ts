@@ -217,7 +217,7 @@ export async function fix(
   }
 }
 
-export async function execute(tip: Tip, context: ExtensionContext): Promise<void> {
+async function execute(tip: Tip, context: ExtensionContext): Promise<void> {
   const result: ActionResult = (await tip.executeAction()) as ActionResult;
   if (result == ActionResult.Ignore) {
     ignore(tip, context);

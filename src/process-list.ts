@@ -8,7 +8,7 @@ import { getRunOutput } from './utilities';
  * @param  {number} processId
  * @returns Promise of an Array of process ids for the children of processId
  */
-export async function getChildProcessIds(folder: string, processId: number): Promise<Array<number>> {
+async function getChildProcessIds(folder: string, processId: number): Promise<Array<number>> {
   try {
     const lines = process.platform === 'win32' ? await getWindowsProcessList(folder) : await getMacProcessList(folder);
 

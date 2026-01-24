@@ -21,7 +21,7 @@ import { execSync } from 'child_process';
 import { getVersionsFromPackageLock } from './package-lock';
 import { getStringFrom, setAllStringIn } from './utilities-strings';
 
-export interface PluginInformation {
+interface PluginInformation {
   androidPermissions: Array<string>;
   androidFeatures: Array<string>;
   dependentPlugins: Array<string>;

@@ -5,7 +5,7 @@ import { getStringFrom, setStringIn } from './utilities-strings';
 
 // Purpose: Capacitor Config File Management
 
-export function getCapacitorConfigureFile(folder: string): string | undefined {
+function getCapacitorConfigureFile(folder: string): string | undefined {
   const capConfigFile = getCapacitorConfigureFilename(folder);
   if (capConfigFile && existsSync(capConfigFile)) {
     return readFileSync(capConfigFile, 'utf-8');

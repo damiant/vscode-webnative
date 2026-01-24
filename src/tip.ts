@@ -314,7 +314,6 @@ export enum TipType {
   Comment,
   Settings,
   Files,
-  Builder,
   Sync,
   Add,
   Dependency,
