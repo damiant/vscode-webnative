@@ -93,7 +93,7 @@ export async function handleError(error: string, logs: Array<string>, folder: st
   }
 }
 
-function extractErrors(errorText: string, logs: Array<string>, folder: string): Array<ErrorLine> {
+export function extractErrors(errorText: string, logs: Array<string>, folder: string): Array<ErrorLine> {
   const errors: Array<ErrorLine> = [];
 
   // If logs array is empty but errorText is provided, use errorText as the log source
