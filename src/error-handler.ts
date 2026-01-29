@@ -93,7 +93,7 @@ export async function handleError(error: string, logs: Array<string>, folder: st
   }
 }
 
-function extractErrors(errorText: string, logs: Array<string>, folder: string): Array<ErrorLine> {
+export function extractErrors(errorText: string, logs: Array<string>, folder: string): Array<ErrorLine> {
   const errors: Array<ErrorLine> = [];
 
   // If logs array is empty but errorText is provided, use errorText as the log source
@@ -288,7 +288,7 @@ function extractESBuildStyleError(errorText: string): ErrorLine {
 // NextJS error has the style: Failed to compile.
 // "./src/components/BynderImage.tsx"
 // "Error:   x Expression expected"
-// "    ,-[/Users/damiantarnawsky/Code/damian-builder1/src/components/BynderImage.tsx:17:1]"
+// "    ,-[/Users/theuser/Code/damian-builder1/src/components/BynderImage.tsx:17:1]"
 function extractNextJSErrorFrom(errorText: string): ErrorLine {
   try {
     const lines = uncolor(errorText).split('\n');
@@ -422,10 +422,10 @@ function extractJavaError(line1: string, line2: string): ErrorLine {
 }
 
 // Parse a Swift compiler error like:
-// /Users/damiantarnawsky/Code/dust3/dust/ios/App/App/AppDelegate.swift:8:1: error: Expected 'func' keyword in instance method declaration
+// /Users/theuser/Code/dust3/dust/ios/App/App/AppDelegate.swift:8:1: error: Expected 'func' keyword in instance method declaration
 // eee
 // OR
-// /Users/damiantarnawsky/Code/dust3/dust/ios/App/App/AppDelegate.swift:8:1: error: Expected 'func' keyword... (in target 'App' from project 'App')
+// /Users/theuser/Code/dust3/dust/ios/App/App/AppDelegate.swift:8:1: error: Expected 'func' keyword... (in target 'App' from project 'App')
 // eee
 function extractSwiftError(line1: string, line2: string): ErrorLine {
   try {

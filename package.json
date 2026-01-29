@@ -15,7 +15,6 @@
     "Vue",
     "Angular",
     "Solid",
-    "Builder",
     "Capacitor",
     "Preact",
     "Nuxt",
@@ -47,9 +46,10 @@
     "watch": "tsc -watch -p ./",
     "lint": "npm run eslint && npm run prettier -- --check",
     "fmt": "npm run eslint -- --fix && npm run prettier -- --write",
-    "test": "npx vitest tests",
+    "test": "npx vitest run",
     "prettier": "prettier \"**/*.ts\"",
-    "eslint": "eslint . --ext .ts"
+    "eslint": "eslint . --ext .ts",
+    "knip": "knip"
   },
   "repository": {
     "type": "git",
@@ -711,7 +711,7 @@
   "devDependencies": {
     "@ionic/prettier-config": "4.0.0",
     "@types/netmask": "^2.0.5",
-    "@types/node": "22.13.10",
+    "@types/node": "^22.13.10",
     "@types/semver": "^7.7.1",
     "@types/vscode": "1.65.0",
     "@typescript-eslint/eslint-plugin": "8.26.1",
@@ -721,7 +721,8 @@
     "eslint": "9.28.0",
     "eslint-plugin-unused-imports": "^4.1.4",
     "husky": "^7.0.0",
-    "typescript": "5.8.3",
+    "knip": "^5.82.1",
+    "typescript": "^5.8.3",
     "typescript-eslint": "8.53.0",
     "vitest": "3.2.1"
   },

@@ -9,13 +9,11 @@ export enum WorkspaceSetting {
   pluginDrift = 'pluginDrift', // Whether the user has been shown the plugin drift compared to NexusBrowser app
   webAction = 'webAction',
   logFilter = 'logFilter',
-  tips = 'tipsShown',
   lastIPAddress = 'lastIPAddress',
   debugBrowser = 'debugBrowser',
   emulator = 'emulator',
   cocoaPods = 'cocoaPods2',
   recCheck = 'recCheck',
-  builderAuthenticated = 'builderAuthenticated',
 }
 
 export enum ExtensionSetting {
@@ -43,7 +41,7 @@ export function getExtSetting(key: ExtensionSetting): any {
   return workspace.getConfiguration(WorkspaceSection).get(key);
 }
 
-export function setExtSetting(key: ExtensionSetting, value: any): any {
+function setExtSetting(key: ExtensionSetting, value: any): any {
   return workspace.getConfiguration(WorkspaceSection).update(key, value);
 }
 

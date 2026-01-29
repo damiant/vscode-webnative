@@ -5,7 +5,7 @@ export const error = (title: string, str: string): Tip => {
   return new Tip(title, str, TipType.Error, str, Command.NoOp, 'OK').canIgnore();
 };
 
-export const libString = (lib: string, ver: string) => {
+const libString = (lib: string, ver: string) => {
   const vstr = ver ? ` (${ver})` : '';
   return `${lib}${vstr}`;
 };
