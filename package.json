@@ -46,7 +46,7 @@
     "watch": "tsc -watch -p ./",
     "lint": "npm run eslint && npm run prettier -- --check",
     "fmt": "npm run eslint -- --fix && npm run prettier -- --write",
-    "test": "npx vitest tests",
+    "test": "npx vitest run",
     "prettier": "prettier \"**/*.ts\"",
     "eslint": "eslint . --ext .ts",
     "knip": "knip"
