@@ -3,6 +3,7 @@
 ### Version 2.1.6
 
 - Remove "Reduce Config Files" browserslist tip
+- Fix import of @webnativellc/simple-plist to properly access readFileSync and writeFileSync
 
 ### Version 2.1.5
 
