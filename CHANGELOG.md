@@ -1,5 +1,9 @@
 ## Changelog
 
+### Version 2.1.6
+
+- Remove "Reduce Config Files" browserslist tip
+
 ### Version 2.1.5
 
 - Fix for "Cannot read properties of undefined (reading 'replace') at finishCommand"
