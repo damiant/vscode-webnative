@@ -89,7 +89,7 @@ export function qrWebView(webview: Webview, externalUrl: string, localUrl: strin
   return title;
 }
 
-export async function troubleshootPlugins() {
+async function troubleshootPlugins() {
   try {
     // Download https://nexusbrowser.com/assets/app-data.json which is the list of plugins included in nexus browser app
     const data = (await httpRequest('GET', 'webnative.app', '/assets/app-data.json')) as Plugins;

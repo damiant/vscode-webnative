@@ -58,7 +58,7 @@ export function replaceAllStringIn(data: string, start: string, end: string, rep
   return result;
 }
 
-export function replaceStringIn(data: string, start: string, end: string, replacement: string): string {
+function replaceStringIn(data: string, start: string, end: string, replacement: string): string {
   const foundIdx = data.lastIndexOf(start);
   if (foundIdx == -1) {
     return data;

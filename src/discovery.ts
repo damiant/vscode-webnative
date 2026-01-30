@@ -131,7 +131,7 @@ export class Publisher extends events.EventEmitter implements IPublisher {
   }
 }
 
-export function prepareInterfaces(interfaces: any): Interface[] {
+function prepareInterfaces(interfaces: any): Interface[] {
   const set = new Set<string>();
   return Object.keys(interfaces)
     .map((key) => interfaces[key] as any[])

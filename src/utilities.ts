@@ -405,7 +405,7 @@ export async function run(
   });
 }
 
-export function delay(ms: number) {
+function delay(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
@@ -515,7 +515,7 @@ export function stripJSON(txt: string, startText: string): string {
   return txt;
 }
 
-export function getSpawnOutput(
+function getSpawnOutput(
   command: string,
   folder: string,
   shell?: string,
@@ -569,7 +569,7 @@ export async function getRunOutput(
   //return getSpawnOutput(command, folder, shell, hideErrors, ignoreErrors);
 }
 
-export async function getExecOutput(
+async function getExecOutput(
   command: string,
   folder: string,
   shell?: string,
@@ -686,7 +686,7 @@ export function alt(key: string): string {
   return isWindows() ? `Alt+${key}` : `⌥+${key}`;
 }
 
-export function generateUUID(): string {
+function generateUUID(): string {
   return new Date().getTime().toString(36) + Math.random().toString(36).slice(2);
 }
 /**
@@ -704,7 +704,7 @@ export function asAppId(name: string): string {
   return name;
 }
 
-export function extractBetween(A: string, B: string, C: string): string | null {
+function extractBetween(A: string, B: string, C: string): string | null {
   const indexB = A.indexOf(B);
   if (indexB === -1) return null; // B not found
 
@@ -731,7 +731,7 @@ export interface CapacitorPackageInfo {
   android?: CapacitorPackagePlatform;
 }
 
-export interface CapacitorPackagePlatform {
+interface CapacitorPackagePlatform {
   src: string;
 }
 

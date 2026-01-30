@@ -30,7 +30,7 @@ function npmHeaders(): any {
   };
 }
 
-export async function httpGet(url: string, opts: any): Promise<any> {
+async function httpGet(url: string, opts: any): Promise<any> {
   const response = await fetch(url, opts);
   try {
     const data = await response.json();

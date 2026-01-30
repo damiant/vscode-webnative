@@ -94,7 +94,7 @@ interface NpmOperationalInternal {
 /**
  * This is the response from the npm api https://api.npmjs.org/downloads/[period]/[package]
  */
-export interface NpmDownloads {
+interface NpmDownloads {
   downloads: number;
   start: string;
   end: string;

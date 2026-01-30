@@ -259,7 +259,7 @@ export function getWhatsNewContent(): string {
  * Alternative example showing how to use local video files
  * Uncomment and modify this section if you want to use local videos instead of YouTube
  */
-export function getVideoExample(): string {
+function getVideoExample(): string {
   return `
     <div class="video-container">
         <video controls>
@@ -274,7 +274,7 @@ export function getVideoExample(): string {
 /**
  * Example of creating a custom section with images
  */
-export function getImageExample(): string {
+function getImageExample(): string {
   return `
     <h2>📸 Screenshots</h2>
     <p>See the new features in action:</p>

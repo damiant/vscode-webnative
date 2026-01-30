@@ -39,8 +39,3 @@ Starter templates and features for:
 - [Angular Migrations](https://webnative.dev/integrations/angular/) - Automate Angular version migrations.
 - [Create Angular Items](https://webnative.dev/integrations/angular/) - Create Angular components, directives, services, pipes, modules, guards, interceptors and more.
 - [Angular Schematics](https://webnative.dev/integrations/angular/) - Run Angular schematics like migration to built-in control flow syntax.
-
-## Builder Features
-
-- [Builder Publish](https://webnative.dev/integrations/builder/) - Integration with Builder.io dev tools for headless CMS
-- [Builder Develop](https://webnative.dev/integrations/builder/) - Import designs from Figma or chat with AI for code generation

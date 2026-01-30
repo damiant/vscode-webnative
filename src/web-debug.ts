@@ -1,12 +1,12 @@
 import { window } from 'vscode';
 import { getSetting, setSetting, WorkspaceSetting } from './workspace-state';
 
-export enum WebDebugSetting {
+enum WebDebugSetting {
   edge = 'pwa-msedge',
   chrome = 'chrome',
 }
 
-export function getWebDebugSetting(): WebDebugSetting {
+function getWebDebugSetting(): WebDebugSetting {
   const setting = getSetting(WorkspaceSetting.debugBrowser);
   if (setting) {
     return setting;

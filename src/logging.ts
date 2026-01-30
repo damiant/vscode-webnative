@@ -31,7 +31,7 @@ export function write(message: string) {
   getOutputChannel().appendLine(message);
 }
 
-export function writeAppend(message: string) {
+function writeAppend(message: string) {
   getOutputChannel().append(message);
 }
 

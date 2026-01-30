@@ -199,9 +199,6 @@ export class Project {
       case TipType.Files:
         r.setIcon('files');
         break;
-      case TipType.Builder:
-        r.setSingleIcon('logo-builder');
-        break;
       case TipType.Apple:
         r.setIcon('apple');
         break;

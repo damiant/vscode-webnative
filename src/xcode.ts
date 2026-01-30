@@ -1,7 +1,7 @@
 import { join } from 'path';
 import { Project } from './project';
 import { project } from 'xcode';
-import plist from '@webnativellc/simple-plist';
+import * as plist from '@webnativellc/simple-plist';
 import { existsSync, writeFileSync } from 'fs';
 import { QueueFunction, Tip, TipType } from './tip';
 import { ExtensionContext, window } from 'vscode';

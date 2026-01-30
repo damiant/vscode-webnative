@@ -8,7 +8,7 @@ test('extractErrors finds Swift errors in errors.txt', () => {
   const content = readFileSync(errorsFile, 'utf8');
   const lines = content.split('\n');
 
-  const errors = extractErrors('', lines, '/Users/damiantarnawsky/Code/dust3/dust');
+  const errors = extractErrors('', lines, '/Users/theuser/Code/dust3/dust');
 
   // Filter to only Swift errors
   const swiftErrors = errors.filter((err) => err.uri.includes('.swift'));
@@ -18,7 +18,7 @@ test('extractErrors finds Swift errors in errors.txt', () => {
 
   // All errors should be from AppDelegate.swift
   swiftErrors.forEach((err) => {
-    expect(err.uri).toBe('/Users/damiantarnawsky/Code/dust3/dust/ios/App/App/AppDelegate.swift');
+    expect(err.uri).toBe('/Users/theuser/Code/dust3/dust/ios/App/App/AppDelegate.swift');
     expect(err.line).toBe(7);
     expect(err.error).toContain('eee');
   });
@@ -29,14 +29,14 @@ test('extractSwiftError parses AppDelegate.swift error correctly', () => {
   const content = readFileSync(errorsFile, 'utf8');
   const lines = content.split('\n');
 
-  const errors = extractErrors('', lines, '/Users/damiantarnawsky/Code/dust3/dust');
+  const errors = extractErrors('', lines, '/Users/theuser/Code/dust3/dust');
   const swiftErrors = errors.filter((err) => err.uri.includes('.swift'));
 
   // Find the first AppDelegate.swift error
   const appDelegateError = swiftErrors[0];
 
   expect(appDelegateError).toBeDefined();
-  expect(appDelegateError.uri).toBe('/Users/damiantarnawsky/Code/dust3/dust/ios/App/App/AppDelegate.swift');
+  expect(appDelegateError.uri).toBe('/Users/theuser/Code/dust3/dust/ios/App/App/AppDelegate.swift');
   expect(appDelegateError.line).toBe(7); // 8:1 (1-indexed) becomes 7:0 (0-indexed): this is the correct 0-indexed conversion from 1-indexed source coordinates
   expect(appDelegateError.position).toBe(0);
   expect(appDelegateError.error).toBe("expected 'func' keyword in instance method declaration eee");

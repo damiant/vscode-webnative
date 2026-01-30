@@ -9,4 +9,3 @@ Thumbs.db
 .config/
 vitest.config.js
 vitest.config.js.map
-tests/errors.txt

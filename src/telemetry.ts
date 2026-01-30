@@ -121,7 +121,7 @@ export function incrementUserProperty(property: string, value: number = 1) {
  * Track a timed event
  * Returns a function to call when the event completes
  */
-export function trackTimedEvent(event: string, props?: { [key: string]: any }): () => void {
+function trackTimedEvent(event: string, props?: { [key: string]: any }): () => void {
   const startTime = Date.now();
 
   return () => {

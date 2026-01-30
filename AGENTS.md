@@ -1,1 +1,2 @@
 - After each change to code run `npm run build:all` and correct any errors found
+- when making a code change add the relevant comment to CHANGELOG.md
