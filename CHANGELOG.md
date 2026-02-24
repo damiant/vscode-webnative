@@ -1,5 +1,11 @@
 ## Changelog
 
+### Version 2.2.1
+
+- Add "Restart" button alongside "Stop" button for running scripts to stop and restart the script
+- Replace stop button text with a stop icon ($(debug-stop))
+- Fix clicking a running task to stop it immediately instead of queuing a new start
+
 ### Version 2.2.0
 
 - Performance improvement to cache package information

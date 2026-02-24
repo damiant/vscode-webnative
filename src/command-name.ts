@@ -7,6 +7,7 @@ export enum CommandName {
   Refresh = 'webnative.refresh',
   Add = 'webnative.add',
   Stop = 'webnative.stop',
+  Restart = 'webnative.restart',
   Rebuild = 'webnative.rebuild',
   RefreshDebug = 'webnative.refreshDebug',
   Function = 'webnative.function',

@@ -161,6 +161,18 @@ export async function activate(context: ExtensionContext) {
     recommendation.setContext(undefined);
   });
 
+  commands.registerCommand(CommandName.Restart, async (recommendation: Recommendation) => {
+    const tip = recommendation.tip;
+    // Stop the running task
+    tip.data = Context.stop;
+    await fixIssue(undefined, context.extensionPath, ionicProvider, tip);
+    recommendation.setContext(undefined);
+    // Clear the stop data flag and wait for the process to fully terminate before restarting
+    tip.data = undefined;
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+    runAction(tip, ionicProvider, rootPath);
+  });
+
   commands.registerCommand(CommandName.OpenInXCode, async () => {
     await findAndRun(ionicProvider, rootPath, CommandTitle.OpenInXCode);
   });
