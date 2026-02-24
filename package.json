@@ -2,7 +2,7 @@
   "name": "webnative",
   "displayName": "WebNative",
   "description": "Create and maintain web and native projects",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "whatsNewRevision": 1,
   "icon": "media/webnative.png",
   "publisher": "WebNative",
@@ -292,7 +292,13 @@
       },
       {
         "command": "webnative.stop",
-        "title": "Stop"
+        "title": "Stop",
+        "icon": "$(debug-stop)"
+      },
+      {
+        "command": "webnative.restart",
+        "title": "Restart",
+        "icon": "$(debug-restart)"
       },
       {
         "command": "webnative.buildConfig",
@@ -485,6 +491,10 @@
         {
           "command": "webnative.stop",
           "when": "false"
+        },
+        {
+          "command": "webnative.restart",
+          "when": "false"
         }
       ],
       "view/title": [
@@ -512,6 +522,11 @@
         },
         {
           "command": "webnative.stop",
+          "when": "view == wn-tree && viewItem == stop",
+          "group": "inline"
+        },
+        {
+          "command": "webnative.restart",
           "when": "view == wn-tree && viewItem == stop",
           "group": "inline"
         },
