@@ -1,5 +1,9 @@
 ## Changelog
 
+### Version 2.2.0
+
+- Performance improvement to cache package information
+
 ### Version 2.1.6
 
 - Remove "Reduce Config Files" browserslist tip

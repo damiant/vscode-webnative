@@ -22,7 +22,7 @@ import { exState } from './tree-provider';
 import { getAndroidWebViewList } from './android-debug-list';
 import { getDebugBrowserName } from './preview';
 import { checkIonicNativePackages } from './rules-ionic-native';
-import { alt, getRunOutput, showProgress, tEnd, tStart } from './utilities';
+import { alt, getRunOutput, showProgress } from './utilities';
 import { startStopLogServer } from './log-server';
 import { getBuildConfigurationName } from './build-configuration';
 import { liveReloadSSL } from './live-reload';
@@ -53,8 +53,6 @@ function hasWebPackages() {
 }
 
 export async function getRecommendations(project: Project, context: ExtensionContext, packages: any): Promise<void> {
-  tStart('getRecommendations');
-
   const isWebProjectOnly = !exists('@capacitor/core') && hasWebPackages();
 
   if (project.isCapacitor || isWebProjectOnly) {
@@ -341,20 +339,13 @@ export async function getRecommendations(project: Project, context: ExtensionCon
     }
   }
 
-  tEnd('getRecommendations');
-
   if (project.isCapacitor) {
-    tStart('checkCapacitorRules');
     await checkCapacitorRules(project, context);
-    tEnd('checkCapacitorRules');
-    tStart('capacitorRecommendations');
     checkIonicNativePackages(packages, project);
     checkCordovaPlugins(packages, project);
     project.tips(await capacitorRecommendations(project, false));
-    tEnd('capacitorRecommendations');
   }
 
-  tStart('reviewPackages');
   if (!project.isCapacitor && !project.isCordova) {
     // The project is not using Cordova or Capacitor
     webProject(project);
@@ -380,8 +371,6 @@ export async function getRecommendations(project: Project, context: ExtensionCon
 
   project.add(new Tip('Settings', '', TipType.Settings).setQueuedAction(settings));
   project.add(new Tip('Show Logs', '', TipType.Files).setQueuedAction(showLogs));
-
-  tEnd('reviewPackages');
 }
 
 async function showLogs(queueFunction: QueueFunction) {

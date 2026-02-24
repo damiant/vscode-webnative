@@ -1,7 +1,7 @@
 import { coerce } from 'semver';
 import { Command, Tip, TipType } from './tip';
 import { Project } from './project';
-import { getRunOutput, isWindows, stripJSON, tEnd, tStart } from './utilities';
+import { getRunOutput, isWindows, stripJSON } from './utilities';
 import { NpmDependency, NpmOutdatedDependency, NpmPackage, PackageType, PackageVersion } from './npm-model';
 import { listCommand, outdatedCommand } from './node-commands';
 import {
@@ -10,6 +10,7 @@ import {
   PackageCacheList,
   PackageCacheModified,
   PackageCacheOutdated,
+  PackageCacheRefreshedAt,
 } from './context-variables';
 import { join } from 'path';
 import { exState } from './tree-provider';
@@ -68,6 +69,53 @@ async function runListPackages(project: Project, folder: string, context: Extens
   }
 }
 
+/**
+ * Fetches fresh outdated and list data from npm/yarn and updates the workspace cache.
+ * Safe to call without await for background refresh.
+ */
+async function refreshPackageData(project: Project, folder: string, context: ExtensionContext): Promise<void> {
+  const outdatedCmd = outdatedCommand(project);
+  try {
+    const [, freshVersions] = await Promise.all([
+      getRunOutput(outdatedCmd, folder, undefined, true, true)
+        .then((data) => {
+          if (project.isYarnV1()) {
+            data = fixYarnV1Outdated(data, project.packageManager);
+          } else if (project.isModernYarn()) {
+            data = fixYarnOutdated(data, project);
+          }
+          context.workspaceState.update(PackageCacheOutdated(project), data);
+        })
+        .catch((reason) => {
+          write(`> ${outdatedCmd}`);
+          writeError(reason);
+        }),
+      runListPackages(project, folder, context),
+    ]);
+    if (freshVersions) {
+      context.workspaceState.update(PackageCacheList(project), freshVersions);
+    } else {
+      context.workspaceState.update(PackageCacheList(project), '{}');
+    }
+    context.workspaceState.update(PackageCacheModified(project), project.modified.toUTCString());
+    context.workspaceState.update(PackageCacheRefreshedAt(project), Date.now());
+  } catch (err) {
+    if (err && err.includes('401')) {
+      window.showInformationMessage(
+        `Unable to run '${outdatedCommand(project)}' due to authentication error. Check .npmrc`,
+        'OK',
+      );
+    } else if (project.isModernYarn()) {
+      writeWarning(
+        `Modern Yarn does not have a command to review outdated package versions. Most functionality of this extension will be disabled.`,
+      );
+    } else {
+      writeError(`Unable to run '${outdatedCommand(project)}'. Try reinstalling node modules.`);
+      console.error(err);
+    }
+  }
+}
+
 export async function processPackages(
   folder: string,
   allDependencies: object,
@@ -78,7 +126,6 @@ export async function processPackages(
   if (!lstatSync(folder).isDirectory()) {
     return {};
   }
-
   // npm outdated only shows dependencies and not dev dependencies if the node module isn't installed
   let outdated = '[]';
   let versions = '{}';
@@ -91,43 +138,34 @@ export async function processPackages(
     if (changed) {
       exState.syncDone = [];
     }
-    if (changed || !outdated || !versions) {
-      const outdatedCmd = outdatedCommand(project);
 
-      const values = await Promise.all([
-        getRunOutput(outdatedCmd, folder, undefined, true, true)
-          .then((data) => {
-            if (project.isYarnV1()) {
-              data = fixYarnV1Outdated(data, project.packageManager);
-            } else if (project.isModernYarn()) {
-              data = fixYarnOutdated(data, project);
-            }
-            outdated = data;
-            context.workspaceState.update(PackageCacheOutdated(project), outdated);
-          })
-          .catch((reason) => {
-            write(`> ${outdatedCmd}`);
-            writeError(reason);
-          }),
-        runListPackages(project, folder, context),
-      ]);
-      versions = values[1];
-      context.workspaceState.update(PackageCacheList(project), versions);
-      context.workspaceState.update(PackageCacheModified(project), packagesModified.toUTCString());
+    const hasCachedData = outdated !== undefined && versions !== undefined;
+    const lastRefreshedAt: number = context.workspaceState.get(PackageCacheRefreshedAt(project)) ?? 0;
+    const oneHourMs = 60 * 60 * 1000;
+    const refreshIsStale = Date.now() - lastRefreshedAt > oneHourMs;
+    // versions with length <= 2 is '{}' or '' - treat as unusable, needs a refresh
+    const versionsUnusable = !versions || versions.length <= 2;
+
+    write(
+      `[processPackages] key=${PackageCacheOutdated(project)} outdated=${outdated === undefined ? 'undefined' : outdated === null ? 'null' : 'set(len=' + String(outdated).length + ')'} versions=${versions === undefined ? 'undefined' : versions === null ? 'null' : 'set(len=' + String(versions).length + ')'} changed=${changed} stale=${refreshIsStale} hasCachedData=${hasCachedData}`,
+    );
+
+    if (!hasCachedData) {
+      // No cache at all - must block and wait for fresh data on first run
+      await refreshPackageData(project, folder, context);
+      outdated = context.workspaceState.get(PackageCacheOutdated(project)) ?? '[]';
+      versions = context.workspaceState.get(PackageCacheList(project)) ?? '{}';
+    } else if (changed || refreshIsStale || versionsUnusable) {
+      // Cache exists but package.json changed, data is over 1 hour old, or versions is empty -
+      // return stale cache now and refresh in background
+      write(
+        `[processPackages] Returning cached data, refreshing in background (changed=${changed}, stale=${refreshIsStale}, versionsUnusable=${versionsUnusable})`,
+      );
+      refreshPackageData(project, folder, context).catch((err) =>
+        console.error('Background package refresh failed', err),
+      );
     } else {
-      // Use the cached value
-      // But also get a copy of the latest packages for updating later
-      const itsAGoodTime = false;
-      if (itsAGoodTime) {
-        getRunOutput(outdatedCommand(project), folder, undefined, true).then((outdatedFresh) => {
-          context.workspaceState.update(PackageCacheOutdated(project), outdatedFresh);
-          context.workspaceState.update(PackageCacheModified(project), packagesModified.toUTCString());
-        });
-
-        getRunOutput(listCommand(project), folder, undefined, true).then((versionsFresh) => {
-          context.workspaceState.update(PackageCacheList(project), versionsFresh);
-        });
-      }
+      write(`[processPackages] Using cached data as-is`);
     }
   } catch (err) {
     outdated = '[]';
@@ -151,17 +189,13 @@ export async function processPackages(
   // outdated is an array with:
   //  "@ionic-native/location-accuracy": { "wanted": "5.36.0", "latest": "5.36.0", "dependent": "cordova-old" }
 
-  tStart('processDependencies');
   const packages = processDependencies(
     allDependencies,
     getOutdatedData(outdated),
     devDependencies,
     getListData(versions),
   );
-  tEnd('processDependencies');
-  tStart('inspectPackages');
   inspectPackages(project.projectFolder() ? project.projectFolder() : folder, packages);
-  tEnd('inspectPackages');
   return packages;
 }
 
