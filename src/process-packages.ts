@@ -146,10 +146,6 @@ export async function processPackages(
     // versions with length <= 2 is '{}' or '' - treat as unusable, needs a refresh
     const versionsUnusable = !versions || versions.length <= 2;
 
-    write(
-      `[processPackages] key=${PackageCacheOutdated(project)} outdated=${outdated === undefined ? 'undefined' : outdated === null ? 'null' : 'set(len=' + String(outdated).length + ')'} versions=${versions === undefined ? 'undefined' : versions === null ? 'null' : 'set(len=' + String(versions).length + ')'} changed=${changed} stale=${refreshIsStale} hasCachedData=${hasCachedData}`,
-    );
-
     if (!hasCachedData) {
       // No cache at all - must block and wait for fresh data on first run
       await refreshPackageData(project, folder, context);
@@ -158,14 +154,9 @@ export async function processPackages(
     } else if (changed || refreshIsStale || versionsUnusable) {
       // Cache exists but package.json changed, data is over 1 hour old, or versions is empty -
       // return stale cache now and refresh in background
-      write(
-        `[processPackages] Returning cached data, refreshing in background (changed=${changed}, stale=${refreshIsStale}, versionsUnusable=${versionsUnusable})`,
-      );
       refreshPackageData(project, folder, context).catch((err) =>
         console.error('Background package refresh failed', err),
       );
-    } else {
-      write(`[processPackages] Using cached data as-is`);
     }
   } catch (err) {
     outdated = '[]';
