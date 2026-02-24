@@ -228,16 +228,17 @@ async function execute(tip: Tip, context: ExtensionContext): Promise<void> {
 }
 
 export async function runAction(tip: Tip, ionicProvider: ExTreeProvider, rootPath: string, srcCommand?: CommandName) {
+  // If this task is already running, stop it immediately instead of queuing
+  if ((tip.stoppable || tip.contextValue == Context.stop) && isRunning(tip)) {
+    cancelIfRunning(tip);
+    markActionAsCancelled(tip);
+    ionicProvider.refresh();
+    return;
+  }
   if (await waitForOtherActions(tip)) {
     return; // Canceled
   }
   if (tip.stoppable || tip.contextValue == Context.stop) {
-    if (isRunning(tip)) {
-      cancelIfRunning(tip);
-      markActionAsCancelled(tip);
-      ionicProvider.refresh();
-      return;
-    }
     markActionAsRunning(tip);
     ionicProvider.refresh();
   }
