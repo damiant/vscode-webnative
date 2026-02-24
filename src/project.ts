@@ -695,10 +695,8 @@ export async function inspectProject(
   }
 
   guessFramework(project);
-
   checkNodeVersion();
   project.getIgnored(context);
-
   await getRecommendations(project, context, packages);
 
   commands.executeCommand(VSCommand.setContext, Context.inspectedProject, true);

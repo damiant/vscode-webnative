@@ -93,3 +93,10 @@ export function PackageCacheModified(project: Project) {
 }
 
 export const LastManifestCheck = 'LastManifestCheck';
+
+export function PackageCacheRefreshedAt(project: Project) {
+  if (project?.monoRepo?.localPackageJson) {
+    return 'packageRefreshedAt_' + project.monoRepo.name;
+  }
+  return 'packageRefreshedAt';
+}
