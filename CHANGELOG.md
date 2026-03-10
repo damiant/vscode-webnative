@@ -1,5 +1,11 @@
 ## Changelog
 
+### Version 2.2.2
+
+- Add port conflict detection and automatic process termination when server fails to start
+- When "Failed to start server. Is port {number} in use?" error occurs, show option to kill process using that port
+- Support for both Windows (netstat/taskkill) and macOS/Linux (lsof/kill) process management
+
 ### Version 2.2.1
 
 - Add "Restart" button alongside "Stop" button for running scripts to stop and restart the script

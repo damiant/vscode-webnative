@@ -90,3 +90,72 @@ async function getWindowsProcessList(folder: string): Promise<Array<string>> {
 async function getMacProcessList(folder: string): Promise<Array<string>> {
   return (await getRunOutput('ps xao pid,ppid', folder)).split('\n');
 }
+
+/**
+ * Find the process ID using a specific port
+ * @param  {number} port
+ * @param  {string} folder
+ * @returns Promise of process ID or null if not found
+ */
+export async function findProcessUsingPort(port: number, folder: string): Promise<number | null> {
+  try {
+    let command: string;
+
+    if (process.platform === 'win32') {
+      // Windows: use netstat to find process using port
+      command = `netstat -ano | findstr :${port}`;
+      const output = await getRunOutput(command, folder);
+      const lines = output.split('\r\n');
+
+      for (const line of lines) {
+        if (line.includes(`:${port}`) && line.includes('LISTENING')) {
+          const parts = line.trim().split(/\s+/);
+          const pid = parseInt(parts[parts.length - 1]);
+          if (!isNaN(pid)) {
+            return pid;
+          }
+        }
+      }
+    } else {
+      // macOS/Linux: use lsof to find process using port
+      command = `lsof -ti:${port}`;
+      const output = await getRunOutput(command, folder);
+      const pid = parseInt(output.trim());
+      if (!isNaN(pid)) {
+        return pid;
+      }
+    }
+
+    return null;
+  } catch (err) {
+    console.error(`Error finding process using port ${port}:`, err);
+    return null;
+  }
+}
+
+/**
+ * Kill a process using a specific port
+ * @param  {number} port
+ * @param  {string} folder
+ * @returns Promise of boolean indicating success
+ */
+export async function killProcessUsingPort(port: number, folder: string): Promise<boolean> {
+  try {
+    const pid = await findProcessUsingPort(port, folder);
+
+    if (!pid) {
+      return false;
+    }
+
+    if (process.platform === 'win32') {
+      await getRunOutput(`taskkill /F /PID ${pid}`, folder);
+    } else {
+      await getRunOutput(`kill -9 ${pid}`, folder);
+    }
+
+    return true;
+  } catch (err) {
+    console.error(`Error killing process using port ${port}:`, err);
+    return false;
+  }
+}

@@ -11,6 +11,7 @@ import { join } from 'path';
 import { uncolor } from './uncolor';
 import { getStringFrom } from './utilities-strings';
 import { hideOutput } from './logging';
+import { killProcessUsingPort } from './process-list';
 
 interface ErrorLine {
   uri: string;
@@ -25,6 +26,38 @@ let currentErrorFilename: string;
 let onSave: Disposable;
 
 export async function handleError(error: string, logs: Array<string>, folder: string): Promise<boolean> {
+  // Check for port conflict errors
+  const portConflictMatch = error?.match(/Failed to start server\. Is port (\d+) in use\?/);
+  if (portConflictMatch) {
+    const port = parseInt(portConflictMatch[1]);
+    const action = await window.showErrorMessage(
+      `Failed to start server. Port ${port} is already in use.`,
+      'Kill Process on Port ' + port,
+      'Cancel',
+    );
+
+    if (action === 'Kill Process on Port ' + port) {
+      try {
+        const success = await killProcessUsingPort(port, folder);
+        if (success) {
+          await window.showInformationMessage(
+            `Successfully killed process using port ${port}. You can try starting the server again.`,
+            'OK',
+          );
+          return true; // Indicate that the operation should be retried
+        } else {
+          await window.showErrorMessage(
+            `Failed to kill process using port ${port}. The process might not exist or requires elevated permissions.`,
+            'OK',
+          );
+        }
+      } catch (err) {
+        await window.showErrorMessage(`Error killing process on port ${port}: ${err}`, 'OK');
+      }
+    }
+    return false; // Don't retry unless explicitly successful
+  }
+
   if (error && error.includes('WebNative:command not found')) {
     await window.showErrorMessage(
       'The Ionic CLI is not installed. Get started by running npm install -g @ionic/cli at the terminal.',
