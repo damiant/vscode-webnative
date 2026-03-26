@@ -28,6 +28,11 @@ interface APIUsage {
 const oneHour = 60 * 1000 * 60;
 
 export async function checkPrivacyManifest(project: Project, context: ExtensionContext): Promise<void> {
+  // Privacy manifest is only relevant on macOS for iOS App Store submissions
+  if (process.platform !== 'darwin') {
+    return;
+  }
+
   const lastManifestCheck = getLastManifestCheck(context);
   if (lastManifestCheck < oneHour) {
     return;
@@ -167,7 +172,7 @@ async function setPrivacyCategory(
     });
   }
   plist.writeFileSync(privacyFilename, data);
-  clearRefreshCache(context);
+  await clearRefreshCache(context);
 }
 
 function XCodeProjFolder(project: Project): string {
@@ -225,7 +230,7 @@ async function createPrivacyManifest(queueFunction: QueueFunction, project: Proj
   } catch (e) {
     writeError(`Unable to create privacy manifest file: ${e}`);
   }
-  clearRefreshCache(context);
+  await clearRefreshCache(context);
 }
 
 function writeManifestFile(iosFolder: string, filename: string): string {
@@ -247,10 +252,19 @@ function writeManifestFile(iosFolder: string, filename: string): string {
 }
 
 async function parse(path: string): Promise<any> {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
+    const timeout = setTimeout(() => {
+      reject(new Error(`Timeout parsing Xcode project at ${path}`));
+    }, 5000); // 5 second timeout
+
     const p = project(path);
     p.parse((err: any) => {
-      resolve(p);
+      clearTimeout(timeout);
+      if (err) {
+        reject(err);
+      } else {
+        resolve(p);
+      }
     });
   });
 }

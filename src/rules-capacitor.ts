@@ -711,6 +711,12 @@ function atVersionOfCapCLI(): string {
 }
 
 let podHasError = false;
+
+export function clearCocoaPodsCache(context: ExtensionContext): void {
+  podHasError = false;
+  setSetting(WorkspaceSetting.cocoaPods, undefined);
+}
+
 async function getCocoaPodsVersion(project: Project, avoidCache?: boolean): Promise<string> {
   if (podHasError) return undefined;
   try {
