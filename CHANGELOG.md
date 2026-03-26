@@ -1,5 +1,9 @@
 ## Changelog
 
+### Version 2.2.3
+
+- Fix for privacy policy checks on XCode projects for Windows and Linux
+
 ### Version 2.2.1
 
 - Add "Restart" button alongside "Stop" button for running scripts to stop and restart the script

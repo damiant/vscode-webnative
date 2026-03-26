@@ -711,6 +711,7 @@ function atVersionOfCapCLI(): string {
 }
 
 let podHasError = false;
+
 async function getCocoaPodsVersion(project: Project, avoidCache?: boolean): Promise<string> {
   if (podHasError) return undefined;
   try {
