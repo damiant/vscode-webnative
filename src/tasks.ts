@@ -183,3 +183,17 @@ export function markActionAsCancelled(tip: Tip) {
     return !same(op, { tip, workspace: exState.workspace });
   });
 }
+
+export async function cancelAllOperations(): Promise<void> {
+  // Copy the array so that modifications to runningOperations during iteration do not affect the loop
+  const operations = [...runningOperations];
+  for (const op of operations) {
+    op.tip.cancelRequested = true;
+    op.tip.applyRunStatus(RunStatus.Idle);
+  }
+  if (operations.length > 0) {
+    // Allow a brief period for in-flight processes to receive the cancellation signal
+    const CLEANUP_TIMEOUT_MS = 1000;
+    await new Promise((resolve) => setTimeout(resolve, CLEANUP_TIMEOUT_MS));
+  }
+}

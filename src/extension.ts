@@ -32,6 +32,7 @@ import { setSetting, WorkspaceSection, WorkspaceSetting } from './workspace-stat
 import { viewInEditor } from './preview';
 import { autoRunClipboard } from './features/auto-run-clipboard';
 import { findAndRun, fix, fixIssue, runAction, runAgain } from './features/fix-issue';
+import { cancelAllOperations } from './tasks';
 import { trackProjectChange } from './features/track-project-changes';
 import { initializeTelemetry } from './telemetry';
 import { checkAndShowWhatsNew, showWhatsNew } from './whats-new';
@@ -365,6 +366,10 @@ export async function activate(context: ExtensionContext) {
 
   // Ensures the Dev Server is Showing
   //qrView(undefined, undefined);
+}
+
+export async function deactivate(): Promise<void> {
+  await cancelAllOperations();
 }
 
 /**
