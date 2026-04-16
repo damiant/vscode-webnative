@@ -1,5 +1,9 @@
 ## Changelog
 
+### Version 2.2.4
+
+- Stop all running scripts when the extension is deactivated (e.g. on VS Code quit or extension restart)
+
 ### Version 2.2.3
 
 - Fix for privacy policy checks on XCode projects for Windows and Linux
