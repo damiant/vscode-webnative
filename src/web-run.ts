@@ -219,7 +219,6 @@ async function externalArg(isNative?: boolean): Promise<string> {
       return '--host=0.0.0.0';
     }
   }
-  return `--host=${bestAddress()}`;
 }
 
 function bestAddress(): string {

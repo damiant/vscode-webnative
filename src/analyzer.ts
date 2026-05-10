@@ -240,7 +240,6 @@ async function getYarnVersion(packageManager: string, folder: string): Promise<s
   }
   const v = await getRunOutput('yarn --version', folder, undefined, true, true);
   return v ? v.replace('\n', '') : '';
-  return packageManager;
 }
 
 export function checkCordovaAndroidPreferenceMinimum(preference: string, minVersion: string): Tip | undefined {
