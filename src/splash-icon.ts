@@ -71,19 +71,14 @@ function getAssetTooltip(folder: string, filename: AssetType): string {
   switch (filename) {
     case AssetType.splash:
       return 'Your splash screen should be a 2732×2732px png file. It will be used as the original asset to create suitably sized splash screens for iOS and Android.';
-      break;
     case AssetType.splashDark:
       return 'Your dark mode splash screen should be a 2732×2732px png file. It will be used as the original asset to create suitably sized dark mode splash screens for iOS and Android.';
-      break;
     case AssetType.icon:
       return 'Your icon should be a 1024×1024px png file that does not contain transparency. It will be used as the original asset to create suitably sized icons for iOS and Android.';
-      break;
     case AssetType.adaptiveForeground:
       return 'The icon should be at least 432x432 png file. It will be used as the original asset to create suitably sized adaptive icons for Android.';
-      break;
     case AssetType.adaptiveBackground:
       return 'The icon should be at least 432x432 png file. It will be used as the original asset to create suitably sized adaptive icons for Android.';
-      break;
   }
 }
 

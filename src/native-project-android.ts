@@ -124,7 +124,6 @@ export class AndroidProject {
     }
     if (!existsSync(currentPath)) {
       throw new Error(`Path ${currentPath} does not exist.`);
-      return;
     }
     if (!existsSync(mainActivity)) {
       console.error('Error: MainActivity.java not found.');

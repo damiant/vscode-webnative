@@ -1,3 +1,4 @@
+/* oxlint-disable no-unreachable */
 import * as vscode from 'vscode';
 import { getWhatsNewContent } from './whats-new-content';
 import { readFileSync } from 'fs';

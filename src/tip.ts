@@ -252,7 +252,6 @@ export class Tip {
       } finally {
         finishCommand(this);
       }
-      return;
     }
 
     // This only marks an action as queued when it starts
