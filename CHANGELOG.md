@@ -1,5 +1,9 @@
 ## Changelog
 
+### Version 2.2.5
+
+- Fix extension activation failure when `HTTPS_PROXY` is set: telemetry (Mixpanel) initialization is now lazy and non-fatal, so proxy environments no longer prevent command registration
+
 ### Version 2.2.4
 
 - Stop all running scripts when the extension is deactivated (e.g. on VS Code quit or extension restart)

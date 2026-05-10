@@ -2,7 +2,19 @@ import mixpanel from 'mixpanel';
 import { env } from 'vscode';
 import { platform } from 'os';
 
-const mp = mixpanel.init('f787e632a507ccd1838204b7b5ca70b3', { geolocate: true });
+let mp: ReturnType<typeof mixpanel.init> | undefined;
+
+function getMixpanel(): ReturnType<typeof mixpanel.init> | undefined {
+  if (!mp) {
+    try {
+      mp = mixpanel.init('f787e632a507ccd1838204b7b5ca70b3', { geolocate: true });
+    } catch {
+      // mixpanel init can fail when a proxy is configured (https-proxy-agent constructor issue)
+      return undefined;
+    }
+  }
+  return mp;
+}
 
 let anonymousUserId: string | undefined;
 let userIdentified = false;
@@ -48,6 +60,9 @@ function getLocaleInfo(): { countryCode?: string; locale?: string } {
  */
 export function initializeTelemetry() {
   if (!userIdentified) {
+    const client = getMixpanel();
+    if (!client) return;
+
     // Use VS Code's machineId for anonymous user tracking
     anonymousUserId = env.machineId;
 
@@ -56,7 +71,7 @@ export function initializeTelemetry() {
     // Set user properties
     // ip: 1 tells Mixpanel to use the request IP for geolocation
     // Mixpanel will auto-resolve $city, $region, $country_code from the IP
-    mp.people.set(anonymousUserId, {
+    client.people.set(anonymousUserId, {
       $distinct_id: anonymousUserId,
       $os: getOSName(),
       locale: localeInfo.locale,
@@ -83,7 +98,9 @@ export function writeEvent(event: string, props?: { [key: string]: any }) {
 
   // ip: 1 tells Mixpanel to use the request IP for geolocation
   // Mixpanel will automatically resolve $city, $region, and $country_code from IP
-  mp.track(event, {
+  const client = getMixpanel();
+  if (!client) return;
+  client.track(event, {
     distinct_id: anonymousUserId,
     $os: getOSName(),
     ...props,
@@ -99,8 +116,9 @@ export function updateUserProperties(properties: { [key: string]: any }) {
     initializeTelemetry();
   }
 
-  if (anonymousUserId) {
-    mp.people.set(anonymousUserId, properties);
+  const client = getMixpanel();
+  if (client && anonymousUserId) {
+    client.people.set(anonymousUserId, properties);
   }
 }
 
@@ -112,8 +130,9 @@ export function incrementUserProperty(property: string, value: number = 1) {
     initializeTelemetry();
   }
 
-  if (anonymousUserId) {
-    mp.people.increment(anonymousUserId, property, value);
+  const client = getMixpanel();
+  if (client && anonymousUserId) {
+    client.people.increment(anonymousUserId, property, value);
   }
 }
 

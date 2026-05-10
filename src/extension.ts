@@ -113,8 +113,12 @@ export async function activate(context: ExtensionContext) {
   exState.projectsView = projectsView;
   exState.context = context;
 
-  // Initialize anonymous telemetry
-  initializeTelemetry();
+  // Initialize anonymous telemetry - non-fatal so proxy environments don't break activation
+  try {
+    initializeTelemetry();
+  } catch {
+    // Telemetry failure must not abort extension activation
+  }
 
   // if (rootPath == undefined) {
   //     // Show the start new project panel
