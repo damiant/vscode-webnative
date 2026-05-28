@@ -8,7 +8,8 @@
     "esModuleInterop": true,
     "sourceMap": true,
     "rootDir": "src",
-    "skipLibCheck": false
+    "skipLibCheck": false,
+    "types": ["node"]
   },
   "exclude": [
     "node_modules",
