@@ -736,7 +736,7 @@
     "vitest": "4.1.5"
   },
   "dependencies": {
-    "@webnativellc/simple-plist": "2.1.0",
+    "@webnativellc/simple-plist": "2.1.2",
     "fast-xml-parser": "5.7.3",
     "globule": "1.3.4",
     "htmlparser2": "^9.1.0",
