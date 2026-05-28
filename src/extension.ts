@@ -36,6 +36,7 @@ import { cancelAllOperations } from './tasks';
 import { trackProjectChange } from './features/track-project-changes';
 import { initializeTelemetry } from './telemetry';
 import { checkAndShowWhatsNew, showWhatsNew } from './whats-new';
+import { guessShell } from './utilities-shell';
 
 export const extensionName = 'WebNative';
 
@@ -129,6 +130,9 @@ export async function activate(context: ExtensionContext) {
   const shellOverride: string = workspace.getConfiguration(WorkspaceSection).get('shellPath');
   if (shellOverride && shellOverride.length > 0) {
     exState.shell = shellOverride;
+  }
+  if (!exState.shell) {
+    exState.shell = await guessShell(console.error);
   }
 
   trackProjectChange();
