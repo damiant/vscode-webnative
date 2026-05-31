@@ -127,12 +127,11 @@ export async function activate(context: ExtensionContext) {
   // }
 
   exState.shell = context.workspaceState.get(Context.shell);
-  const shellOverride: string = workspace.getConfiguration(WorkspaceSection).get('shellPath');
-  if (shellOverride && shellOverride.length > 0) {
-    exState.shell = shellOverride;
-  }
-  if (!exState.shell) {
+  const shellOverride: string | undefined = workspace.getConfiguration(WorkspaceSection).get('shellPath');
+  if (shellOverride === '*') {
     exState.shell = await guessShell(console.error);
+  } else if (shellOverride && shellOverride.length > 0) {
+    exState.shell = shellOverride;
   }
 
   trackProjectChange();

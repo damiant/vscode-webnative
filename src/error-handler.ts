@@ -11,7 +11,6 @@ import { join } from 'path';
 import { uncolor } from './uncolor';
 import { getStringFrom } from './utilities-strings';
 import { hideOutput } from './logging';
-import { guessShell } from './utilities-shell';
 
 interface ErrorLine {
   uri: string;
@@ -46,13 +45,12 @@ export async function handleError(error: string, logs: Array<string>, folder: st
   }
 
   if (error && error.startsWith('/bin/sh: npx')) {
-    const detectedShell = await guessShell(console.error);
-    const shell = detectedShell || '/bin/zsh';
-    exState.shell = shell;
-    exState.context.workspaceState.update(Context.shell, shell);
+    const zsh = '/bin/zsh';
+    exState.shell = zsh;
+    exState.context.workspaceState.update(Context.shell, zsh);
     const msg =
       'It looks like node was not found with the default shell so it has been switched to ' +
-      shell +
+      zsh +
       '. Please try the operation again.';
     await window.showErrorMessage(msg, 'OK');
     return;
