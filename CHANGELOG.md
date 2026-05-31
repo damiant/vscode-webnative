@@ -1,6 +1,6 @@
 ## Changelog
 
-### Version 2.2.6
+### Version 2.2.7
 
 - Fix `npm run test` failures caused by `@webnativellc/simple-plist` ESM bundle requiring Node.js `stream` module: resolve to CJS bundle in vitest config
 - Fix `/bin/sh: npx: not found` on Linux and machines with nvm/homebrew Node.js: shell is now proactively detected at startup using VS Code terminal profile and `$SHELL`, and the error-handler fallback now uses the detected shell instead of hardcoded `/bin/zsh`
