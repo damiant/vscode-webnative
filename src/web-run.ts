@@ -124,6 +124,10 @@ async function runServe(
 let serveUnknownMsg = false;
 
 function serveCmd(project: Project): string {
+  const guessed = guessServeCommand(project);
+  if (guessed) {
+    return guessed + ' -- ';
+  }
   switch (project.frameworkType) {
     case 'angular':
     case 'angular-standalone':
@@ -136,9 +140,8 @@ function serveCmd(project: Project): string {
     case 'vue':
       return 'vue-cli-service serve';
     default: {
-      const cmd = guessServeCommand(project);
-      if (cmd) {
-        return cmd + ' -- ';
+      if (exists('vite')) {
+        return 'vite';
       }
       if (!serveUnknownMsg) {
         window.showErrorMessage(
@@ -158,7 +161,9 @@ function guessServeCommand(project: Project): string | undefined {
   const filename = join(project.projectFolder(), 'package.json');
   if (existsSync(filename)) {
     const packageFile = JSON.parse(readFileSync(filename, 'utf8'));
-    if (packageFile.scripts['ionic:serve']) {
+    if (packageFile.scripts?.['wn:serve']) {
+      return npmRun('wn:serve');
+    } else if (packageFile.scripts?.['ionic:serve']) {
       return npmRun('ionic:serve');
     } else if (packageFile.scripts?.serve) {
       return npmRun('serve');
@@ -166,8 +171,6 @@ function guessServeCommand(project: Project): string | undefined {
       return npmRun('dev');
     } else if (packageFile.scripts?.start) {
       return npmRun('start');
-    } else if (exists('vite')) {
-      return 'vite';
     }
   }
   return undefined;

@@ -67,7 +67,7 @@ function runBuild(
 ): string {
   let cmd = `${npx(project)} ${buildCmd(project)}`;
   if (configurationArg) {
-    if (cmd.includes('npm run ionic:build')) {
+    if (cmd.includes('wn:build') || cmd.includes('ionic:build')) {
       // This adds -- if the command is npm run build but does not if it is something like ng build
       cmd += ' -- --';
     } else if (cmd.includes('run ')) {
@@ -90,12 +90,15 @@ function runBuild(
 }
 
 function buildCmd(project: Project): string {
+  const guessed = guessBuildCommand(project);
+  if (guessed) {
+    return guessed;
+  }
   switch (project.frameworkType) {
     case 'angular':
     case 'angular-standalone':
-      return guessBuildCommand(project) ?? 'ng build';
+      return 'ng build';
     case 'vue-vite':
-      return guessBuildCommand(project) ?? 'vite build';
     case 'react-vite':
       return 'vite build';
     case 'react':
@@ -103,11 +106,8 @@ function buildCmd(project: Project): string {
     case 'vue':
       return 'vue-cli-service build';
     default: {
-      const cmd = guessBuildCommand(project);
-      if (!cmd) {
-        error('build command is unknown');
-      }
-      return cmd;
+      error('build command is unknown');
+      return '';
     }
   }
 }
@@ -116,9 +116,11 @@ function guessBuildCommand(project: Project): string | undefined {
   const filename = join(project.projectFolder(), 'package.json');
   if (existsSync(filename)) {
     const packageFile = JSON.parse(readFileSync(filename, 'utf8'));
-    if (packageFile.scripts['ionic:build']) {
+    if (packageFile.scripts?.['wn:build']) {
+      return npmRun('wn:build');
+    } else if (packageFile.scripts?.['ionic:build']) {
       return npmRun('ionic:build');
-    } else if (packageFile.scripts['build']) {
+    } else if (packageFile.scripts?.['build']) {
       return npmRun('build');
     }
   }
