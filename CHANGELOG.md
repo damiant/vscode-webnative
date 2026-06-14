@@ -1,5 +1,10 @@
 ## Changelog
 
+### Version 2.2.9
+
+- Fix build command to use `wn:build`, then `ionic:build`, then `build` from package.json for all framework types, instead of hardcoding `vite build`
+- Fix serve command to use `wn:serve`, then `ionic:serve`, then `serve`/`dev`/`start` from package.json for all framework types, instead of hardcoding `vite`
+
 ### Version 2.2.8
 
 - Update shellOverride. If set to \* will guess the shell.
