@@ -11,6 +11,7 @@ vi.mock('vscode', () => {
       showQuickPick: vi.fn(),
       activeTextEditor: null,
       withProgress: vi.fn(),
+      createOutputChannel: vi.fn(() => ({ appendLine: vi.fn(), show: vi.fn() })),
     },
     commands: {
       executeCommand: vi.fn(),

@@ -10,6 +10,7 @@ import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { write, writeError } from './logging';
 import { join } from 'path';
 import { updateBrowserslist } from './browserslist';
+import { fixDeprecatedTsconfigOptions } from './rules-typescript-config';
 import { CommandName, InternalCommand } from './command-name';
 import { exState } from './tree-provider';
 import { MonoRepoType } from './monorepo';
@@ -110,10 +111,10 @@ async function migrate(queueFunction: QueueFunction, project: Project, next: num
         commands.push(npmInstall(list.join(' '), '--force'));
       }
       const success = await runCommands(commands, `Migrating to Angular ${version}`, project);
+      postFixes(project, version);
       if (!success) {
         return;
       }
-      postFixes(project, version);
       await refreshProject(project);
       logOptionalMigrations(version);
       await suggestOtherAngularMigrations(project, version);
@@ -127,6 +128,7 @@ async function migrate(queueFunction: QueueFunction, project: Project, next: num
   }
 
   function postFixes(project: Project, version: number) {
+    fixDeprecatedTsconfigOptions(project);
     if (version == 17) {
       // Fix polyfills.ts
       replaceInFile(join(project.projectFolder(), 'src', 'polyfills.ts'), {
