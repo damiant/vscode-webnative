@@ -112,6 +112,10 @@ function updatePackageJsonBrowserslist(filepath: string, browserMap: Map<string,
       }
     }
 
+    if (arraysEqual(currentBrowserslist, newBrowserslist)) {
+      return false;
+    }
+
     packageJson.browserslist = newBrowserslist;
     writeFileSync(filepath, JSON.stringify(packageJson, null, 2) + '\n');
     write(`Updated browserslist in ${filepath} with new browser requirements.`);
@@ -121,4 +125,8 @@ function updatePackageJsonBrowserslist(filepath: string, browserMap: Map<string,
   }
 
   return false;
+}
+
+function arraysEqual(a: string[], b: string[]): boolean {
+  return a.length == b.length && a.every((value, index) => value == b[index]);
 }

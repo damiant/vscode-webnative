@@ -22,20 +22,22 @@ export function checkPackages(project: Project) {
   exState.nodeModulesFolder = nmf;
   if (!existsSync(nmf) && !project.isModernYarn()) {
     exState.hasNodeModules = false;
-    project.add(
-      new Tip(
-        'Install Node Modules',
-        '',
-        TipType.Idea,
-        'Install Node Modules',
-        npmInstallAll(),
-        'Installing Node Modules...',
-      )
-        .performRun()
-        .showProgressDialog(),
-    );
-    if (!exState.hasNodeModulesNotified) {
-      suggestInstallAll(project);
+    if (!exState.isAngularMigrating) {
+      project.add(
+        new Tip(
+          'Install Node Modules',
+          '',
+          TipType.Idea,
+          'Install Node Modules',
+          npmInstallAll(),
+          'Installing Node Modules...',
+        )
+          .performRun()
+          .showProgressDialog(),
+      );
+      if (!exState.hasNodeModulesNotified) {
+        suggestInstallAll(project);
+      }
     }
   }
 

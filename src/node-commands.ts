@@ -150,7 +150,7 @@ async function getVersion(cmd: string): Promise<string> {
  * @param project The project for which to install node modules
  */
 export async function suggestInstallAll(project: Project) {
-  if (!exState || !exState.hasPackageJson) {
+  if (!exState || !exState.hasPackageJson || exState.isAngularMigrating) {
     return;
   }
 

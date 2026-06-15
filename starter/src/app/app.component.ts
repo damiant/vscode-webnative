@@ -1,4 +1,4 @@
-import { Component, CUSTOM_ELEMENTS_SCHEMA, OnInit } from '@angular/core';
+import { Component, CUSTOM_ELEMENTS_SCHEMA, OnInit, ChangeDetectionStrategy } from '@angular/core';
 
 import { MessageType, sendMessage } from './utilities/messages';
 import { Template } from './utilities/template';
@@ -31,6 +31,7 @@ interface Target {
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css'],
   imports: [BrowserModule, FormsModule],
+  changeDetection: ChangeDetectionStrategy.Eager,
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class AppComponent implements OnInit {

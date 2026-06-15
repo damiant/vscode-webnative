@@ -1,9 +1,10 @@
-import { CUSTOM_ELEMENTS_SCHEMA, Component, Input } from '@angular/core';
+import { CUSTOM_ELEMENTS_SCHEMA, Component, Input, ChangeDetectionStrategy } from '@angular/core';
 
 @Component({
   selector: 'star',
   imports: [],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     @for (x of _stars; track x) {
       <svg style="width:16px" xmlns="http://www.w3.org/2000/svg" fill="#aa0" viewBox="0 0 512 512">

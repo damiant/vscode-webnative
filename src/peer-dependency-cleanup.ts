@@ -1,25 +1,26 @@
+import { existsSync, readFileSync } from 'fs';
+import { join } from 'path';
+import { coerce } from 'semver';
 import { window } from 'vscode';
-import { getAllPackageNames, getPackageVersion } from './analyzer';
-import { exState } from './tree-provider';
 import { write } from './logging';
 import { DependencyVersion, PeerReport, checkPeerDependencies } from './peer-dependencies';
-import { Project, inspectProject } from './project';
+import { Project } from './project';
 import { showProgress } from './utilities';
 
-export async function peerDependencyCleanup(project: Project): Promise<void> {
+export interface PeerCleanupOptions {
+  ignoreDeps?: string[];
+}
+
+export async function peerDependencyCleanup(project: Project, options?: PeerCleanupOptions): Promise<void> {
+  const projectFolder = project.projectFolder();
+  const list = getDependencyVersionsFromPackageJson(projectFolder);
+  if (list.length == 0) {
+    return;
+  }
+
   let report: PeerReport;
   await showProgress(`Checking dependencies in your project...`, async () => {
-    // Need to reload dependency list
-    await inspectProject(exState.rootFolder, exState.context, undefined);
-
-    const dependencies = getAllPackageNames();
-    const list: DependencyVersion[] = [];
-    for (const dependency of dependencies) {
-      const versionInfo = getPackageVersion(dependency);
-      list.push({ name: dependency, version: versionInfo.version });
-    }
-
-    report = await checkPeerDependencies(project.projectFolder(), list, []);
+    report = await checkPeerDependencies(projectFolder, list, options?.ignoreDeps ?? []);
   });
   //write(JSON.stringify(report, undefined, 2));
   if (report.commands.length == 0) {
@@ -55,4 +56,23 @@ function isAre(count: number): string {
 
 function plural(count: number): string {
   return count > 1 ? 's' : '';
+}
+
+function getDependencyVersionsFromPackageJson(folder: string): DependencyVersion[] {
+  const filename = join(folder, 'package.json');
+  if (!existsSync(filename)) {
+    return [];
+  }
+  try {
+    const packageJson = JSON.parse(readFileSync(filename, 'utf8'));
+    const dependencies = { ...packageJson.dependencies, ...packageJson.devDependencies };
+    const list: DependencyVersion[] = [];
+    for (const name of Object.keys(dependencies)) {
+      const version = coerce(dependencies[name])?.version ?? dependencies[name];
+      list.push({ name, version });
+    }
+    return list;
+  } catch {
+    return [];
+  }
 }

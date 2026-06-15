@@ -34,6 +34,7 @@ import { audit } from './audit';
 import { analyzeSize } from './analyze-size';
 import { ionicExport } from './ionic-export';
 import { addAngularGenerateAction } from './angular-generate';
+import { addAngularMigrationRecommendation } from './rules-angular-migrate';
 import { LoggingSettings } from './log-settings';
 import { writeWN } from './logging';
 import { cancelLastOperation } from './tasks';
@@ -314,6 +315,8 @@ export async function getRecommendations(project: Project, context: ExtensionCon
     true,
     // !isWebProjectOnly, TODO: Having this expanded is a little annoying maybe remember if the user closes it
   );
+
+  addAngularMigrationRecommendation(project);
 
   // General Rules around node modules (eg Jquery)
   checkPackages(project);
