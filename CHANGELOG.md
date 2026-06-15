@@ -1,7 +1,14 @@
 ## Changelog
 
+### Version 2.2.13
+
+- Angular optional migrations added to project menu
+- Migration for deprecated typescript settings
+
 ### Version 2.2.11
 
+- Add Angular 22+ migration options in Advanced Actions for Karma to Vitest and Application Builder
+- Fix Angular schematic migrations running outside the workspace by using the project folder and package-manager-aware ng invocation
 - Fix Angular migration to verify dependencies before `ng update`, offer `node_modules` reinstall when out of sync, warn on dirty git and monorepo subprojects, and skip post-migration steps on failure
 - Fix Angular migration running peer dependency cleanup that could suggest downgrading `@angular/*` packages after a successful update
 - Fix duplicate browserslist updates during Angular migration
@@ -11,6 +18,9 @@
 - Suppress the install node_modules prompt during Angular migration while `ng update` reinstalls dependencies
 - Show the Angular migration recommendation in Recommendations for all Angular projects, not only Capacitor apps
 - Remove deprecated TypeScript `baseUrl` and `downlevelIteration` options from Angular subproject tsconfigs to fix build failures with TypeScript 5.9+
+- Fix deprecated TypeScript config cleanup to follow tsconfig `extends` chains and angular.json references in monorepos
+- Fix deprecated TypeScript config cleanup to include parent-folder and repo-root tsconfig files for subfolder Angular projects
+- Add a recommendation to fix deprecated TypeScript compiler options when detected in project tsconfigs
 
 ### Version 2.2.9
 
