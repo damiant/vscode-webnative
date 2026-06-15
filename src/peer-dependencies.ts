@@ -25,6 +25,9 @@ export interface DependencyConflict {
   conflict: DependencyVersion;
 }
 
+// Framework packages are updated by ng update, not by plugin version search
+const frameworkPrefixes = ['@angular/', '@angular-devkit/'];
+
 /**
  * Check project for dependencies that do not meet peer dependency requirements
  * @param {string} peerDependency (eg @capacitor/core)
@@ -37,18 +40,26 @@ export async function checkPeerDependencies(
   ignoreDeps: string[],
 ): Promise<PeerReport> {
   if (exState.packageManager != PackageManager.npm) return { dependencies: [], incompatible: [], commands: [] };
-  const dependencies = await getDependencyConflicts(folder, peerDeps, ignoreDeps);
+  const ignores = mergeIgnoreDeps(ignoreDeps);
+  const dependencies = await getDependencyConflicts(folder, peerDeps, ignores);
   const conflicts = [];
   const updates: string[] = [];
   const commands = [];
+  const reportedErrors = new Set<string>();
   for (const dependency of dependencies) {
+    if (isFrameworkPackage(dependency.name)) {
+      continue;
+    }
     const version = await findCompatibleVersion2(dependency);
-    if (version == 'latest') {
+    if (version == 'latest' || !version) {
+      if (!version && !reportedErrors.has(dependency.name)) {
+        reportedErrors.add(dependency.name);
+        writeError(`Unable to search for a version of ${dependency.name} that works in your project`);
+      }
       conflicts.push(dependency);
     } else {
-      const v = version ?? 'unsure';
-      write(`${dependency.name} will be updated to ${v}`);
-      const cmd = `${dependency.name}@${v}`;
+      write(`${dependency.name} will be updated to ${version}`);
+      const cmd = `${dependency.name}@${version}`;
       if (updates.indexOf(cmd) == -1) {
         updates.push(cmd);
       }
@@ -62,6 +73,29 @@ export async function checkPeerDependencies(
   return { dependencies, incompatible: conflicts, commands };
 }
 
+function mergeIgnoreDeps(ignoreDeps: string[]): string[] {
+  const ignores = [...frameworkPrefixes];
+  for (const ignoreDep of ignoreDeps) {
+    if (ignores.indexOf(ignoreDep) == -1) {
+      ignores.push(ignoreDep);
+    }
+  }
+  return ignores;
+}
+
+function isFrameworkPackage(name: string): boolean {
+  return shouldIgnoreDependency(name, frameworkPrefixes);
+}
+
+function shouldIgnoreDependency(name: string, ignoreDeps: string[]): boolean {
+  for (const ignoreDep of ignoreDeps) {
+    if (name.startsWith(ignoreDep)) {
+      return true;
+    }
+  }
+  return false;
+}
+
 async function getDependencyConflicts(
   folder: string,
   peerDeps: DependencyVersion[],
@@ -69,22 +103,24 @@ async function getDependencyConflicts(
 ): Promise<DependencyConflict[]> {
   try {
     const list: DependencyConflict[] = [];
+    const seen = new Set<string>();
     const data = await getRunOutput(`npm ls --depth=1 --long --json`, folder, undefined, true, true);
     const deps = JSON.parse(data);
     for (const peerDependency of peerDeps) {
+      if (shouldIgnoreDependency(peerDependency.name, ignoreDeps)) {
+        continue;
+      }
       for (const key of Object.keys(deps.dependencies)) {
+        if (shouldIgnoreDependency(key, ignoreDeps)) {
+          continue;
+        }
         for (const peer of Object.keys(deps.dependencies[key].peerDependencies)) {
           const versionRange = deps.dependencies[key].peerDependencies[peer];
           if (peer == peerDependency.name) {
             if (!satisfies(peerDependency.version, cleanRange(versionRange))) {
-              // Migration will update capacitor plugins so leave them out
-              let ignore = false;
-              for (const ignoreDep of ignoreDeps) {
-                if (key.startsWith(ignoreDep)) {
-                  ignore = true;
-                }
-              }
-              if (!ignore) {
+              const id = `${key}:${peerDependency.name}`;
+              if (!seen.has(id)) {
+                seen.add(id);
                 list.push({ name: key, conflict: peerDependency });
               }
             }
@@ -125,12 +161,23 @@ function cleanRange(range: string): string {
   return range;
 }
 
+function satisfiesPeerVersion(version: string | undefined, range: string): boolean {
+  if (!version) {
+    return false;
+  }
+  return satisfies(version, cleanRange(range));
+}
+
 /**
  * Finds the latest release version of the plugin that is compatible with peer dependencies.
  * If hasPeer is supplied then it will look for a version that passes with that peer and version
  *
  */
 export async function findCompatibleVersion2(dependency: DependencyConflict): Promise<string> {
+  if (isFrameworkPackage(dependency.name)) {
+    return undefined;
+  }
+
   let best: string;
   let incompatible = false;
   try {
@@ -141,13 +188,19 @@ export async function findCompatibleVersion2(dependency: DependencyConflict): Pr
         for (const peerDependency of Object.keys(pck.versions[version].peerDependencies)) {
           const peerVersion = pck.versions[version].peerDependencies[peerDependency];
           const current = getPackageVersion(peerDependency);
-          let meetsNeeds = satisfies(current.version, cleanRange(peerVersion));
+          let meetsNeeds: boolean;
 
           if (dependency.conflict) {
             if (dependency.conflict.name == peerDependency) {
-              meetsNeeds = satisfies(dependency.conflict.version, cleanRange(peerVersion));
+              meetsNeeds = satisfiesPeerVersion(dependency.conflict.version, peerVersion);
             } else {
               meetsNeeds = false;
+            }
+          } else {
+            if (!current) {
+              meetsNeeds = false;
+            } else {
+              meetsNeeds = satisfiesPeerVersion(current.version, peerVersion);
             }
           }
           // Is it a real version (not nightly etc) and meets version and we have the package

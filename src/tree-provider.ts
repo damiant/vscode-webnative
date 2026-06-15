@@ -68,6 +68,7 @@ interface ExState {
   localUrl: string | undefined; // URL for the local browser
   externalUrl: string | undefined; // URL for the external browser
   dontOpenBrowser: boolean; // If true then avoid opening the browser
+  isAngularMigrating?: boolean; // Suppress node_modules install prompts during ng update
 }
 
 export const exState: ExState = {
@@ -108,6 +109,7 @@ export const exState: ExState = {
   project: undefined,
   debugged: false,
   dontOpenBrowser: false,
+  isAngularMigrating: false,
 };
 
 interface FolderInfo {

@@ -21,6 +21,7 @@ import { existsSync, lstatSync, readFileSync, readdirSync } from 'fs';
 import { execSync } from 'child_process';
 import { getVersionsFromPackageLock } from './package-lock';
 import { getStringFrom, setAllStringIn } from './utilities-strings';
+import { maxAngularVersion } from './rules-angular-migrate';
 
 interface PluginInformation {
   androidPermissions: Array<string>;
@@ -474,8 +475,7 @@ function listPackages(
         if (scope) {
           latest = undefined;
           if (scope == 'angular') {
-            //
-            latest = packages['@angular/core']?.latest;
+            latest = maxAngularVersion;
           }
           project.addSubGroup(scope, latest);
           lastScope = scope;

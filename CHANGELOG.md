@@ -1,5 +1,17 @@
 ## Changelog
 
+### Version 2.2.11
+
+- Fix Angular migration to verify dependencies before `ng update`, offer `node_modules` reinstall when out of sync, warn on dirty git and monorepo subprojects, and skip post-migration steps on failure
+- Fix Angular migration running peer dependency cleanup that could suggest downgrading `@angular/*` packages after a successful update
+- Fix duplicate browserslist updates during Angular migration
+- Fix command runner reporting success when a step fails
+- Fix peer dependency cleanup proposing invalid `@unsure` package versions
+- Fix peer dependency checks treating `@angular/*` framework packages as plugins, causing spurious errors when optional peers are missing from the project
+- Suppress the install node_modules prompt during Angular migration while `ng update` reinstalls dependencies
+- Show the Angular migration recommendation in Recommendations for all Angular projects, not only Capacitor apps
+- Remove deprecated TypeScript `baseUrl` and `downlevelIteration` options from Angular subproject tsconfigs to fix build failures with TypeScript 5.9+
+
 ### Version 2.2.9
 
 - Fix build command to use `wn:build`, then `ionic:build`, then `build` from package.json for all framework types, instead of hardcoding `vite build`

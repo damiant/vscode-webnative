@@ -1,4 +1,4 @@
-import { Component, CUSTOM_ELEMENTS_SCHEMA, OnInit } from '@angular/core';
+import { Component, CUSTOM_ELEMENTS_SCHEMA, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { PluginFilter, PluginService } from './plugin.service';
 import { Plugin } from './plugin-info';
 import { checked, d, setChecked } from './utilities/dom';
@@ -12,6 +12,7 @@ import { PluginComponent } from './plugin.component';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css'],
   imports: [BrowserModule, FormsModule, PluginComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class AppComponent implements OnInit {

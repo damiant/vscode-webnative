@@ -202,31 +202,39 @@ function showIgnoredRecommendations(): void {
   commands.executeCommand(CommandName.Refresh);
 }
 
-export async function runCommands(commands: Array<string>, title: string, project: Project): Promise<void> {
+export async function runCommands(commands: Array<string>, title: string, project: Project): Promise<boolean> {
   try {
     if (title.includes(')')) {
       title = title.substring(title.indexOf(')') + 1);
     }
+    let success = false;
     await window.withProgress({ location: ProgressLocation.Notification, title, cancellable: false }, async () => {
-      await run(commands, project.folder);
+      success = await run(commands, project.folder);
     });
 
-    writeWN(`Completed ${title}`);
+    if (success) {
+      writeWN(`Completed ${title}`);
+    } else {
+      writeError(`Failed ${title}`);
+    }
+    return success;
   } catch (err) {
     writeError(`Failed ${title}: ${err}`);
+    return false;
   }
 }
 
-async function run(commands: Array<string>, folder: string): Promise<void> {
+async function run(commands: Array<string>, folder: string): Promise<boolean> {
   for (const command of commands) {
     writeWN(replaceAll(command, InternalCommand.cwd, ''));
     try {
       write(await getRunOutput(command, folder));
     } catch (err) {
-      //writeError(err);
-      break;
+      writeError(`${replaceAll(command, InternalCommand.cwd, '')} failed: ${err}`);
+      return false;
     }
   }
+  return true;
 }
 
 function angularUsingESBuild(project: Project): boolean {
