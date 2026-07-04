@@ -1,5 +1,13 @@
 ## Changelog
 
+### Version 2.2.14
+
+- Fix package manager detection for NX monorepos with pnpm/yarn lockfiles at repo root
+- Fix Android/iOS detection when Capacitor platform packages are declared in an NX app package.json
+- Fix `isCapacitor` detection when `@capacitor/core` is a devDependency
+- Fix Angular CLI package manager recommendation for NX monorepos using pnpm or yarn
+- Fix NX app package.json merge clearing the root Android manifest when the app folder has no native Android project
+
 ### Version 2.2.13
 
 - Angular optional migrations added to project menu

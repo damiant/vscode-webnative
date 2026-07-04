@@ -3,12 +3,12 @@ import { QueueFunction, Tip, TipType } from './tip';
 import { writeError, writeWN } from './logging';
 import { exState } from './tree-provider';
 import { isGreaterOrEqual } from './analyzer';
+import { PackageManager } from './node-commands';
 import { getCapacitorConfigWebDir, getCapacitorConfigureFilename, writeCapacitorConfig } from './capacitor-config-file';
 import { join, sep } from 'path';
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { window } from 'vscode';
 import { openUri, replaceAll } from './utilities';
-import { MonoRepoType } from './monorepo';
 
 /**
  * For Capacitor project if @angular/core >= v13 then
@@ -64,8 +64,7 @@ function checkWebpackToESBuild(angular: any, project: Project, projectName: stri
 
 function checkPackageManager(angular: any, project: Project, filename: string): boolean {
   try {
-    // Angular CLI supports yarn and pnpm
-    if (project.repoType == MonoRepoType.pnpm) {
+    if (project.packageManager === PackageManager.pnpm) {
       if (!angular.cli?.packageManager || angular.cli?.packageManager !== 'pnpm') {
         project.add(
           new Tip('Set Angular CLI to pnpm', '', TipType.Idea).setQueuedAction(
@@ -76,8 +75,8 @@ function checkPackageManager(angular: any, project: Project, filename: string): 
           ),
         );
       }
-    } else if (project.repoType == MonoRepoType.yarn) {
-      if (!angular.cli?.packageManager || angular.cli?.packageManager !== 'pnpm') {
+    } else if (project.packageManager === PackageManager.yarn) {
+      if (!angular.cli?.packageManager || angular.cli?.packageManager !== 'yarn') {
         project.add(
           new Tip('Set Angular CLI to yarn', '', TipType.Idea).setQueuedAction(
             setAngularPackageManager,
