@@ -123,10 +123,6 @@ export async function checkForMonoRepo(project: Project, selectedProject: string
     } else {
       exState.view.title = project.monoRepo.name;
 
-      //  // Switch to pnpm if needed
-      //  const isPnpm = fs.existsSync(path.join(projects[0].folder, 'pnpm-lock.yaml'));
-      //  if (isPnpm)project.repoType = MonoRepoType.pnpm;
-
       project.monoRepo.localPackageJson = [
         MonoRepoType.npm,
         MonoRepoType.bun,

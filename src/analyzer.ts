@@ -19,6 +19,7 @@ import { npmInstall, npmUninstall, PackageManager } from './node-commands';
 import { exState } from './tree-provider';
 import { ExtensionContext, window } from 'vscode';
 import { existsSync, lstatSync, readFileSync, statSync, writeFileSync } from 'fs';
+import { join } from 'path';
 import { setStringIn } from './utilities-strings';
 
 let packageFile;
@@ -91,6 +92,36 @@ function processAndroidXML(folder: string) {
   return parser.parse(xml);
 }
 
+function recomputeIsCapacitor(project: Project) {
+  project.isCapacitor = !!(
+    allDependencies['@capacitor/core'] ||
+    allDependencies['@capacitor/ios'] ||
+    allDependencies['@capacitor/android']
+  );
+}
+
+/**
+ * Merge an NX app package.json into the root dependency map without replacing root deps.
+ */
+export function mergeAppPackageJson(appFolder: string, project: Project): boolean {
+  const pkgPath = join(appFolder, 'package.json');
+  if (!existsSync(pkgPath)) {
+    return false;
+  }
+  const appPkg = JSON.parse(readFileSync(pkgPath, 'utf8'));
+  allDependencies = {
+    ...allDependencies,
+    ...(appPkg.dependencies ?? {}),
+    ...(appPkg.devDependencies ?? {}),
+  };
+  const appManifest = processAndroidXML(appFolder);
+  if (appManifest !== undefined) {
+    androidManifest = appManifest;
+  }
+  recomputeIsCapacitor(project);
+  return true;
+}
+
 export async function load(fn: string, project: Project, context: ExtensionContext): Promise<any> {
   let packageJsonFilename = fn;
   if (lstatSync(fn).isDirectory()) {
@@ -129,13 +160,7 @@ export async function load(fn: string, project: Project, context: ExtensionConte
     ...packageFile.devDependencies,
   };
 
-  // Its a capacitor project only if its a dependency and not a dev dependency
-  project.isCapacitor = !!(
-    packageFile.dependencies &&
-    (packageFile.dependencies['@capacitor/core'] ||
-      packageFile.dependencies['@capacitor/ios'] ||
-      packageFile.dependencies['@capacitor/android'])
-  );
+  recomputeIsCapacitor(project);
 
   project.isCordova = !!(allDependencies['cordova-ios'] || allDependencies['cordova-android'] || packageFile.cordova);
 

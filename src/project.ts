@@ -1,6 +1,6 @@
 import { Recommendation } from './recommendation';
 import { Tip, TipType } from './tip';
-import { load, exists } from './analyzer';
+import { load, exists, mergeAppPackageJson } from './analyzer';
 import { isRunning } from './tasks';
 import { exState } from './tree-provider';
 import { Context, VSCommand } from './context-variables';
@@ -11,6 +11,8 @@ import { angularMigrate, maxAngularVersion } from './rules-angular-migrate';
 import { checkForMonoRepo, FrameworkType, MonoRepoProject, MonoRepoType } from './monorepo';
 import { CapacitorPlatform } from './capacitor-platform';
 import { addCommand, npmInstall, npmUninstall, PackageManager, saveDevArgument } from './node-commands';
+import { getPackageManager } from './package-manager';
+import { ExtensionSetting, getExtSetting } from './workspace-state';
 import { run } from './utilities';
 import { getCapacitorConfigDistFolder } from './capacitor-config-file';
 import { Command, ExtensionContext, TreeItemCollapsibleState, commands, window } from 'vscode';
@@ -667,7 +669,11 @@ export async function inspectProject(
 
   const project: Project = new Project('My Project');
   project.folder = folder;
-  project.packageManager = getPackageManager(folder, project.repoType);
+  project.packageManager = getPackageManager(
+    folder,
+    project.repoType ?? MonoRepoType.none,
+    getExtSetting(ExtensionSetting.packageManager),
+  );
   exState.packageManager = project.packageManager;
   exState.rootFolder = folder;
   exState.projectRef = project;
@@ -684,13 +690,29 @@ export async function inspectProject(
 
   await checkForMonoRepo(project, selectedProject, context);
 
-  if (project.monoRepo?.folder) {
-    // Use the package manager from the monorepo project
-    project.packageManager = getPackageManager(project.monoRepo.folder, project.repoType);
+  project.packageManager = getPackageManager(
+    project.folder,
+    project.repoType,
+    getExtSetting(ExtensionSetting.packageManager),
+  );
+  exState.packageManager = project.packageManager;
 
-    exState.packageManager = project.packageManager;
+  if (project.repoType === MonoRepoType.nx && project.monoRepo?.folder) {
+    const merged = mergeAppPackageJson(project.monoRepo.folder, project);
+    if (merged) {
+      project.monoRepo.localPackageJson = true;
+    }
+    if (!project.isCapacitor) {
+      project.isCapacitor =
+        project.hasACapacitorProject() ||
+        project.fileExists('capacitor.config.ts') ||
+        project.fileExists('capacitor.config.js') ||
+        project.fileExists('capacitor.config.json');
+    }
+    project.type = project.isCapacitor ? 'Capacitor' : project.isCordova ? 'Cordova' : 'Other';
   }
-  if (project.monoRepo?.localPackageJson) {
+
+  if (project.monoRepo?.localPackageJson && project.repoType !== MonoRepoType.nx) {
     packages = await load(project.monoRepo.folder, project, context);
   }
 
@@ -729,38 +751,4 @@ function guessFramework(project: Project) {
   if (!project.frameworkType) {
     // Project may not being using a known framework or its a regular node project  }
   }
-}
-
-function getPackageManager(folder: string, monoRepoType: MonoRepoType): PackageManager {
-  const yarnLock = join(folder, 'yarn.lock');
-  const pnpmLock = join(folder, 'pnpm-lock.yaml');
-  const bunLockb = join(folder, 'bun.lockb');
-  const bunLock = join(folder, 'bun.lock');
-  if (existsSync(yarnLock)) {
-    return PackageManager.yarn;
-  } else if (existsSync(pnpmLock) || exState.repoType == MonoRepoType.pnpm) {
-    return PackageManager.pnpm;
-  } else if (existsSync(bunLockb)) {
-    return PackageManager.bun;
-  } else if (existsSync(bunLock)) {
-    return PackageManager.bun;
-  }
-
-  if (monoRepoType == MonoRepoType.yarn) {
-    const packageLock = join(folder, 'package-lock.json');
-
-    if (!existsSync(packageLock)) {
-      // Its a yarn monorepo so use yarn as package manager
-      return PackageManager.yarn;
-    }
-  }
-  if (monoRepoType == MonoRepoType.bun) {
-    const packageLock = join(folder, 'package-lock.json');
-
-    if (!existsSync(packageLock)) {
-      // Its a bun monorepo so use bun as package manager
-      return PackageManager.bun;
-    }
-  }
-  return PackageManager.npm;
 }
