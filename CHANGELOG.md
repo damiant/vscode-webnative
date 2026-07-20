@@ -1,5 +1,13 @@
 ## Changelog
 
+### Version 2.2.10
+
+- Stop infinite npm outdated/list loops by deduping in-flight package refreshes and not re-triggering solely because the cached list is empty after a recent attempt
+- Fix TypeScript Problems in tree-provider by making lazily initialized ExState fields optional
+- Fix TypeScript Problems in process-packages (strict typing for package maps, error handling, and optional cache-key Project args)
+- Allow package/project cache key helpers to be called without a Project so clearRefreshCache can match all workspace-scoped keys by prefix
+- Return project inspection results immediately, then refresh outdated package data in a second background pass cached per selected workspace and trigger a UI refresh when that data arrives
+
 ### Version 2.2.9
 
 - Fix build command to use `wn:build`, then `ionic:build`, then `build` from package.json for all framework types, instead of hardcoding `vite build`
