@@ -1,4 +1,4 @@
-import { CUSTOM_ELEMENTS_SCHEMA, Component, Input } from '@angular/core';
+import { CUSTOM_ELEMENTS_SCHEMA, Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { Plugin } from './plugin-info';
 
 import { StarComponent } from './star.component';
@@ -9,6 +9,7 @@ import { vscode } from './utilities/vscode';
   imports: [StarComponent],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   styleUrls: ['./plugin.component.css'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <div class="px-group">
       <div class="prof tooltip">

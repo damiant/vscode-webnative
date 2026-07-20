@@ -1,5 +1,5 @@
 import { Project } from './project';
-import { PackageManager, npmInstall, npmInstallAll } from './node-commands';
+import { PackageManager, npmInstall, npmInstallAll, npx } from './node-commands';
 import { confirm, getRunOutput, isWindows, replaceAll } from './utilities';
 import { write, writeError, writeWN } from './logging';
 import { exists, isGreaterOrEqual, isLess } from './analyzer';
@@ -10,6 +10,7 @@ import { CommandName, InternalCommand } from './command-name';
 import { ProgressLocation, QuickPickItem, QuickPickItemKind, commands, window } from 'vscode';
 import { sep } from 'path';
 import { integratePrettier } from './prettier';
+import { fixDeprecatedTsconfigOptions } from './rules-typescript-config';
 
 enum Features {
   migrateToPNPM = '$(find-replace) Migrate to PNPM',
@@ -55,20 +56,32 @@ const angularSchematics: AngularSchematic[] = [
     name: '$(test-view-icon) Migrate to replace @Output with Output functions',
     minimumVersion: '19.0.0',
     description: 'This will replace your @Output decorators with Output functions. Are you sure?',
-    command: `ng generate @angular/core:output-migration --interactive=false --defaults=true --path=".${sep}"`,
+    command: `npx ng generate @angular/core:output-migration --interactive=false --defaults=true --path=".${sep}"`,
   },
   {
     name: '$(test-view-icon) Migrate to use inject for dependency injection',
     minimumVersion: '19.0.0',
     description: 'This will replace dependency injection to use the inject function. Are you sure?',
-    command: `ng generate @angular/core:inject --interactive=false --defaults=true --path=".${sep}"`,
+    command: `npx ng generate @angular/core:inject --interactive=false --defaults=true --path=".${sep}"`,
   },
   {
     name: '$(test-view-icon) Migrate ViewChild and ContentChild to use signals',
     minimumVersion: '19.0.0',
     description:
       'This will replace @ViewChild and @ContentChild decorators with the equivalent signal query. Are you sure?',
-    command: `ng generate @angular/core:signal-queries --interactive=false --defaults=true --path=".${sep}"`,
+    command: `npx ng generate @angular/core:signal-queries --interactive=false --defaults=true --path=".${sep}"`,
+  },
+  {
+    name: '$(test-view-icon) Migrate Karma to Vitest',
+    minimumVersion: '22.0.0',
+    description: 'This will migrate your Karma test configuration to Vitest. Are you sure?',
+    command: 'ng update @angular/cli --name migrate-karma-to-vitest',
+  },
+  {
+    name: '$(test-view-icon) Migrate to Use Application Builder',
+    minimumVersion: '22.0.0',
+    description: 'This will migrate your project to use the application builder. Are you sure?',
+    command: 'ng update @angular/cli --name use-application-builder',
   },
 ];
 
@@ -157,9 +170,22 @@ async function angularSchematic(selection: string, project: Project) {
     await migration.commandFn(selection, project);
     return;
   } else {
-    const commands = [migration.command];
-    await runCommands(commands, selection, project);
+    const commands = [qualifyAngularCommand(migration.command, project)];
+    const success = await runCommands(commands, selection, project, project.projectFolder());
+    if (success) {
+      fixDeprecatedTsconfigOptions(project);
+    }
   }
+}
+
+function qualifyAngularCommand(command: string, project: Project): string {
+  if (command.startsWith('npx ')) {
+    return command.replace('npx ', `${npx(project)} `);
+  }
+  if (command.startsWith('ng ')) {
+    return `${npx(project)} ${command}`;
+  }
+  return command;
 }
 
 function migrateToPNPM(): Array<string> {
@@ -202,31 +228,44 @@ function showIgnoredRecommendations(): void {
   commands.executeCommand(CommandName.Refresh);
 }
 
-export async function runCommands(commands: Array<string>, title: string, project: Project): Promise<void> {
+export async function runCommands(
+  commands: Array<string>,
+  title: string,
+  project: Project,
+  folder?: string,
+): Promise<boolean> {
   try {
     if (title.includes(')')) {
       title = title.substring(title.indexOf(')') + 1);
     }
+    let success = false;
     await window.withProgress({ location: ProgressLocation.Notification, title, cancellable: false }, async () => {
-      await run(commands, project.folder);
+      success = await run(commands, folder ?? project.folder);
     });
 
-    writeWN(`Completed ${title}`);
+    if (success) {
+      writeWN(`Completed ${title}`);
+    } else {
+      writeError(`Failed ${title}`);
+    }
+    return success;
   } catch (err) {
     writeError(`Failed ${title}: ${err}`);
+    return false;
   }
 }
 
-async function run(commands: Array<string>, folder: string): Promise<void> {
+async function run(commands: Array<string>, folder: string): Promise<boolean> {
   for (const command of commands) {
     writeWN(replaceAll(command, InternalCommand.cwd, ''));
     try {
       write(await getRunOutput(command, folder));
     } catch (err) {
-      //writeError(err);
-      break;
+      writeError(`${replaceAll(command, InternalCommand.cwd, '')} failed: ${err}`);
+      return false;
     }
   }
+  return true;
 }
 
 function angularUsingESBuild(project: Project): boolean {

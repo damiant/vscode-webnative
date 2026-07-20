@@ -30,7 +30,6 @@ import { integratePWA } from './capacitor-pwa';
 import { showOutput, write, writeWN } from './logging';
 import { ExtensionContext, window } from 'vscode';
 import { WorkspaceSetting, getSetting, setSetting } from './workspace-state';
-import { angularMigrate, maxAngularVersion } from './rules-angular-migrate';
 import { checkPrivacyManifest } from './xcode';
 import { existsSync, readFileSync } from 'fs';
 import { join } from 'path';
@@ -178,10 +177,6 @@ export async function checkCapacitorRules(project: Project, context: ExtensionCo
     }
     if (isLess('@ionic/cli', '7.2.0')) {
       project.tip(checkMinVersion('@ionic/cli', '7.2.0', 'to fix live reload support'));
-    }
-    if (isLess('@angular/core', `${maxAngularVersion}.0.0`)) {
-      const t = angularMigrate(project, maxAngularVersion);
-      project.add(t);
     }
   }
 

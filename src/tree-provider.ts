@@ -69,6 +69,7 @@ interface ExState {
   externalUrl: string | undefined; // URL for the external browser
   dontOpenBrowser: boolean; // If true then avoid opening the browser
   refreshTree?: () => void; // Soft-refresh the tree without clearing package caches
+  isAngularMigrating?: boolean; // Suppress node_modules install prompts during ng update
 }
 
 export const exState: ExState = {
@@ -109,6 +110,7 @@ export const exState: ExState = {
   project: undefined,
   debugged: false,
   dontOpenBrowser: false,
+  isAngularMigrating: false,
 };
 
 interface FolderInfo {

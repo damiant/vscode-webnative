@@ -7,7 +7,7 @@ import { Context, VSCommand } from './context-variables';
 import { getRecommendations } from './recommend';
 import { getIgnored } from './ignore';
 import { CommandName, InternalCommand } from './command-name';
-import { angularMigrate } from './rules-angular-migrate';
+import { angularMigrate, maxAngularVersion } from './rules-angular-migrate';
 import { checkForMonoRepo, FrameworkType, MonoRepoProject, MonoRepoType } from './monorepo';
 import { CapacitorPlatform } from './capacitor-platform';
 import { addCommand, npmInstall, npmUninstall, PackageManager, saveDevArgument } from './node-commands';
@@ -372,10 +372,10 @@ export class Project {
     if (title == 'angular') {
       // Option to upgrade with:
       // ng update @angular/cli@13 @angular/core@13 --allow-dirty
-      if (!latestVersion) {
-        return;
+      tip = angularMigrate(this, latestVersion ?? maxAngularVersion);
+      if (!tip) {
+        tip = new Tip('Angular Packages', '', TipType.Angular);
       }
-      tip = angularMigrate(this, latestVersion);
     } else {
       tip = new Tip('Upgrade All Packages', undefined, TipType.Run, undefined, undefined, 'Upgrade');
     }
