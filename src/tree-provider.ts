@@ -24,15 +24,15 @@ import { join } from 'path';
 import { StarterPanel } from './starter';
 
 interface ExState {
-  view: TreeView<any>;
+  view?: TreeView<any>;
   skipAuth: boolean;
   projects: Array<MonoRepoProject>;
   repoType: MonoRepoType;
   packageManager: PackageManager;
-  workspace: string; // Monorepo workspace name
-  context: ExtensionContext;
+  workspace?: string; // Monorepo workspace name
+  context?: ExtensionContext;
   shell?: string;
-  projectsView: TreeView<any>;
+  projectsView?: TreeView<any>;
   selectedAndroidDevice?: string;
   selectedIOSDevice?: string;
   selectedAndroidDeviceName?: string;
@@ -43,31 +43,32 @@ interface ExState {
   channelFocus: boolean; // Whether to focus the output window
   refreshDebugDevices: boolean; // Should we refresh the list of debuggable devices
   remoteLogging: boolean; // Whether remote logging is enabled
-  hasNodeModules: boolean; // Whether node modules are installed
-  nodeModulesFolder: string; // The folder where node_modules is located
-  hasPackageJson: boolean; // Whether folder has package.json
-  hasNodeModulesNotified: boolean; // Whether we've notified the user of no node_modules
-  buildConfiguration: string; // Build configuration
-  runConfiguration: string; // Run configuration
-  project: string; // Angular project name
-  nvm: string; // If .nvmrc is used will contain its contents
-  rootFolder: string; // The folder to inspect
-  flavors: string[]; // Android Flavors
+  hasNodeModules?: boolean; // Whether node modules are installed
+  nodeModulesFolder?: string; // The folder where node_modules is located
+  hasPackageJson?: boolean; // Whether folder has package.json
+  hasNodeModulesNotified?: boolean; // Whether we've notified the user of no node_modules
+  buildConfiguration?: string; // Build configuration
+  runConfiguration?: string; // Run configuration
+  project?: string; // Angular project name
+  nvm?: string; // If .nvmrc is used will contain its contents
+  rootFolder?: string; // The folder to inspect
+  flavors?: string[]; // Android Flavors
   debugged: boolean; // Have we ever started debugging
   servePort: number; // The port used when the dev server is running
   webView: WebviewPanel | undefined; // The Web Browser preview
-  runIOS: Tip;
-  runAndroid: Tip;
-  runWeb: Tip;
-  lastRun: CapacitorPlatform;
+  runIOS?: Tip;
+  runAndroid?: Tip;
+  runWeb?: Tip;
+  lastRun?: CapacitorPlatform;
   lastAutoRun?: string; // Last command that automatically run via clipboard
-  projectRef: Project;
+  projectRef?: Project;
   runStatusBar: StatusBarItem | undefined;
   openWebStatusBar: StatusBarItem | undefined;
   openEditorStatusBar: StatusBarItem | undefined;
   localUrl: string | undefined; // URL for the local browser
   externalUrl: string | undefined; // URL for the external browser
   dontOpenBrowser: boolean; // If true then avoid opening the browser
+  refreshTree?: () => void; // Soft-refresh the tree without clearing package caches
   isAngularMigrating?: boolean; // Suppress node_modules install prompts during ng update
 }
 
@@ -118,7 +119,7 @@ interface FolderInfo {
   folder: string;
 }
 
-let folderInfoCache: FolderInfo = undefined;
+let folderInfoCache: FolderInfo | undefined;
 
 export class ExTreeProvider implements TreeDataProvider<Recommendation> {
   private _onDidChangeTreeData: EventEmitter<Recommendation | undefined | void> = new EventEmitter<
@@ -126,7 +127,7 @@ export class ExTreeProvider implements TreeDataProvider<Recommendation> {
   >();
   readonly onDidChangeTreeData: Event<Recommendation | undefined | void> = this._onDidChangeTreeData.event;
 
-  selectedProject: string;
+  selectedProject: string | undefined;
 
   constructor(
     private workspaceRoot: string | undefined,
@@ -164,26 +165,28 @@ export class ExTreeProvider implements TreeDataProvider<Recommendation> {
         return Promise.resolve(element.children);
       }
     } else {
-      let folderInfo: FolderInfo = folderInfoCache;
+      let folderInfo: FolderInfo | undefined = folderInfoCache;
       if (!folderInfo || folderInfo.folder != this.workspaceRoot || !folderInfo.packageJsonExists) {
         folderInfo = this.getFolderInfo(this.workspaceRoot);
         folderInfoCache = folderInfo;
       }
       if (folderInfo.packageJsonExists || folderInfo.folderBased) {
-        const summary = await reviewProject(this.workspaceRoot, this.context, this.selectedProject);
+        const summary = await reviewProject(this.workspaceRoot, this.context, this.selectedProject ?? '');
 
         if (!summary) return [];
         return summary.project.groups;
       } else {
-        StarterPanel.init(exState.context.extensionUri, this.workspaceRoot, exState.context);
+        if (exState.context) {
+          StarterPanel.init(exState.context.extensionUri, this.workspaceRoot, exState.context);
+        }
         return Promise.resolve([]);
       }
     }
   }
 
   private getFolderInfo(folder: string): FolderInfo {
-    const packageJsonPath = join(this.workspaceRoot, 'package.json');
-    const folders = isFolderBasedMonoRepo(this.workspaceRoot);
+    const packageJsonPath = join(folder, 'package.json');
+    const folders = isFolderBasedMonoRepo(folder);
     const packageJsonExists = this.pathExists(packageJsonPath);
     const folderBased = folders.length > 0 && !packageJsonExists;
 

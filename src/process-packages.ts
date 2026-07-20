@@ -30,6 +30,35 @@ interface PluginInformation {
   hasHooks: boolean;
 }
 
+interface ProcessedPackage {
+  version: string;
+  current?: string;
+  wanted?: string;
+  latest?: string;
+  isDevDependency?: boolean;
+  depType: string;
+  plugin?: PluginInformation;
+  deprecated?: string;
+  updated?: string;
+  description?: string;
+  isOld?: boolean;
+  url?: string;
+}
+
+type ProcessedPackages = Record<string, ProcessedPackage>;
+type DependencyMap = Record<string, string>;
+
+function asErrorText(err: unknown): string {
+  return err instanceof Error ? err.message : String(err);
+}
+
+/** Prevents overlapping npm outdated/list runs for the same workspace. */
+const packageRefreshInFlight = new Set<string>();
+
+function packageRefreshKey(project: Project, folder: string): string {
+  return project?.monoRepo?.name ?? project.folder ?? folder;
+}
+
 export function clearRefreshCache(context: ExtensionContext) {
   if (context) {
     for (const key of context.workspaceState.keys()) {
@@ -42,6 +71,9 @@ export function clearRefreshCache(context: ExtensionContext) {
       if (key.startsWith(CapProjectCache(undefined))) {
         context.workspaceState.update(key, undefined);
       }
+      if (key.startsWith(PackageCacheRefreshedAt(undefined))) {
+        context.workspaceState.update(key, undefined);
+      }
       if (key == LastManifestCheck) {
         context.workspaceState.update(key, undefined);
       }
@@ -51,14 +83,18 @@ export function clearRefreshCache(context: ExtensionContext) {
   console.log('Cached data cleared');
 }
 
-async function runListPackages(project: Project, folder: string, context: ExtensionContext): Promise<string> {
+async function runListPackages(
+  project: Project,
+  folder: string,
+  context: ExtensionContext,
+): Promise<string | undefined> {
   const listOutput = getVersionsFromPackageLock(project);
   if (listOutput) {
     return JSON.stringify(listOutput);
   }
   const listCmd = listCommand(project);
   try {
-    const shell = isWindows ? 'powershell.exe' : undefined;
+    const shell = isWindows() ? 'powershell.exe' : undefined;
     let data = await getRunOutput(listCmd, folder, shell, true);
     if (project.isModernYarn()) {
       data = fixModernYarnList(data);
@@ -66,7 +102,8 @@ async function runListPackages(project: Project, folder: string, context: Extens
     return data;
   } catch (reason) {
     write(`> ${listCmd}`);
-    writeError(reason);
+    writeError(asErrorText(reason));
+    return undefined;
   }
 }
 
@@ -75,7 +112,14 @@ async function runListPackages(project: Project, folder: string, context: Extens
  * Safe to call without await for background refresh.
  */
 async function refreshPackageData(project: Project, folder: string, context: ExtensionContext): Promise<void> {
+  const key = packageRefreshKey(project, folder);
+  if (packageRefreshInFlight.has(key)) {
+    return;
+  }
+  packageRefreshInFlight.add(key);
+
   const outdatedCmd = outdatedCommand(project);
+  const selectedProject = context.workspaceState.get('SelectedProject');
   try {
     const [, freshVersions] = await Promise.all([
       getRunOutput(outdatedCmd, folder, undefined, true, true)
@@ -89,7 +133,7 @@ async function refreshPackageData(project: Project, folder: string, context: Ext
         })
         .catch((reason) => {
           write(`> ${outdatedCmd}`);
-          writeError(reason);
+          writeError(asErrorText(reason));
         }),
       runListPackages(project, folder, context),
     ]);
@@ -100,8 +144,15 @@ async function refreshPackageData(project: Project, folder: string, context: Ext
     }
     context.workspaceState.update(PackageCacheModified(project), project.modified.toUTCString());
     context.workspaceState.update(PackageCacheRefreshedAt(project), Date.now());
+    if ((selectedProject ?? '') === (project?.monoRepo?.name ?? '')) {
+      exState.refreshTree?.();
+    } else if (!selectedProject && exState.workspace === key) {
+      exState.refreshTree?.();
+    }
   } catch (err) {
-    if (err && err.includes('401')) {
+    // Record the attempt so an empty/failed list result does not immediately re-trigger refresh.
+    context.workspaceState.update(PackageCacheRefreshedAt(project), Date.now());
+    if (asErrorText(err).includes('401')) {
       window.showInformationMessage(
         `Unable to run '${outdatedCommand(project)}' due to authentication error. Check .npmrc`,
         'OK',
@@ -114,27 +165,29 @@ async function refreshPackageData(project: Project, folder: string, context: Ext
       writeError(`Unable to run '${outdatedCommand(project)}'. Try reinstalling node modules.`);
       console.error(err);
     }
+  } finally {
+    packageRefreshInFlight.delete(key);
   }
 }
 
 export async function processPackages(
   folder: string,
-  allDependencies: object,
-  devDependencies: object,
+  allDependencies: DependencyMap,
+  devDependencies: DependencyMap,
   context: ExtensionContext,
   project: Project,
-): Promise<any> {
+): Promise<ProcessedPackages> {
   if (!lstatSync(folder).isDirectory()) {
     return {};
   }
   // npm outdated only shows dependencies and not dev dependencies if the node module isn't installed
-  let outdated = '[]';
-  let versions = '{}';
+  let outdated: string | undefined = '[]';
+  let versions: string | undefined = '{}';
   try {
     const packagesModified: Date = project.modified;
     const packageModifiedLast = context.workspaceState.get(PackageCacheModified(project));
-    outdated = context.workspaceState.get(PackageCacheOutdated(project));
-    versions = context.workspaceState.get(PackageCacheList(project));
+    outdated = context.workspaceState.get<string>(PackageCacheOutdated(project));
+    versions = context.workspaceState.get<string>(PackageCacheList(project));
     const changed = packagesModified.toUTCString() != packageModifiedLast;
     if (changed) {
       exState.syncDone = [];
@@ -144,17 +197,14 @@ export async function processPackages(
     const lastRefreshedAt: number = context.workspaceState.get(PackageCacheRefreshedAt(project)) ?? 0;
     const oneHourMs = 60 * 60 * 1000;
     const refreshIsStale = Date.now() - lastRefreshedAt > oneHourMs;
-    // versions with length <= 2 is '{}' or '' - treat as unusable, needs a refresh
+    // versions with length <= 2 is '{}' or '' - only force a refresh if we have never attempted one
     const versionsUnusable = !versions || versions.length <= 2;
+    const neverRefreshed = lastRefreshedAt === 0;
+    const key = packageRefreshKey(project, folder);
+    const alreadyRefreshing = packageRefreshInFlight.has(key);
 
-    if (!hasCachedData) {
-      // No cache at all - must block and wait for fresh data on first run
-      await refreshPackageData(project, folder, context);
-      outdated = context.workspaceState.get(PackageCacheOutdated(project)) ?? '[]';
-      versions = context.workspaceState.get(PackageCacheList(project)) ?? '{}';
-    } else if (changed || refreshIsStale || versionsUnusable) {
-      // Cache exists but package.json changed, data is over 1 hour old, or versions is empty -
-      // return stale cache now and refresh in background
+    if (!alreadyRefreshing && (!hasCachedData || changed || refreshIsStale || (versionsUnusable && neverRefreshed))) {
+      // Return current project info immediately; fetch package freshness in the background.
       refreshPackageData(project, folder, context).catch((err) =>
         console.error('Background package refresh failed', err),
       );
@@ -162,7 +212,7 @@ export async function processPackages(
   } catch (err) {
     outdated = '[]';
     versions = '{}';
-    if (err && err.includes('401')) {
+    if (asErrorText(err).includes('401')) {
       window.showInformationMessage(
         `Unable to run '${outdatedCommand(project)}' due to authentication error. Check .npmrc`,
         'OK',
@@ -183,19 +233,19 @@ export async function processPackages(
 
   const packages = processDependencies(
     allDependencies,
-    getOutdatedData(outdated),
+    getOutdatedData(outdated ?? '[]'),
     devDependencies,
-    getListData(versions),
+    getListData(versions ?? '{}'),
   );
   inspectPackages(project.projectFolder() ? project.projectFolder() : folder, packages);
   return packages;
 }
 
-function getOutdatedData(outdated: string): any {
+function getOutdatedData(outdated: string): Record<string, NpmOutdatedDependency> {
   try {
     return JSON.parse(stripJSON(outdated, '{'));
   } catch {
-    return [];
+    return {};
   }
 }
 
@@ -203,11 +253,11 @@ function getListData(list: string): NpmPackage {
   try {
     return JSON.parse(list);
   } catch {
-    return { name: undefined, dependencies: undefined, version: undefined };
+    return { name: '', dependencies: {}, version: '' };
   }
 }
 
-export function reviewPackages(packages: object, project: Project) {
+export function reviewPackages(packages: ProcessedPackages, project: Project) {
   if (!packages || Object.keys(packages).length == 0) return;
 
   listPackages(project, 'Packages', `Your project relies on these packages.`, packages, [PackageType.Dependency]);
@@ -232,8 +282,8 @@ export function reviewPackages(packages: object, project: Project) {
 }
 
 // List any plugins that use Cordova Hooks as potential issue
-export function reviewPluginsWithHooks(packages: object): Tip[] {
-  const tips = [];
+export function reviewPluginsWithHooks(packages: ProcessedPackages): Tip[] {
+  const tips: Tip[] = [];
   // List of packages that don't need to be reported to the user because they would be dropped in a Capacitor migration
   // Using a Set for O(1) lookups instead of an array with O(n) includes() method
   const dontReportSet = new Set([
@@ -245,7 +295,7 @@ export function reviewPluginsWithHooks(packages: object): Tip[] {
     'cordova-plugin-push', // This has a hook for browser which is not applicable
   ]);
 
-  if (Object.keys(packages).length == 0) return;
+  if (Object.keys(packages).length == 0) return tips;
   for (const library of Object.keys(packages)) {
     if (
       packages[library].plugin &&
@@ -314,7 +364,7 @@ function markIfPlugin(folder: string): boolean {
   return false;
 }
 
-function markDeprecated(lockFile: string, packages) {
+function markDeprecated(lockFile: string, packages: ProcessedPackages) {
   const txt = readFileSync(lockFile, { encoding: 'utf8' });
   const data = JSON.parse(txt);
   if (!data.packages) {
@@ -331,7 +381,7 @@ function markDeprecated(lockFile: string, packages) {
   }
 }
 
-function inspectPackages(folder: string, packages) {
+function inspectPackages(folder: string, packages: ProcessedPackages) {
   // Use package-lock.json for deprecated packages
   const lockFile = join(folder, 'package-lock.json');
   if (existsSync(lockFile)) {
@@ -408,7 +458,12 @@ function inspectPackages(folder: string, packages) {
 }
 
 function processPlugin(content: string): PluginInformation {
-  const result = { androidPermissions: [], androidFeatures: [], dependentPlugins: [], hasHooks: false };
+  const result: PluginInformation = {
+    androidPermissions: [],
+    androidFeatures: [],
+    dependentPlugins: [],
+    hasHooks: false,
+  };
   if (content == '') {
     return result;
   }
@@ -431,9 +486,9 @@ function processPlugin(content: string): PluginInformation {
   return result;
 }
 
-function findAll(content, search: string, endsearch: string): Array<any> {
+function findAll(content: string, search: string, endsearch: string): string[] {
   const list = Array.from(content.matchAll(new RegExp(search + '(.*?)' + endsearch, 'g')));
-  const result = [];
+  const result: string[] = [];
   if (!list) return result;
   for (const item of list) {
     result.push(item[1]);
@@ -445,7 +500,7 @@ function listPackages(
   project: Project,
   title: string,
   description: string,
-  packages: object,
+  packages: ProcessedPackages,
   depTypes: Array<string>,
   tipType?: TipType,
 ) {
@@ -458,7 +513,7 @@ function listPackages(
     project.setGroup(`${count} ${title}`, description, tipType, undefined, 'packages');
   }
 
-  let lastScope: string;
+  let lastScope: string | undefined;
   for (const library of Object.keys(packages).sort()) {
     if (depTypes.includes(packages[library].depType)) {
       let v = `${packages[library].version}`;
@@ -477,7 +532,7 @@ function listPackages(
           if (scope == 'angular') {
             latest = maxAngularVersion;
           }
-          project.addSubGroup(scope, latest);
+          project.addSubGroup(scope, latest ?? '');
           lastScope = scope;
         } else {
           project.clearSubgroup();
@@ -488,8 +543,9 @@ function listPackages(
       if (scope) {
         libraryTitle = library.substring(scope.length + 2);
       }
-      if (v != packages[library].latest && packages[library].latest !== PackageVersion.Unknown) {
-        project.upgrade(library, libraryTitle, `${v} → ${packages[library].latest}`, v, packages[library].latest, type);
+      const pkgLatest = packages[library].latest;
+      if (pkgLatest && v != pkgLatest && pkgLatest !== PackageVersion.Unknown) {
+        project.upgrade(library, libraryTitle, `${v} → ${pkgLatest}`, v, pkgLatest, type);
       } else {
         project.package(library, libraryTitle, `${v}`, type);
       }
@@ -498,10 +554,15 @@ function listPackages(
   project.clearSubgroup();
 }
 
-function processDependencies(allDependencies: object, outdated: object, devDependencies: object, list: NpmPackage) {
-  const packages = {};
+function processDependencies(
+  allDependencies: DependencyMap,
+  outdated: Record<string, NpmOutdatedDependency>,
+  devDependencies: DependencyMap,
+  list: NpmPackage,
+): ProcessedPackages {
+  const packages: ProcessedPackages = {};
   for (const library of Object.keys(allDependencies)) {
-    const dep: NpmDependency = list.dependencies ? list.dependencies[library] : undefined;
+    const dep: NpmDependency | undefined = list.dependencies?.[library];
     let version = dep ? dep.version : `${coerce(allDependencies[library])}`;
     if (allDependencies[library]?.startsWith('git') || allDependencies[library]?.startsWith('file')) {
       version = PackageVersion.Custom;

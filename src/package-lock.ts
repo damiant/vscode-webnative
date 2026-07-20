@@ -9,7 +9,7 @@ export function hasPackageLock(project: Project): boolean {
   return existsSync(join(project.projectFolder(), 'package-lock.json'));
 }
 
-export function getVersionsFromPackageLock(project: Project): NpmPackage {
+export function getVersionsFromPackageLock(project: Project): NpmPackage | undefined {
   if (project.packageManager != PackageManager.npm) return undefined;
   const lockFile = join(project.projectFolder(), 'package-lock.json');
   if (!existsSync(lockFile)) return undefined;
@@ -17,7 +17,7 @@ export function getVersionsFromPackageLock(project: Project): NpmPackage {
   tStart(command);
   const txt = readFileSync(lockFile, { encoding: 'utf8' });
   const data = JSON.parse(txt);
-  const result = {};
+  const result: Record<string, { version: string }> = {};
   try {
     const packages = data.packages[''];
     for (const dep of [...Object.keys(packages.dependencies), ...Object.keys(packages.devDependencies)]) {
