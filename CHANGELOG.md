@@ -1,5 +1,9 @@
 ## Changelog
 
+### Version 2.2.14
+
+- Fix @angular light bulb so projects already on the latest major still get “Update to latest v{N}”
+
 ### Version 2.2.13
 
 - Angular optional migrations added to project menu

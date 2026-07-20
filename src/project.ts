@@ -369,12 +369,14 @@ export class Project {
 
   public addSubGroup(title: string, latestVersion: string) {
     let tip: Tip = undefined;
+    let showLightbulb = true;
     if (title == 'angular') {
       // Option to upgrade with:
       // ng update @angular/cli@13 @angular/core@13 --allow-dirty
-      tip = angularMigrate(this, latestVersion ?? maxAngularVersion);
+      tip = angularMigrate(this, latestVersion || maxAngularVersion);
       if (!tip) {
         tip = new Tip('Angular Packages', '', TipType.Angular);
+        showLightbulb = false;
       }
     } else {
       tip = new Tip('Upgrade All Packages', undefined, TipType.Run, undefined, undefined, 'Upgrade');
@@ -388,10 +390,10 @@ export class Project {
 
     const r = new Recommendation(tip.title, undefined, '@' + title, TreeItemCollapsibleState.Expanded, command, tip);
     r.children = [];
-    if (title == 'angular') {
+    if (showLightbulb) {
       r.setContext(Context.lightbulb);
-    } else {
-      r.setContext(Context.lightbulb);
+    }
+    if (title != 'angular') {
       r.tip.setDynamicCommand(this.updatePackages, r).setDynamicTitle(this.updatePackagesTitle, r);
     }
 
