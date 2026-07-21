@@ -68,7 +68,6 @@ interface ExState {
   localUrl: string | undefined; // URL for the local browser
   externalUrl: string | undefined; // URL for the external browser
   dontOpenBrowser: boolean; // If true then avoid opening the browser
-  refreshTree?: () => void; // Soft-refresh the tree without clearing package caches
   isAngularMigrating?: boolean; // Suppress node_modules install prompts during ng update
 }
 

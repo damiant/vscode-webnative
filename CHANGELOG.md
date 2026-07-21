@@ -1,8 +1,13 @@
 ## Changelog
 
+### Version 2.2.15
+
+- Fix for package outdated refresh. Update dependencies.
+
 ### Version 2.2.14
 
 - Fix @angular light bulb so projects already on the latest major still get “Update to latest v{N}”
+- Stop package list from refreshing continuously after background npm outdated/list completes; tree refreshes only on package.json changes or force refresh
 
 ### Version 2.2.13
 

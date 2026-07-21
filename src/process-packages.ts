@@ -119,7 +119,6 @@ async function refreshPackageData(project: Project, folder: string, context: Ext
   packageRefreshInFlight.add(key);
 
   const outdatedCmd = outdatedCommand(project);
-  const selectedProject = context.workspaceState.get('SelectedProject');
   try {
     const [, freshVersions] = await Promise.all([
       getRunOutput(outdatedCmd, folder, undefined, true, true)
@@ -144,11 +143,8 @@ async function refreshPackageData(project: Project, folder: string, context: Ext
     }
     context.workspaceState.update(PackageCacheModified(project), project.modified.toUTCString());
     context.workspaceState.update(PackageCacheRefreshedAt(project), Date.now());
-    if ((selectedProject ?? '') === (project?.monoRepo?.name ?? '')) {
-      exState.refreshTree?.();
-    } else if (!selectedProject && exState.workspace === key) {
-      exState.refreshTree?.();
-    }
+    // Do not call refreshTree here: that re-enters processPackages and can refresh the
+    // package list continuously. Cache is picked up on package.json change or force refresh.
   } catch (err) {
     // Record the attempt so an empty/failed list result does not immediately re-trigger refresh.
     context.workspaceState.update(PackageCacheRefreshedAt(project), Date.now());

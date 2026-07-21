@@ -113,7 +113,6 @@ export async function activate(context: ExtensionContext) {
   exState.view = view;
   exState.projectsView = projectsView;
   exState.context = context;
-  exState.refreshTree = () => ionicProvider.refresh();
 
   // Initialize anonymous telemetry - non-fatal so proxy environments don't break activation
   try {
