@@ -31,7 +31,7 @@ Starter templates and features for:
 - [Capacitor Preview](#capacitor-preview) - Preview your web application in Capacitor
 - [Configuration Issues](https://webnative.dev/capacitor/recommendations/) - Recommends changes to `config.xml` and `androidmanifest.xml`
 - [Integrate Capacitor](https://webnative.dev/capacitor/about/) into web projects
-- [Splash Screen and Icons]https://webnative.dev/capacitor/splash-icon/) - Generate Splash Screen and Icons assets for iOS and Android projects
+- [Splash Screen and Icons](https://webnative.dev/capacitor/splash-icon/) - Generate Splash Screen and Icons assets for iOS and Android projects
 - [Debugging for Android](https://webnative.dev/capacitor/debugging/) - Support for debugging for Android devices
 
 ## Angular Features
