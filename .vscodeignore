@@ -13,6 +13,8 @@ starter/**
 !starter/build/**
 preview/**
 !preview/build/**
+cli/**
+!cli/dist/**
 plugin-explorer/*.json
 plugin-explorer/*.js
 plugin-explorer/*.md

@@ -18,6 +18,7 @@
     "plugin-explorer",
     "starter",
     "preview",
+    "cli",
     "tests",
     "vitest.config.ts"
   ]

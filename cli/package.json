@@ -1,0 +1,40 @@
+{
+  "name": "wn",
+  "version": "0.1.0",
+  "description": "WebNative CLI — run, build, sync, and manage web and native apps",
+  "license": "MIT",
+  "bin": {
+    "wn": "dist/bin.js"
+  },
+  "main": "dist/bin.js",
+  "files": [
+    "dist",
+    "README.md",
+    "docs.md"
+  ],
+  "scripts": {
+    "build": "tsc -p ./ && node -e \"require('fs').chmodSync('dist/bin.js', 0o755)\"",
+    "watch": "tsc -p ./ --watch",
+    "test": "npx vitest run",
+    "clean": "rm -rf dist"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@webnativellc/simple-plist": "2.1.2",
+    "fast-xml-parser": "5.7.3",
+    "globule": "1.3.4",
+    "htmlparser2": "^9.1.0",
+    "netmask": "2.0.2",
+    "rimraf": "6.1.2",
+    "semver": "7.7.3",
+    "xcode": "3.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.10",
+    "@types/semver": "^7.7.1",
+    "typescript": "^5.8.3",
+    "vitest": "4.1.5"
+  }
+}
