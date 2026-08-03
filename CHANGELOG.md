@@ -3,6 +3,14 @@
 ### Version 2.2.14
 
 - Fix monorepo project switching re-running `npm outdated` on every switch by resolving the selected project before package processing and reusing per-project workspace cache
+### Version 2.2.15
+
+- Fix for package outdated refresh. Update dependencies.
+
+### Version 2.2.14
+
+- Fix @angular light bulb so projects already on the latest major still get “Update to latest v{N}”
+- Stop package list from refreshing continuously after background npm outdated/list completes; tree refreshes only on package.json changes or force refresh
 
 ### Version 2.2.13
 
@@ -29,6 +37,14 @@
 - Fix deprecated TypeScript config cleanup to follow tsconfig `extends` chains and angular.json references in monorepos
 - Fix deprecated TypeScript config cleanup to include parent-folder and repo-root tsconfig files for subfolder Angular projects
 - Add a recommendation to fix deprecated TypeScript compiler options when detected in project tsconfigs
+
+### Version 2.2.10
+
+- Stop infinite npm outdated/list loops by deduping in-flight package refreshes and not re-triggering solely because the cached list is empty after a recent attempt
+- Fix TypeScript Problems in tree-provider by making lazily initialized ExState fields optional
+- Fix TypeScript Problems in process-packages (strict typing for package maps, error handling, and optional cache-key Project args)
+- Allow package/project cache key helpers to be called without a Project so clearRefreshCache can match all workspace-scoped keys by prefix
+- Return project inspection results immediately, then refresh outdated package data in a second background pass cached per selected workspace and trigger a UI refresh when that data arrives
 
 ### Version 2.2.9
 

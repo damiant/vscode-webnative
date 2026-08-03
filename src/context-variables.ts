@@ -64,28 +64,28 @@ export enum VSCommand {
   setContext = 'setContext',
 }
 
-export function PackageCacheOutdated(project: Project) {
+export function PackageCacheOutdated(project?: Project) {
   if (project?.monoRepo?.localPackageJson) {
     return 'npmOutdatedData_' + project.monoRepo.name;
   }
   return 'npmOutdatedData';
 }
 
-export function PackageCacheList(project: Project) {
+export function PackageCacheList(project?: Project) {
   if (project?.monoRepo?.localPackageJson) {
     return 'npmListData_' + project.monoRepo.name;
   }
   return 'npmListData';
 }
 
-export function CapProjectCache(project: Project) {
+export function CapProjectCache(project?: Project) {
   if (project?.monoRepo?.localPackageJson) {
     return 'CapacitorProject_' + project.monoRepo.name;
   }
   return 'CapacitorProject';
 }
 
-export function PackageCacheModified(project: Project) {
+export function PackageCacheModified(project?: Project) {
   if (project?.monoRepo?.localPackageJson) {
     return 'packagesModified_' + project.monoRepo.name;
   }
@@ -94,7 +94,7 @@ export function PackageCacheModified(project: Project) {
 
 export const LastManifestCheck = 'LastManifestCheck';
 
-export function PackageCacheRefreshedAt(project: Project) {
+export function PackageCacheRefreshedAt(project?: Project) {
   if (project?.monoRepo?.localPackageJson) {
     return 'packageRefreshedAt_' + project.monoRepo.name;
   }

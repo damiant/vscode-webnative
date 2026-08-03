@@ -31,38 +31,36 @@ export function addAngularMigrationRecommendation(project: Project): void {
   }
 }
 
-export function angularMigrate(project: Project, latestVersion: string): Tip | undefined {
+export function angularMigrate(project: Project, latestVersion?: string): Tip | undefined {
   const current = getPackageVersion('@angular/core');
-  const max = coerce(maxAngularVersion);
+  const max = coerce(latestVersion || maxAngularVersion);
   if (!current || !max) {
     return;
   }
-  if (current.major >= max.major) {
+  // Do not offer migrations beyond the highest version we support
+  if (current.major > max.major) {
     return;
   }
-  const next = current.major + 1;
-  if (next > max.major) {
-    return;
-  }
-  return new Tip(`Migrate to Angular ${next}`, '', TipType.Angular).setQueuedAction(
-    migrate,
-    project,
-    next,
-    current.major,
-    current.version,
-  );
+
+  // Prefer the next major when available; otherwise stay on the current major so
+  // the light bulb can still offer "Update to latest v{current}".
+  const next = current.major < max.major ? current.major + 1 : current.major;
+  const title = next > current.major ? `Migrate to Angular ${next}` : `Update Angular ${current.major}`;
+  return new Tip(title, '', TipType.Angular).setQueuedAction(migrate, project, next, current.major, current.version);
 }
 
 async function migrate(queueFunction: QueueFunction, project: Project, next: number, current: number, now: string) {
+  const canMigrateToNext = next > current;
   const nextButton = `Update to v${next}`;
   const currentButton = `Update to latest v${current}`;
   const infoButton = 'Info';
-  const result = await window.showInformationMessage(
-    `Would you like to migrate from Angular ${now} to ${next}? This will use 'ng update': Make sure you have committed your code before you begin.`,
-    infoButton,
-    currentButton,
-    nextButton,
-  );
+  const message = canMigrateToNext
+    ? `Would you like to migrate from Angular ${now} to ${next}? This will use 'ng update': Make sure you have committed your code before you begin.`
+    : `Would you like to update to the latest Angular ${current}? This will use 'ng update': Make sure you have committed your code before you begin.`;
+
+  const result = canMigrateToNext
+    ? await window.showInformationMessage(message, infoButton, currentButton, nextButton)
+    : await window.showInformationMessage(message, infoButton, currentButton);
   if (!result) return;
   switch (result) {
     case infoButton:

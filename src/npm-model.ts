@@ -1,19 +1,19 @@
 // Used for the data than comes from npm list --json
 export interface NpmPackage {
   // Version number in the package.json
-  version: string;
+  version?: string;
 
   // Name in package.json
-  name: string;
+  name?: string;
 
   // This is an object with properties for each package.
   // eg { "@capacitor/project": {"version": "1.0.31", "resolved": "https://registry.npmjs.org/@capacitor/project/-/project-1.0.31.tgz"}}
-  dependencies: object;
+  dependencies?: Record<string, NpmDependency>;
 }
 
 export interface NpmDependency {
   version: string; // Version number
-  resolved: string; // URL to the package
+  resolved?: string; // URL to the package
 }
 
 // Used from npm outdated --json
