@@ -30,7 +30,9 @@ jobs:
           cd ../starter
           npm install
           cd ../preview
-          npm install          
+          npm install
+          cd ../cli
+          npm install
           npm install -g @vscode/vsce
 
       - name: Lint

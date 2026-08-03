@@ -4,6 +4,8 @@
     "starter/**/*",
     "preview/**/*",
     "plugin-explorer/**/*",
+    "cli/dist/**/*",
+    "cli/node_modules/**/*",
     "out/**/*",
     "tests/**/*",
     "resources/**/*",

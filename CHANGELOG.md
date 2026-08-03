@@ -1,5 +1,9 @@
 ## Changelog
 
+### Version 2.2.16
+
+- Fix monorepo project switching re-running `npm outdated` on every switch by resolving the selected project before package processing and reusing per-project workspace cache
+
 ### Version 2.2.15
 
 - Fix for package outdated refresh. Update dependencies.
@@ -11,6 +15,10 @@
 
 ### Version 2.2.13
 
+- Implement standalone `wn` CLI under `cli/` (fully independent of the VS Code extension): info, run, build, sync, open, stop, devices, debug, scripts, check, packages, plugins, native, assets, release, migrate, new, integrate, generate, and config
+- Port extension logic into `cli/src` (project detection, command builders, error parsers, recommendation rules, native project editors, device listing, migrations, starter templates)
+- Add CLI framework with JSON envelope, exit-code contract, `--dry-run`, config precedence (`wn.json` / `~/.config/wn`), and agent skills under `cli/skill/`
+- Wire `cli` into `npm run build:all`, `install:all`, CI, and `.vscodeignore`
 - Angular optional migrations added to project menu
 - Migration for deprecated typescript settings
 
