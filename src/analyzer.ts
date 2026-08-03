@@ -91,7 +91,11 @@ function processAndroidXML(folder: string) {
   return parser.parse(xml);
 }
 
-export async function load(fn: string, project: Project, context: ExtensionContext): Promise<any> {
+/**
+ * Reads package.json metadata into the analyzer/project without running npm outdated.
+ * Used so monorepo detection can run before the (cached) package processing step.
+ */
+export async function loadPackageFile(fn: string, project: Project): Promise<boolean> {
   let packageJsonFilename = fn;
   if (lstatSync(fn).isDirectory()) {
     packageJsonFilename = fn + '/package.json';
@@ -103,7 +107,7 @@ export async function load(fn: string, project: Project, context: ExtensionConte
     error('package.json', 'This folder does not contain an Ionic application (its missing package.json)');
     allDependencies = [];
     packageFile = {};
-    return undefined;
+    return false;
   }
   project.modified = statSync(packageJsonFilename).mtime;
   try {
@@ -138,7 +142,13 @@ export async function load(fn: string, project: Project, context: ExtensionConte
   );
 
   project.isCordova = !!(allDependencies['cordova-ios'] || allDependencies['cordova-android'] || packageFile.cordova);
+  return true;
+}
 
+export async function load(fn: string, project: Project, context: ExtensionContext): Promise<any> {
+  if (!(await loadPackageFile(fn, project))) {
+    return undefined;
+  }
   return await processPackages(fn, allDependencies, packageFile.devDependencies, context, project);
 }
 

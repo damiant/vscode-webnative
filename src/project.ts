@@ -1,6 +1,6 @@
 import { Recommendation } from './recommendation';
 import { Tip, TipType } from './tip';
-import { load, exists } from './analyzer';
+import { load, loadPackageFile, exists } from './analyzer';
 import { isRunning } from './tasks';
 import { exState } from './tree-provider';
 import { Context, VSCommand } from './context-variables';
@@ -674,9 +674,11 @@ export async function inspectProject(
   exState.rootFolder = folder;
   exState.projectRef = project;
 
-  let packages = await load(folder, project, context);
+  // Read root package.json for monorepo detection only — do not run npm outdated yet.
+  // Outdated/list data is fetched once below for the selected project folder so that
+  // switching monorepo projects reuses per-project workspace cache.
+  await loadPackageFile(folder, project);
   exState.view.title = project.name;
-  project.type = project.isCapacitor ? 'Capacitor' : project.isCordova ? 'Cordova' : 'Other';
 
   if (!Features.requireLogin) {
     exState.skipAuth = true;
@@ -692,9 +694,10 @@ export async function inspectProject(
 
     exState.packageManager = project.packageManager;
   }
-  if (project.monoRepo?.localPackageJson) {
-    packages = await load(project.monoRepo.folder, project, context);
-  }
+
+  const packageFolder = project.monoRepo?.localPackageJson ? project.monoRepo.folder : folder;
+  const packages = await load(packageFolder, project, context);
+  project.type = project.isCapacitor ? 'Capacitor' : project.isCordova ? 'Cordova' : 'Other';
 
   guessFramework(project);
   checkNodeVersion();
