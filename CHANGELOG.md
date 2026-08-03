@@ -2,6 +2,7 @@
 
 ### Version 2.2.15
 
+- Fix monorepo project switching re-running `npm outdated` on every switch by resolving the selected project before package processing and reusing per-project workspace cache
 - Fix for package outdated refresh. Update dependencies.
 
 ### Version 2.2.14
