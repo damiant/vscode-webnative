@@ -23,21 +23,17 @@ export class IosProject {
     }
     this._project = xcode.project(this._projectPath);
     try {
-      await this.parseAsync(this._project);
+      // Use the synchronous parser. xcode's async parse() forks lib/parseJob.js and only
+      // settles on a message from the child process. If that child never starts (bundled
+      // extension where __dirname no longer resolves to xcode/lib, sandboxed/snap Linux
+      // installs) no message arrives, the promise never settles and the panel stays stuck
+      // on "Inspecting project...". parseSync runs the same pure-JS parser in-process.
+      this._project.parseSync();
       return true;
     } catch (error) {
       console.error(error);
-      throw new Error(`Unable to parse project ${this._projectPath}`);
+      throw new Error(`Unable to parse project ${this._projectPath}: ${error}`);
     }
-  }
-
-  parseAsync(project: XcodeProjectType) {
-    return new Promise((resolve, reject) => {
-      project.parse((err) => {
-        if (err) return reject(err);
-        resolve(undefined);
-      });
-    });
   }
 
   getAppTarget(): AppTarget {
