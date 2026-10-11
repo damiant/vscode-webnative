@@ -1,8 +1,11 @@
 ## Changelog
 
-### Version 2.2.16
+### Version 2.2.17
 
 - Fix iOS projects hanging the panel on "Inspecting project..." by parsing the Xcode project in-process (`parseSync`) instead of xcode's forked parser, which never settles when its child process fails to start (bundled extension, sandboxed Linux installs)
+
+### Version 2.2.16
+
 - Fix monorepo project switching re-running `npm outdated` on every switch by resolving the selected project before package processing and reusing per-project workspace cache
 - Fix for package outdated refresh. Update dependencies.
 
