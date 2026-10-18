@@ -35,6 +35,7 @@ import { analyzeSize } from './analyze-size';
 import { ionicExport } from './ionic-export';
 import { addAngularGenerateAction } from './angular-generate';
 import { addAngularMigrationRecommendation } from './rules-angular-migrate';
+import { addIonicMigrationRecommendation } from './rules-ionic-migrate';
 import { addDeprecatedTsconfigRecommendation } from './rules-typescript-config';
 import { LoggingSettings } from './log-settings';
 import { writeWN } from './logging';
@@ -318,6 +319,7 @@ export async function getRecommendations(project: Project, context: ExtensionCon
   );
 
   addAngularMigrationRecommendation(project);
+  addIonicMigrationRecommendation(project);
   addDeprecatedTsconfigRecommendation(project);
 
   // General Rules around node modules (eg Jquery)

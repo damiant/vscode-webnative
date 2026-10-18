@@ -1,5 +1,11 @@
 ## Changelog
 
+### Version 2.2.18
+
+- Add Ionic 7 to Ionic 8 migration recommendation: it installs the Ionic 8 packages, keeps `@ionic/angular-toolkit` on v10 for Angular 16 and v11 for Angular 17+, updates browserslist to the Ionic 8 browser support, renames `IonBackButtonDelegate` to `IonBackButton`, and lists the required and recommended changes of the Ionic 8 update guide
+- The Ionic migration warns when Angular, React or Vue is below the Ionic 8 minimum, checks for a dirty git repository and verifies node_modules before it changes dependencies
+- Move the shared migration guards (git status, node_modules verification, project refresh) into `migration-guards` so that the Angular and Ionic migrations use the same checks
+
 ### Version 2.2.17
 
 - Fix iOS projects hanging the panel on "Inspecting project..." by parsing the Xcode project in-process (`parseSync`) instead of xcode's forked parser, which never settles when its child process fails to start (bundled extension, sandboxed Linux installs)
