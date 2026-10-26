@@ -1,5 +1,10 @@
 ## Changelog
 
+### Version 2.2.19
+
+- Update the bundled Angular projects (plugin-explorer, preview, starter) to Angular 22.2: @angular/\* framework packages to 22.2.3 and @angular-devkit/build-angular and @angular/cli to 22.2.4
+- Update vitest to 4.1.12 and apply `npm audit fix` for the transitive vulnerabilities in @xmldom/xmldom, brace-expansion, nanoid, postcss, smol-toml, source-map-js, vite and zod. The xcode 3.0.1 and globule 1.3.4 advisories stay: xcode 4.0.0 is a breaking major upgrade and globule has no fixed release
+
 ### Version 2.2.18
 
 - Add Ionic 8 to Ionic 9 migration recommendation: it installs the Ionic 9 packages, keeps `@ionic/angular-toolkit` on the release for the installed Angular version (12.1.1 for Angular 18, 12.2.0 for Angular 19, 12.3.0 for Angular 20 and 13 for Angular 21+), updates React Router to 6 and Vue Router to 5, removes the `@types/react-router` packages and requires TypeScript 5.4+

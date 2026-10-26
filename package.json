@@ -2,7 +2,7 @@
   "name": "webnative",
   "displayName": "WebNative",
   "description": "Create and maintain web and native projects",
-  "version": "2.2.18",
+  "version": "2.2.19",
   "whatsNewRevision": 1,
   "icon": "media/webnative.png",
   "publisher": "WebNative",
@@ -733,7 +733,7 @@
     "knip": "6.12.2",
     "oxlint": "^1.63.0",
     "typescript": "^5.8.3",
-    "vitest": "4.1.5"
+    "vitest": "4.1.12"
   },
   "dependencies": {
     "@webnativellc/simple-plist": "2.1.2",
