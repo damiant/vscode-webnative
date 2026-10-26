@@ -1,5 +1,14 @@
 ## Changelog
 
+### Version 2.2.18
+
+- Add Ionic 8 to Ionic 9 migration recommendation: it installs the Ionic 9 packages, keeps `@ionic/angular-toolkit` on the release for the installed Angular version (12.1.1 for Angular 18, 12.2.0 for Angular 19, 12.3.0 for Angular 20 and 13 for Angular 21+), updates React Router to 6 and Vue Router to 5, removes the `@types/react-router` packages and requires TypeScript 5.4+
+- The Ionic 9 migration renames `ion-picker-legacy` to `ion-picker`, removes `autocorrect="off"` from `ion-input` and `ion-searchbar`, removes the `~` prefix from `@ionic/angular` CSS imports, updates browserslist to Safari 16 and iOS 16, and lists the required and recommended changes of the Ionic 9 update guide
+- The Ionic migration now offers one migration per major version: Ionic 7 projects receive the Ionic 8 migration and Ionic 8 projects receive the Ionic 9 migration
+- Add Ionic 7 to Ionic 8 migration recommendation: it installs the Ionic 8 packages, keeps `@ionic/angular-toolkit` on v10 for Angular 16 and v11 for Angular 17+, updates browserslist to the Ionic 8 browser support, renames `IonBackButtonDelegate` to `IonBackButton`, and lists the required and recommended changes of the Ionic 8 update guide
+- The Ionic migration warns when Angular, React or Vue is below the Ionic 8 minimum, checks for a dirty git repository and verifies node_modules before it changes dependencies
+- Move the shared migration guards (git status, node_modules verification, project refresh) into `migration-guards` so that the Angular and Ionic migrations use the same checks
+
 ### Version 2.2.17
 
 - Fix iOS projects hanging the panel on "Inspecting project..." by parsing the Xcode project in-process (`parseSync`) instead of xcode's forked parser, which never settles when its child process fails to start (bundled extension, sandboxed Linux installs)
