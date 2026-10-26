@@ -1,0 +1,100 @@
+
+> webnative@2.2.18 build:all
+> npm run compile && npm run build:pe && npm run build:preview && npm run build:is
+
+
+> webnative@2.2.18 compile
+> tsc -p ./
+
+
+> webnative@2.2.18 build:pe
+> cd plugin-explorer && npm run build
+
+
+> plugin-explorer@0.0.1 build
+> ng build --output-hashing=none --configuration production
+
+The "@angular-devkit/build-angular:browser" builder is deprecated as part of Angular's Webpack support deprecation. Use "@angular/build:application" instead. For more information, see https://angular.dev/tools/cli/build-system-migration.
+One or more browsers which are configured in the project's Browserslist configuration fall outside Angular's browser support for this version.
+Unsupported browsers:
+chrome 110, chrome 109, chrome 108, chrome 107, edge 110, edge 109, edge 108, edge 107, firefox 111, firefox 110, firefox 109, firefox 108, firefox 107, firefox 106, ios_saf 16.3, ios_saf 16.2, ios_saf 16.1, safari 16.3, safari 16.2, safari 16.1
+- Generating browser application bundles (phase: setup)...
+✔ Browser application bundle generation complete.
+✔ Browser application bundle generation complete.
+- Copying assets...
+✔ Copying assets complete.
+- Generating index html...
+✔ Index html generation complete.
+
+Initial chunk files | Names         |  Raw size | Estimated transfer size
+main.js             | main          | 251.73 kB |                64.58 kB
+polyfills.js        | polyfills     |  34.93 kB |                11.44 kB
+runtime.js          | runtime       |   1.06 kB |               592 bytes
+styles.css          | styles        | 658 bytes |               240 bytes
+
+                    | Initial total | 288.38 kB |                76.85 kB
+
+Build at: 2026-10-26T13:40:24.309Z - Hash: d75a8758fd200fb4 - Time: 1132ms
+
+> webnative@2.2.18 build:preview
+> cd preview && npm run build
+
+
+> preview@0.0.1 build
+> ng build --output-hashing=none --configuration production
+
+The "@angular-devkit/build-angular:browser" builder is deprecated as part of Angular's Webpack support deprecation. Use "@angular/build:application" instead. For more information, see https://angular.dev/tools/cli/build-system-migration.
+One or more browsers which are configured in the project's Browserslist configuration fall outside Angular's browser support for this version.
+Unsupported browsers:
+chrome 110, chrome 109, chrome 108, chrome 107, edge 110, edge 109, edge 108, edge 107, firefox 111, firefox 110, firefox 109, firefox 108, firefox 107, firefox 106, ios_saf 16.3, ios_saf 16.2, ios_saf 16.1, safari 16.3, safari 16.2, safari 16.1
+- Generating browser application bundles (phase: setup)...
+✔ Browser application bundle generation complete.
+✔ Browser application bundle generation complete.
+- Copying assets...
+✔ Copying assets complete.
+- Generating index html...
+✔ Index html generation complete.
+
+Initial chunk files | Names         |  Raw size | Estimated transfer size
+main.js             | main          | 244.32 kB |                62.06 kB
+polyfills.js        | polyfills     |  34.93 kB |                11.44 kB
+runtime.js          | runtime       |   1.06 kB |               592 bytes
+styles.css          | styles        | 658 bytes |               240 bytes
+
+                    | Initial total | 280.97 kB |                74.33 kB
+
+Build at: 2026-10-26T13:40:26.851Z - Hash: 3d764407a2422c9d - Time: 1074ms
+
+> webnative@2.2.18 build:is
+> cd starter && npm run build
+
+
+> starter@0.0.1 build
+> ng build --output-hashing=none --configuration production
+
+The "@angular-devkit/build-angular:browser" builder is deprecated as part of Angular's Webpack support deprecation. Use "@angular/build:application" instead. For more information, see https://angular.dev/tools/cli/build-system-migration.
+One or more browsers which are configured in the project's Browserslist configuration fall outside Angular's browser support for this version.
+Unsupported browsers:
+chrome 110, chrome 109, chrome 108, chrome 107, edge 110, edge 109, edge 108, edge 107, firefox 111, firefox 110, firefox 109, firefox 108, firefox 107, firefox 106, ios_saf 16.3, ios_saf 16.2, ios_saf 16.1, safari 16.3, safari 16.2, safari 16.1
+- Generating browser application bundles (phase: setup)...
+✔ Browser application bundle generation complete.
+✔ Browser application bundle generation complete.
+- Copying assets...
+✔ Copying assets complete.
+- Generating index html...
+✔ Index html generation complete.
+
+Initial chunk files | Names         |  Raw size | Estimated transfer size
+main.js             | main          | 249.11 kB |                63.86 kB
+polyfills.js        | polyfills     |  34.93 kB |                11.44 kB
+runtime.js          | runtime       |   1.06 kB |               592 bytes
+styles.css          | styles        | 658 bytes |               240 bytes
+
+                    | Initial total | 285.76 kB |                76.13 kB
+
+Build at: 2026-10-26T13:40:29.404Z - Hash: ffda31336a01302e - Time: 1065ms
+npm notice
+npm notice New major version of npm available! 11.13.0 -> 12.2.1
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.1
+npm notice To update run: npm install -g npm@12.2.1
+npm notice
