@@ -3,6 +3,7 @@ node_modules
 yarn.lock
 .DS_Store
 npm-debug.log
+.npm-cache/
 Thumbs.db
 .vs/
 *.vsix
