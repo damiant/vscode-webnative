@@ -2,6 +2,8 @@
 
 ### Version 2.2.19
 
+- Fix Ionic component hover auto-imports (issue #115): use `@ionic/angular` for Ionic 9 and later, and keep `@ionic/angular/standalone` for earlier versions. Match import entry points exactly so the removed standalone subpath is not reused for Ionic 9
+
 - Update the bundled Angular projects (plugin-explorer, preview, starter) to Angular 22.2: @angular/\* framework packages to 22.2.3 and @angular-devkit/build-angular and @angular/cli to 22.2.4
 - Update vitest to 4.1.12 and apply `npm audit fix` for the transitive vulnerabilities in @xmldom/xmldom, brace-expansion, nanoid, postcss, smol-toml, source-map-js, vite and zod. The xcode 3.0.1 and globule 1.3.4 advisories stay: xcode 4.0.0 is a breaking major upgrade and globule has no fixed release
 
