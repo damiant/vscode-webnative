@@ -44,12 +44,13 @@ export async function autoFixAngularImports(document: TextDocument, component: s
 
   const importDeclarations = sourceFile.getImportDeclarations();
   const importName = toPascalCase(component);
-  const moduleSpecifier = '@ionic/angular/standalone';
+  // Ionic 9 exports standalone components from the main Angular entry point.
+  const moduleSpecifier = isGreaterOrEqual('@ionic/angular', '9.0.0') ? '@ionic/angular' : '@ionic/angular/standalone';
 
   let existsAlready = false;
   // Check if the import name already exists in the typescript file
   for (const importDeclaration of importDeclarations) {
-    if (importDeclaration.getModuleSpecifier().getText().includes(moduleSpecifier)) {
+    if (importDeclaration.getModuleSpecifierValue() === moduleSpecifier) {
       for (const named of importDeclaration.getNamedImports()) {
         if (named.getText() == importName) {
           existsAlready = true;
@@ -62,7 +63,7 @@ export async function autoFixAngularImports(document: TextDocument, component: s
 
   // Add the import
   for (const importDeclaration of importDeclarations) {
-    if (!added && importDeclaration.getModuleSpecifier().getText().includes(moduleSpecifier)) {
+    if (!added && importDeclaration.getModuleSpecifierValue() === moduleSpecifier) {
       importDeclaration.addNamedImport(importName);
       added = true;
     }

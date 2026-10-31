@@ -1,5 +1,9 @@
 ## Changelog
 
+### Version 2.2.20
+
+- Fix Ionic component hover auto-imports (issue #115): use `@ionic/angular` for Ionic 9 and later, and keep `@ionic/angular/standalone` for earlier versions. Match import entry points exactly so the removed standalone subpath is not reused for Ionic 9
+
 ### Version 2.2.19
 
 - Update the bundled Angular projects (plugin-explorer, preview, starter) to Angular 22.2: @angular/\* framework packages to 22.2.3 and @angular-devkit/build-angular and @angular/cli to 22.2.4
