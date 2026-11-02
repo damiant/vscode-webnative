@@ -1,5 +1,9 @@
 ## Changelog
 
+### Unreleased
+
+- Fix Yarn live reload on Windows by omitting the extra argument separator when forwarding script options
+
 ### Version 2.2.20
 
 - Fix Ionic component hover auto-imports (issue #115): use `@ionic/angular` for Ionic 9 and later, and keep `@ionic/angular/standalone` for earlier versions. Match import entry points exactly so the removed standalone subpath is not reused for Ionic 9

@@ -6,7 +6,7 @@ import { InternalCommand } from './command-name';
 import { exState } from './tree-provider';
 import { certPath } from './live-reload';
 import { MonoRepoType } from './monorepo';
-import { npmRun, npx, preflightNPMCheck } from './node-commands';
+import { npmRun, npx, PackageManager, preflightNPMCheck } from './node-commands';
 import { Project } from './project';
 import { liveReloadSSL } from './live-reload';
 import {
@@ -126,7 +126,7 @@ let serveUnknownMsg = false;
 function serveCmd(project: Project): string {
   const guessed = guessServeCommand(project);
   if (guessed) {
-    return guessed + ' -- ';
+    return guessed + getServeScriptArgumentSeparator(project.packageManager);
   }
   switch (project.frameworkType) {
     case 'angular':
@@ -155,6 +155,10 @@ function serveCmd(project: Project): string {
       showOutput();
     }
   }
+}
+
+export function getServeScriptArgumentSeparator(packageManager: PackageManager, platform = process.platform): string {
+  return platform === 'win32' && packageManager === PackageManager.yarn ? ' ' : ' -- ';
 }
 
 function guessServeCommand(project: Project): string | undefined {
