@@ -1,6 +1,6 @@
 ## Changelog
 
-### Unreleased
+### Version 2.2.21
 
 - Fix live reload with Yarn Berry (2 and later) on every platform: leave out the `--` separator so the serve script receives its options instead of a literal `--`. Yarn Classic, npm, pnpm and bun keep the separator. The separator now follows the Yarn version instead of the operating system
 
