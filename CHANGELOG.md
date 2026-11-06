@@ -1,5 +1,9 @@
 ## Changelog
 
+### Unreleased
+
+- Fix live reload with Yarn Berry (2 and later) on every platform: leave out the `--` separator so the serve script receives its options instead of a literal `--`. Yarn Classic, npm, pnpm and bun keep the separator. The separator now follows the Yarn version instead of the operating system
+
 ### Version 2.2.20
 
 - Fix Ionic component hover auto-imports (issue #115): use `@ionic/angular` for Ionic 9 and later, and keep `@ionic/angular/standalone` for earlier versions. Match import entry points exactly so the removed standalone subpath is not reused for Ionic 9

@@ -6,7 +6,7 @@ import { InternalCommand } from './command-name';
 import { exState } from './tree-provider';
 import { certPath } from './live-reload';
 import { MonoRepoType } from './monorepo';
-import { npmRun, npx, preflightNPMCheck } from './node-commands';
+import { npmRun, npx, PackageManager, preflightNPMCheck } from './node-commands';
 import { Project } from './project';
 import { liveReloadSSL } from './live-reload';
 import {
@@ -123,10 +123,22 @@ async function runServe(
 
 let serveUnknownMsg = false;
 
-function serveCmd(project: Project): string {
+/**
+ * Returns the token between the package manager run command and the serve script arguments.
+ *
+ * npm needs `--` to forward the options to the script. Yarn Berry (2+) forwards script arguments
+ * as-is, so `--` reaches the script as a literal argument and the framework reports an empty or
+ * unknown option. Yarn Classic needs `--` because `yarn exec` reads leading `--options` itself.
+ */
+export function getServeScriptArgumentSeparator(packageManager: PackageManager, isModernYarn: boolean): string {
+  return packageManager === PackageManager.yarn && isModernYarn ? ' ' : ' -- ';
+}
+
+/** Exported so that the generated serve command can be tested. */
+export function serveCmd(project: Project): string {
   const guessed = guessServeCommand(project);
   if (guessed) {
-    return guessed + ' -- ';
+    return guessed + getServeScriptArgumentSeparator(project.packageManager, project.isModernYarn());
   }
   switch (project.frameworkType) {
     case 'angular':
